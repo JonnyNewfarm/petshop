@@ -9,6 +9,41 @@ type EditProductPageProps = {
   }>;
 };
 
+type Category = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
+type ProductImage = {
+  url: string;
+};
+
+type ProductOption = {
+  name: string;
+  value: string;
+};
+
+type ProductVariant = {
+  name: string;
+  price: number | null;
+  stock: number;
+  options: ProductOption[];
+};
+
+type ProductWithRelations = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  stock: number;
+  featured: boolean;
+  categoryId: string;
+  images: ProductImage[];
+  variants: ProductVariant[];
+};
+
 export default async function EditProductPage({
   params,
 }: EditProductPageProps) {
@@ -20,33 +55,34 @@ export default async function EditProductPage({
 
   const { id } = await params;
 
-  const [categories, product] = await Promise.all([
-    prisma.category.findMany({
-      orderBy: {
-        name: "asc",
-      },
-    }),
-    prisma.product.findUnique({
-      where: {
-        id,
-      },
-      include: {
-        images: {
-          orderBy: {
-            order: "asc",
+  const [categories, product]: [Category[], ProductWithRelations | null] =
+    await Promise.all([
+      prisma.category.findMany({
+        orderBy: {
+          name: "asc",
+        },
+      }),
+      prisma.product.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          images: {
+            orderBy: {
+              order: "asc",
+            },
+          },
+          variants: {
+            include: {
+              options: true,
+            },
+            orderBy: {
+              createdAt: "asc",
+            },
           },
         },
-        variants: {
-          include: {
-            options: true,
-          },
-          orderBy: {
-            createdAt: "asc",
-          },
-        },
-      },
-    }),
-  ]);
+      }),
+    ]);
 
   if (!product) {
     notFound();
