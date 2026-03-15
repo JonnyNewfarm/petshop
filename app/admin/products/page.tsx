@@ -1,9 +1,18 @@
 import Link from "next/link";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { deleteProduct } from "@/actions/product-actions";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
+
+type ProductWithRelations = Prisma.ProductGetPayload<{
+  include: {
+    category: true;
+    images: true;
+    variants: true;
+  };
+}>;
 
 export default async function AdminProductsPage() {
   const session = await auth();
@@ -11,7 +20,8 @@ export default async function AdminProductsPage() {
   if (!session?.user) {
     redirect("/login");
   }
-  const products = await prisma.product.findMany({
+
+  const products: ProductWithRelations[] = await prisma.product.findMany({
     include: {
       category: true,
       images: {
