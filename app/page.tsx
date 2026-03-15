@@ -1,8 +1,9 @@
 import HeroSection from "@/components/HeroSection";
+import ScrollSection from "@/components/SmoothScroll";
 
 export default function HomePage() {
   return (
-    <main>
+    <ScrollSection>
       <HeroSection />
 
       <section
@@ -18,6 +19,6 @@ export default function HomePage() {
           </h2>
         </div>
       </section>
-    </main>
+    </ScrollSection>
   );
 }

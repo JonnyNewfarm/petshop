@@ -9,10 +9,45 @@ type ProductPageProps = {
   }>;
 };
 
+type ProductImage = {
+  id: string;
+  url: string;
+  alt: string | null;
+  order: number;
+};
+
+type ProductOption = {
+  id: string;
+  name: string;
+  value: string;
+};
+
+type ProductVariant = {
+  id: string;
+  name: string;
+  price: number | null;
+  stock: number;
+  options: ProductOption[];
+};
+
+type ProductWithRelations = {
+  id: string;
+  slug: string;
+  name: string;
+  description: string;
+  price: number;
+  stock: number;
+  category: {
+    name: string;
+  };
+  images: ProductImage[];
+  variants: ProductVariant[];
+};
+
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  const product = await prisma.product.findUnique({
+  const product: ProductWithRelations | null = await prisma.product.findUnique({
     where: { slug },
     include: {
       category: true,
