@@ -2,7 +2,7 @@
 
 import { useActionState, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import { createProduct } from "@/actions/product-actions";
+import { createProduct, updateProduct } from "@/actions/product-actions";
 
 type Category = {
   id: string;
@@ -26,14 +26,33 @@ type OptionGroup = {
   values: string[];
 };
 
+type ProductFormInitialData = {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  price: number;
+  stock: number;
+  featured: boolean;
+  categoryId: string;
+  images: {
+    url: string;
+  }[];
+  variants: {
+    name: string;
+    price: number | null;
+    stock: number;
+    options: {
+      name: string;
+      value: string;
+    }[];
+  }[];
+};
+
 const initialState = {
   error: "",
   success: false,
 };
-
-function makeId() {
-  return Math.random().toString(36).slice(2, 10);
-}
 
 function cartesianProduct(groups: OptionGroup[]) {
   const validGroups = groups
@@ -62,29 +81,82 @@ function cartesianProduct(groups: OptionGroup[]) {
   return result;
 }
 
+function buildOptionGroupsFromVariants(
+  variants: ProductFormInitialData["variants"],
+): OptionGroup[] {
+  const groupMap = new Map<string, string[]>();
+
+  for (const variant of variants) {
+    for (const option of variant.options) {
+      const existing = groupMap.get(option.name) ?? [];
+      if (!existing.includes(option.value)) {
+        existing.push(option.value);
+      }
+      groupMap.set(option.name, existing);
+    }
+  }
+
+  if (groupMap.size === 0) {
+    return [
+      {
+        id: "option-group-1",
+        name: "Color",
+        values: [""],
+      },
+    ];
+  }
+
+  return Array.from(groupMap.entries()).map(([name, values], index) => ({
+    id: `option-group-${index + 1}`,
+    name,
+    values,
+  }));
+}
+
 export default function ProductForm({
   categories,
+  initialData,
 }: {
   categories: Category[];
+  initialData?: ProductFormInitialData;
 }) {
   const router = useRouter();
-  const [state, formAction, pending] = useActionState(
-    createProduct,
-    initialState,
+  const isEdit = !!initialData;
+  const action = isEdit ? updateProduct : createProduct;
+  const [state, formAction, pending] = useActionState(action, initialState);
+
+  const [images, setImages] = useState<string[]>(
+    initialData?.images.length
+      ? initialData.images.map((image) => image.url)
+      : [""],
   );
 
-  const [images, setImages] = useState<string[]>([""]);
-  const [hasVariants, setHasVariants] = useState(false);
+  const [hasVariants, setHasVariants] = useState(
+    initialData ? initialData.variants.length > 0 : false,
+  );
 
-  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>([
-    {
-      id: makeId(),
-      name: "Color",
-      values: [""],
-    },
-  ]);
+  const [optionGroups, setOptionGroups] = useState<OptionGroup[]>(
+    initialData
+      ? buildOptionGroupsFromVariants(initialData.variants)
+      : [
+          {
+            id: "option-group-1",
+            name: "Color",
+            values: [""],
+          },
+        ],
+  );
 
-  const [variants, setVariants] = useState<GeneratedVariant[]>([]);
+  const [variants, setVariants] = useState<GeneratedVariant[]>(
+    initialData
+      ? initialData.variants.map((variant) => ({
+          name: variant.name,
+          price: variant.price ?? "",
+          stock: variant.stock,
+          options: variant.options,
+        }))
+      : [],
+  );
 
   useEffect(() => {
     if (state.success) {
@@ -108,7 +180,7 @@ export default function ProductForm({
     setOptionGroups((prev) => [
       ...prev,
       {
-        id: makeId(),
+        id: `option-group-${Date.now()}-${prev.length + 1}`,
         name: "",
         values: [""],
       },
@@ -239,6 +311,10 @@ export default function ProductForm({
 
   return (
     <form action={formAction} className="space-y-10">
+      {isEdit ? (
+        <input type="hidden" name="productId" value={initialData.id} />
+      ) : null}
+
       <input type="hidden" name="imageUrls" value={serializedImageUrls} />
       <input type="hidden" name="variantsJson" value={serializedVariants} />
 
@@ -264,6 +340,7 @@ export default function ProductForm({
                   id="name"
                   name="name"
                   required
+                  defaultValue={initialData?.name ?? ""}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
               </div>
@@ -279,6 +356,7 @@ export default function ProductForm({
                   id="slug"
                   name="slug"
                   required
+                  defaultValue={initialData?.slug ?? ""}
                   placeholder="orthopedic-dog-bed"
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
@@ -295,6 +373,7 @@ export default function ProductForm({
                   id="description"
                   name="description"
                   required
+                  defaultValue={initialData?.description ?? ""}
                   rows={7}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
@@ -594,6 +673,7 @@ export default function ProductForm({
                   type="number"
                   min="0"
                   required
+                  defaultValue={initialData?.price ?? ""}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
               </div>
@@ -611,6 +691,7 @@ export default function ProductForm({
                   type="number"
                   min="0"
                   required
+                  defaultValue={initialData?.stock ?? ""}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
               </div>
@@ -626,7 +707,7 @@ export default function ProductForm({
                   id="categoryId"
                   name="categoryId"
                   required
-                  defaultValue=""
+                  defaultValue={initialData?.categoryId ?? ""}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 >
                   <option value="" disabled>
@@ -641,7 +722,12 @@ export default function ProductForm({
               </div>
 
               <label className="flex items-center gap-3 text-sm uppercase tracking-[0.14em]">
-                <input type="checkbox" name="featured" className="h-4 w-4" />
+                <input
+                  type="checkbox"
+                  name="featured"
+                  defaultChecked={initialData?.featured ?? false}
+                  className="h-4 w-4"
+                />
                 Featured product
               </label>
             </div>
@@ -661,7 +747,11 @@ export default function ProductForm({
               disabled={pending}
               className="mt-6 inline-flex w-full items-center justify-center border border-black bg-black px-7 py-4 text-sm uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black disabled:opacity-50"
             >
-              {pending ? "Saving..." : "Create product"}
+              {pending
+                ? "Saving..."
+                : isEdit
+                  ? "Update product"
+                  : "Create product"}
             </button>
           </section>
         </div>

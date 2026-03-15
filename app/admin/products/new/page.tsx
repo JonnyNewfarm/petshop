@@ -1,6 +1,6 @@
-import { auth } from "@/auth";
 import ProductForm from "@/components/admin/ProductForm";
 import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
 export default async function NewAdminProductPage() {
@@ -9,6 +9,7 @@ export default async function NewAdminProductPage() {
   if (!session?.user) {
     redirect("/login");
   }
+
   const categories = await prisma.category.findMany({
     orderBy: {
       name: "asc",
