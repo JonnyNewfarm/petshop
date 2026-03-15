@@ -2,8 +2,15 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { formatPrice } from "@/lib/format";
 import { deleteProduct } from "@/actions/product-actions";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
 
 export default async function AdminProductsPage() {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
   const products = await prisma.product.findMany({
     include: {
       category: true,
