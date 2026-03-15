@@ -5,6 +5,27 @@ import { deleteProduct } from "@/actions/product-actions";
 import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 
+type ProductRow = {
+  id: string;
+  name: string;
+  slug: string;
+  price: number;
+  stock: number;
+  featured: boolean;
+  category: {
+    name: string;
+  };
+  images: {
+    id: string;
+    url: string;
+    alt: string | null;
+    order: number;
+  }[];
+  variants: {
+    id: string;
+  }[];
+};
+
 export default async function AdminProductsPage() {
   const session = await auth();
 
@@ -12,7 +33,7 @@ export default async function AdminProductsPage() {
     redirect("/login");
   }
 
-  const products = await prisma.product.findMany({
+  const products: ProductRow[] = await prisma.product.findMany({
     include: {
       category: true,
       images: {
