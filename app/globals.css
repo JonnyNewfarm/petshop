@@ -10,3 +10,11 @@ body {
 body::-webkit-scrollbar {
   display: none;
 }
+
+@font-face {
+  font-family: "Mango";
+  src: url("/fonts/mango/Mango.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}

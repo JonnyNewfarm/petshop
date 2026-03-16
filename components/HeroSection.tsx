@@ -1,107 +1,326 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 
-const container = {
-  hidden: {},
-  show: {
-    transition: {
-      staggerChildren: 0.12,
-    },
-  },
-};
-
-const item = {
-  hidden: { opacity: 0, y: 32 },
-  show: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.9,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-};
+gsap.registerPlugin(ScrollTrigger);
 
 export default function HeroSection() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const heroRef = useRef<HTMLDivElement | null>(null);
+
+  const imageStageRef = useRef<HTMLDivElement | null>(null);
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+
+  const textWrapRef = useRef<HTMLDivElement | null>(null);
+  const line1Ref = useRef<HTMLSpanElement | null>(null);
+  const line2Ref = useRef<HTMLSpanElement | null>(null);
+  const line3Ref = useRef<HTMLSpanElement | null>(null);
+  const subRef = useRef<HTMLParagraphElement | null>(null);
+
+  const petRef = useRef<HTMLSpanElement | null>(null);
+  const dogRef = useRef<HTMLSpanElement | null>(null);
+  const catRef = useRef<HTMLSpanElement | null>(null);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.set(imageStageRef.current, {
+        scale: 0.28,
+        transformOrigin: "50% 50%",
+      });
+
+      gsap.set(overlayRef.current, {
+        opacity: 0.08,
+      });
+
+      gsap.set(
+        [line1Ref.current, line2Ref.current, line3Ref.current, subRef.current],
+        {
+          yPercent: 110,
+          opacity: 0,
+        },
+      );
+
+      gsap.set(petRef.current, {
+        opacity: 1,
+        rotateX: 0,
+        yPercent: 0,
+        filter: "blur(0px)",
+        transformPerspective: 1200,
+        transformOrigin: "50% 50%",
+        force3D: true,
+      });
+
+      gsap.set([dogRef.current, catRef.current], {
+        opacity: 0,
+        rotateX: -90,
+        yPercent: 30,
+        filter: "blur(8px)",
+        transformPerspective: 1200,
+        transformOrigin: "50% 50%",
+        force3D: true,
+      });
+
+      const intro = gsap.timeline();
+
+      intro
+        .to(imageStageRef.current, {
+          scale: 1,
+          duration: 1.8,
+          ease: "power3.inOut",
+        })
+        .to(
+          overlayRef.current,
+          {
+            opacity: 0.22,
+            duration: 1.1,
+            ease: "power2.out",
+          },
+          0.35,
+        )
+        .to(
+          [line1Ref.current, line2Ref.current, line3Ref.current],
+          {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.95,
+            stagger: 0.08,
+            ease: "power3.out",
+          },
+          0.95,
+        )
+        .to(
+          subRef.current,
+          {
+            yPercent: 0,
+            opacity: 1,
+            duration: 0.85,
+            ease: "power3.out",
+          },
+          1.15,
+        );
+
+      const tl = gsap.timeline({
+        scrollTrigger: {
+          trigger: sectionRef.current,
+          start: "top top",
+          end: "+=2200",
+          scrub: 1,
+          pin: heroRef.current,
+          anticipatePin: 1,
+          snap: {
+            snapTo: [0, 0.22, 0.42, 1],
+            duration: { min: 0.2, max: 0.4 },
+            ease: "power2.inOut",
+          },
+        },
+      });
+
+      tl.to(
+        textWrapRef.current,
+        {
+          yPercent: -10,
+          ease: "none",
+        },
+        0,
+      )
+        .to(
+          line1Ref.current,
+          {
+            xPercent: 8,
+            ease: "none",
+          },
+          0,
+        )
+        .to(
+          line2Ref.current,
+          {
+            xPercent: -8,
+            ease: "none",
+          },
+          0,
+        )
+        .to(
+          subRef.current,
+          {
+            opacity: 0.6,
+            yPercent: -18,
+            ease: "none",
+          },
+          0.12,
+        )
+
+        // PET -> DOG
+        .to(
+          petRef.current,
+          {
+            rotateX: 90,
+            yPercent: -30,
+            opacity: 0,
+            filter: "blur(8px)",
+            duration: 0.16,
+            ease: "power2.inOut",
+          },
+          0.18,
+        )
+        .to(
+          dogRef.current,
+          {
+            rotateX: 0,
+            yPercent: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.16,
+            ease: "power2.inOut",
+          },
+          0.18,
+        )
+
+        // DOG -> CAT
+        .to(
+          dogRef.current,
+          {
+            rotateX: 90,
+            yPercent: -30,
+            opacity: 0,
+            filter: "blur(8px)",
+            duration: 0.16,
+            ease: "power2.inOut",
+          },
+          0.38,
+        )
+        .to(
+          catRef.current,
+          {
+            rotateX: 0,
+            yPercent: 0,
+            opacity: 1,
+            filter: "blur(0px)",
+            duration: 0.16,
+            ease: "power2.inOut",
+          },
+          0.38,
+        )
+
+        // videre scroll etter cat
+        .to(
+          line1Ref.current,
+          {
+            xPercent: 14,
+            ease: "none",
+          },
+          0.52,
+        )
+        .to(
+          line2Ref.current,
+          {
+            xPercent: -14,
+            ease: "none",
+          },
+          0.52,
+        )
+        .to(
+          textWrapRef.current,
+          {
+            yPercent: -16,
+            ease: "none",
+          },
+          0.52,
+        );
+    }, sectionRef);
+
+    return () => ctx.revert();
+  }, []);
+
   return (
-    <section className="relative min-h-screen overflow-hidden bg-[#f6f1e8] text-neutral-950">
-      {/* Background */}
-      <div className="absolute inset-0">
-        <div className="absolute left-[-10%] top-[-10%] h-[500px] w-[500px] rounded-full bg-[#e8d8bd]/50 blur-3xl" />
-        <div className="absolute bottom-[-20%] right-[-10%] h-[550px] w-[550px] rounded-full bg-[#d8c2a6]/40 blur-3xl" />
-      </div>
-
-      {/* Grain */}
+    <section ref={sectionRef} className="relative h-[300vh] bg-[#dddad5]">
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.05] mix-blend-multiply"
-        style={{
-          backgroundImage:
-            "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'%3E%3Cg fill='black' fill-opacity='1'%3E%3Ccircle cx='8' cy='12' r='1'/%3E%3Ccircle cx='38' cy='52' r='1'/%3E%3Ccircle cx='72' cy='18' r='1'/%3E%3Ccircle cx='110' cy='35' r='1'/%3E%3Ccircle cx='25' cy='100' r='1'/%3E%3Ccircle cx='60' cy='88' r='1'/%3E%3Ccircle cx='95' cy='120' r='1'/%3E%3Ccircle cx='125' cy='92' r='1'/%3E%3C/g%3E%3C/svg%3E\")",
-        }}
-      />
-
-      <div className="relative z-10  flex min-h-screen w-full max-w-[1200px] items-center px-6 pb-12 pt-28 sm:px-8 lg:px-12">
-        <motion.div
-          variants={container}
-          initial="hidden"
-          animate="show"
-          className="relative"
+        ref={heroRef}
+        className="relative h-screen sm:h-[120vh] overflow-hidden bg-[#dddad5]"
+      >
+        <div
+          ref={imageStageRef}
+          className="absolute left-1/2 top-1/2 h-[180vh] w-[130vw] -translate-x-1/2 -translate-y-1/2 will-change-transform"
         >
-          <motion.div
-            variants={item}
-            className="mb-6 inline-flex items-center gap-2 border border-black/10 px-4 py-2 text-[11px] uppercase tracking-[0.22em] text-black/70"
-          >
-            <span className="block h-2 w-2 rounded-full bg-black" />
-            Premium essentials for modern pet owners
-          </motion.div>
+          <img
+            src="/dogs.jpg"
+            alt="Pets hero"
+            className="h-full w-full object-cover"
+          />
+        </div>
 
-          <motion.h1
-            variants={item}
-            className="max-w-[8ch] text-[clamp(4rem,10vw,9rem)] font-semibold uppercase leading-[0.86] tracking-[-0.07em]"
-          >
-            Everything for your pet
-          </motion.h1>
+        <div
+          ref={overlayRef}
+          className="absolute inset-0 bg-black will-change-[opacity]"
+        />
 
-          <motion.p
-            variants={item}
-            className="mt-8 max-w-[560px] text-base leading-7 text-black/70 sm:text-lg sm:leading-8"
-          >
-            Discover refined essentials for dogs, cats and small pets —
-            thoughtfully selected for everyday comfort, play and care.
-          </motion.p>
+        <div
+          ref={textWrapRef}
+          className="relative z-10 flex min-h-screen items-center px-6 py-16 md:px-10 md:py-20"
+        >
+          <div className="w-full text-white">
+            <div className="w-full overflow-hidden">
+              <span
+                style={{ fontFamily: "Mango" }}
+                ref={line1Ref}
+                className="block w-fit font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)] will-change-transform"
+              >
+                Everything
+              </span>
+            </div>
 
-          <motion.div
-            variants={item}
-            className="mt-10 flex flex-col gap-4 sm:flex-row"
-          >
-            <a
-              href="#shop"
-              className="group inline-flex items-center justify-center gap-2 border border-black bg-black px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
-            >
-              Shop now
-            </a>
+            <div className="w-full overflow-hidden">
+              <span
+                style={{ fontFamily: "Mango" }}
+                ref={line2Ref}
+                className="ml-auto block w-fit text-right font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)] will-change-transform"
+              >
+                for modern
+              </span>
+            </div>
 
-            <a
-              href="#categories"
-              className="inline-flex items-center justify-center border border-black/15 px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-black transition hover:border-black hover:bg-black hover:text-[#f6f1e8]"
-            >
-              Browse categories
-            </a>
-          </motion.div>
+            <div className="w-full overflow-hidden">
+              <span
+                style={{ fontFamily: "Mango" }}
+                ref={line3Ref}
+                className="block w-fit font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)]"
+              >
+                <span className="relative inline-grid [perspective:1200px]">
+                  <span
+                    ref={petRef}
+                    className="col-start-1 row-start-1 inline-block will-change-transform"
+                  >
+                    pet
+                  </span>
+                  <span
+                    ref={dogRef}
+                    className="col-start-1 row-start-1 inline-block will-change-transform"
+                  >
+                    dog
+                  </span>
+                  <span
+                    ref={catRef}
+                    className="col-start-1 row-start-1 inline-block will-change-transform"
+                  >
+                    cat
+                  </span>
+                </span>{" "}
+                living
+              </span>
+            </div>
 
-          <motion.div
-            variants={item}
-            className="mt-12 flex flex-wrap gap-x-8 gap-y-3 text-[12px] uppercase tracking-[0.18em] text-black/55"
-          >
-            <span>Fast delivery</span>
-            <span>Secure checkout</span>
-            <span>Curated collections</span>
-          </motion.div>
-        </motion.div>
+            <div className="mt-8 w-full overflow-hidden">
+              <p
+                ref={subRef}
+                className="ml-auto w-fit max-w-[34rem] text-right text-[11px] uppercase tracking-[0.2em] text-white/75 md:text-[12px]"
+              >
+                Curated essentials for dogs, cats and everyday life with pets
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
-
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#f6f1e8] to-transparent" />
     </section>
   );
 }

@@ -8,9 +8,9 @@ export default function HomePage() {
 
       <section
         id="shop"
-        className="bg-[#f6f1e8] px-6 py-24 text-neutral-950 sm:px-8 lg:px-12"
+        className="bg-[#dddad5] px-6 py-24 text-neutral-950 sm:px-8 lg:px-12"
       >
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl h-screen">
           <p className="text-sm uppercase tracking-[0.18em] text-black/50">
             Next section
           </p>

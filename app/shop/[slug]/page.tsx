@@ -74,7 +74,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
   const mainImage = product.images[0];
 
   return (
-    <main className="min-h-screen bg-[#f6f1e8] px-6 py-28 text-black sm:px-8 lg:px-12">
+    <main className="min-h-screen bg-[#dddad5] px-6 py-28 text-black sm:px-8 lg:px-12">
       <div className="mx-auto grid max-w-[1400px] gap-10 lg:grid-cols-2">
         <div>
           <div className="relative aspect-[4/5] overflow-hidden border border-black/10 bg-[#f3efe8]">

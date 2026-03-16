@@ -15,10 +15,11 @@ export default function CartButton() {
   return (
     <Link
       href="/cart"
-      className="inline-flex items-center gap-2 text-[13px] uppercase tracking-[0.18em] text-black/70 transition hover:text-black"
+      className="flex w-full items-center justify-between text-lg font-semibold text-black/70 transition hover:text-black"
     >
-      Cart
-      <span className="inline-flex min-w-6 items-center justify-center border border-black/10 px-1.5 py-1 text-[11px] text-black">
+      <span>Cart</span>
+
+      <span className="ml-4 inline-flex min-w-7 items-center justify-center border border-black/10 px-2 py-1 text-sm text-black">
         {mounted ? itemCount : ""}
       </span>
     </Link>

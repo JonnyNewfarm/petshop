@@ -2,213 +2,178 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
-import { useState } from "react";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import CartButton from "@/components/CartButton";
 
 const navItems = [
+  { label: "Home", href: "/" },
   { label: "Shop", href: "/shop" },
   { label: "About", href: "#about" },
   { label: "Contact", href: "#contact" },
 ];
 
-const overlayVariants = {
-  hidden: { opacity: 0 },
+const dropdownVariants = {
+  hidden: {
+    opacity: 0,
+    y: -10,
+    scale: 0.98,
+    transition: {
+      duration: 0.18,
+      ease: [0.22, 1, 0.36, 1] as const,
+    },
+  },
   visible: {
     opacity: 1,
+    y: 0,
+    scale: 1,
     transition: {
-      duration: 0.25,
+      duration: 0.22,
       ease: [0.22, 1, 0.36, 1] as const,
     },
   },
   exit: {
     opacity: 0,
+    y: -8,
+    scale: 0.98,
     transition: {
-      duration: 0.2,
+      duration: 0.16,
       ease: [0.22, 1, 0.36, 1] as const,
     },
   },
 };
 
-const drawerVariants = {
-  hidden: {
-    x: "100%",
-    transition: {
-      duration: 0.35,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-  visible: {
-    x: 0,
-    transition: {
-      duration: 0.45,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-  exit: {
-    x: "100%",
-    transition: {
-      duration: 0.35,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, x: 20 },
-  visible: (i: number) => ({
-    opacity: 1,
-    x: 0,
-    transition: {
-      delay: 0.08 + i * 0.06,
-      duration: 0.35,
-      ease: [0.22, 1, 0.36, 1] as const,
-    },
-  }),
-  exit: { opacity: 0, x: 12 },
-};
+function getCurrentPageLabel(pathname: string) {
+  if (pathname === "/") return "Home";
+  if (pathname.startsWith("/shop")) return "Shop";
+  if (pathname.startsWith("/about")) return "About";
+  if (pathname.startsWith("/contact")) return "Contact";
+  if (pathname.startsWith("/cart")) return "Cart";
+  return "Menu";
+}
 
 export default function Navbar() {
+  const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
+  const wrapperRef = useRef<HTMLDivElement | null>(null);
+
+  const currentPage = getCurrentPageLabel(pathname);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (!wrapperRef.current) return;
+      if (!wrapperRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    }
+
+    function handleEscape(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setIsOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, []);
 
   return (
-    <>
-      <motion.header
-        initial={{ opacity: 0, y: -24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-        className="absolute left-0 top-0 z-50 w-full"
-      >
-        <div className="mx-auto flex w-full max-w-[1700px] items-center justify-between px-6 py-6 sm:px-8 lg:px-12">
-          <Link
-            href="/"
-            className="text-lg font-semibold uppercase tracking-[0.25em] text-black"
-          >
-            Petsaco
-          </Link>
+    <motion.header
+      initial={{ opacity: 0, y: -24 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      className="fixed left-0 top-0 z-50 w-full"
+    >
+      <div className="relative mx-auto flex w-full max-w-[1700px] items-start justify-center px-4 py-6 sm:px-6 lg:px-10">
+        <div className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2">
+          <div ref={wrapperRef} className="pointer-events-auto relative">
+            <div className="flex min-w-[230px] sm:min-w-[270px] items-center justify-between gap-2 border border-black/10 bg-white/65 px-5 py-1.5 text-black backdrop-blur-md  sm:px-7">
+              <Link
+                href="/"
+                className="shrink-0 text-lg font-semibold tracking-[-0.04em] text-black"
+              >
+                Petsaco
+              </Link>
 
-          <div className="hidden items-center gap-10 md:flex">
-            <nav className="flex items-center gap-10 text-[13px] uppercase tracking-[0.18em] text-black/70">
-              {navItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="transition hover:text-black"
-                >
-                  {item.label}
-                </Link>
-              ))}
-            </nav>
-
-            <CartButton />
-          </div>
-
-          <button
-            type="button"
-            aria-label={isOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isOpen}
-            onClick={() => setIsOpen(true)}
-            className="inline-flex h-11 w-11 items-center justify-center text-black md:hidden"
-          >
-            Menu
-          </button>
-        </div>
-      </motion.header>
-
-      <AnimatePresence>
-        {isOpen && (
-          <>
-            <motion.button
-              type="button"
-              aria-label="Close menu overlay"
-              onClick={() => setIsOpen(false)}
-              variants={overlayVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed inset-0 z-[60] bg-black/30 backdrop-blur-[2px]"
-            />
-
-            <motion.aside
-              variants={drawerVariants}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="fixed right-0 top-0 z-[70] flex h-screen w-[88vw] max-w-[420px] flex-col border-l border-black/10 bg-[#f6f1e8] p-6 sm:p-8"
-            >
-              <div className="flex items-center justify-between">
-                <Link
-                  href="/"
-                  className="text-lg font-semibold uppercase tracking-[0.25em] text-black"
-                >
-                  Petsaco
-                </Link>
-
-                <button
-                  type="button"
-                  aria-label="Close menu"
-                  onClick={() => setIsOpen(false)}
-                  className="text-black"
-                >
-                  Close
-                </button>
+              <div className="flex-1 text-center">
+                <span className="text-sm font-medium text-black">
+                  {currentPage}
+                </span>
               </div>
 
-              <div className="mt-16 flex flex-col">
-                {navItems.map((item, i) => (
-                  <motion.div
-                    key={item.label}
-                    custom={i}
-                    variants={itemVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                  >
-                    <Link
-                      href={item.href}
-                      onClick={() => setIsOpen(false)}
-                      className="block border-b border-black/10 py-5 text-[15px] uppercase tracking-[0.16em] text-black/80 transition hover:text-black"
-                    >
-                      {item.label}
-                    </Link>
-                  </motion.div>
-                ))}
+              <button
+                type="button"
+                aria-label={isOpen ? "Close menu" : "Open menu"}
+                aria-expanded={isOpen}
+                onClick={() => setIsOpen((prev) => !prev)}
+                className="inline-flex h-8 w-8 shrink-0 items-center justify-center"
+              >
+                <span className="relative block h-4 w-5">
+                  <span
+                    className={`absolute left-0 h-[1.5px] bg-black transition-all duration-300 ${
+                      isOpen ? "top-1/2 w-5 -translate-y-1/2" : "top-[3px] w-5"
+                    }`}
+                  />
+                  <span
+                    className={`absolute left-0 h-[1.5px] bg-black transition-all duration-300 ${
+                      isOpen
+                        ? "top-1/2 w-0 opacity-0"
+                        : "top-[11px] w-5 opacity-100"
+                    }`}
+                  />
+                </span>
+              </button>
+            </div>
 
+            <AnimatePresence>
+              {isOpen && (
                 <motion.div
-                  custom={navItems.length}
-                  variants={itemVariants}
+                  variants={dropdownVariants}
                   initial="hidden"
                   animate="visible"
                   exit="exit"
+                  className="absolute left-0 top-[calc(100%+10px)] w-full overflow-hidden border border-black/10 bg-white/90 shadow-lg backdrop-blur-md"
                 >
-                  <Link
-                    href="/cart"
-                    onClick={() => setIsOpen(false)}
-                    className="block border-b border-black/10 py-5 text-[15px] uppercase tracking-[0.16em] text-black/80 transition hover:text-black"
-                  >
-                    Cart
-                  </Link>
-                </motion.div>
-              </div>
+                  <nav className="flex flex-col">
+                    {navItems.map((item) => {
+                      const isActive =
+                        item.href === "/"
+                          ? pathname === "/"
+                          : item.href.startsWith("#")
+                            ? false
+                            : pathname.startsWith(item.href);
 
-              <motion.div
-                custom={navItems.length + 1}
-                variants={itemVariants}
-                initial="hidden"
-                animate="visible"
-                exit="exit"
-              >
-                <Link
-                  href="/shop"
-                  onClick={() => setIsOpen(false)}
-                  className="mt-8 inline-flex items-center justify-center border border-black bg-black px-6 py-4 text-sm uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
-                >
-                  Shop now
-                </Link>
-              </motion.div>
-            </motion.aside>
-          </>
-        )}
-      </AnimatePresence>
-    </>
+                      return (
+                        <Link
+                          key={item.label}
+                          href={item.href}
+                          onClick={() => setIsOpen(false)}
+                          className={`border-b border-black/10 px-5 py-4 text-lg font-semibold transition last:border-b-0 ${
+                            isActive
+                              ? "ml-2 text-black"
+                              : "text-black/70 hover:text-black"
+                          }`}
+                        >
+                          {item.label}
+                        </Link>
+                      );
+                    })}
+
+                    <div className="border-t border-black/10 px-5 py-4">
+                      <CartButton />
+                    </div>
+                  </nav>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        </div>
+      </div>
+    </motion.header>
   );
 }
