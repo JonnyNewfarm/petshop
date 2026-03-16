@@ -105,15 +105,10 @@ export default function HeroSection() {
         scrollTrigger: {
           trigger: sectionRef.current,
           start: "top top",
-          end: "+=2200",
-          scrub: 1,
+          end: "+=1000",
+          scrub: 0.6,
           pin: heroRef.current,
           anticipatePin: 1,
-          snap: {
-            snapTo: [0, 0.22, 0.42, 1],
-            duration: { min: 0.2, max: 0.4 },
-            ease: "power2.inOut",
-          },
         },
       });
 
@@ -148,7 +143,7 @@ export default function HeroSection() {
             yPercent: -18,
             ease: "none",
           },
-          0.12,
+          0.1,
         )
 
         // PET -> DOG
@@ -159,10 +154,10 @@ export default function HeroSection() {
             yPercent: -30,
             opacity: 0,
             filter: "blur(8px)",
-            duration: 0.16,
+            duration: 0.14,
             ease: "power2.inOut",
           },
-          0.18,
+          0.16,
         )
         .to(
           dogRef.current,
@@ -171,10 +166,10 @@ export default function HeroSection() {
             yPercent: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 0.16,
+            duration: 0.14,
             ease: "power2.inOut",
           },
-          0.18,
+          0.16,
         )
 
         // DOG -> CAT
@@ -185,10 +180,10 @@ export default function HeroSection() {
             yPercent: -30,
             opacity: 0,
             filter: "blur(8px)",
-            duration: 0.16,
+            duration: 0.14,
             ease: "power2.inOut",
           },
-          0.38,
+          0.3,
         )
         .to(
           catRef.current,
@@ -197,20 +192,20 @@ export default function HeroSection() {
             yPercent: 0,
             opacity: 1,
             filter: "blur(0px)",
-            duration: 0.16,
+            duration: 0.14,
             ease: "power2.inOut",
           },
-          0.38,
+          0.3,
         )
 
-        // videre scroll etter cat
+        // videre scroll etter cat - starter tidligere nå
         .to(
           line1Ref.current,
           {
             xPercent: 14,
             ease: "none",
           },
-          0.52,
+          0.42,
         )
         .to(
           line2Ref.current,
@@ -218,7 +213,7 @@ export default function HeroSection() {
             xPercent: -14,
             ease: "none",
           },
-          0.52,
+          0.42,
         )
         .to(
           textWrapRef.current,
@@ -226,7 +221,7 @@ export default function HeroSection() {
             yPercent: -16,
             ease: "none",
           },
-          0.52,
+          0.42,
         );
     }, sectionRef);
 
@@ -234,7 +229,7 @@ export default function HeroSection() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative h-[300vh] bg-[#dddad5]">
+    <section ref={sectionRef} className="relative bg-[#dddad5]">
       <div
         ref={heroRef}
         className="relative h-screen sm:h-[120vh] overflow-hidden bg-[#dddad5]"
@@ -310,10 +305,10 @@ export default function HeroSection() {
               </span>
             </div>
 
-            <div className="mt-8 w-full overflow-hidden">
+            <div className="mt-8 w-full ">
               <p
                 ref={subRef}
-                className="ml-auto w-fit max-w-[34rem] text-right text-[11px] uppercase tracking-[0.2em] text-white/75 md:text-[12px]"
+                className="ml-auto w-fit max-w-[34rem] text-right text-[11px] uppercase tracking-[0.2em] text-white/90 md:text-[12px]"
               >
                 Curated essentials for dogs, cats and everyday life with pets
               </p>
