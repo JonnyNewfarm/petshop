@@ -29,6 +29,7 @@ model Product {
 
   images   ProductImage[]
   variants ProductVariant[]
+  tags     Tag[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -66,6 +67,56 @@ model ProductImage {
 
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+}
+
+model Tag {
+  id        String    @id @default(cuid())
+  name      String    @unique
+  slug      String    @unique
+  products  Product[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+model Order {
+  id              String  @id @default(cuid())
+  stripeSessionId String  @unique
+  customerName    String?
+  customerEmail   String?
+  currency        String?
+  amountTotal     Int?
+  paymentStatus   String?
+  status          String  @default("paid")
+
+  shippingLine1      String?
+  shippingLine2      String?
+  shippingCity       String?
+  shippingState      String?
+  shippingPostalCode String?
+  shippingCountry    String?
+
+  items OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id      String @id @default(cuid())
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  productId String?
+  variantId String?
+
+  productName    String
+  variantName    String?
+  variantOptions Json?
+
+  price    Int
+  quantity Int
 
   createdAt DateTime @default(now())
 }

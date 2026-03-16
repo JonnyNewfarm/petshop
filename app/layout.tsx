@@ -3,6 +3,7 @@ import { Montserrat } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import PawCursor from "@/components/PawCursor";
 
 const mont = Montserrat({
   variable: "--font-geist-mono",
@@ -23,6 +24,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={`${mont.variable}  antialiased`}>
         <Navbar />
+        <PawCursor />
         {children}
         <Footer />
       </body>

@@ -12,6 +12,7 @@ type AddToCartButtonProps = {
   categoryName?: string;
   variantId?: string | null;
   variantName?: string | null;
+  variantOptions?: { name: string; value: string }[];
 };
 
 export default function AddToCartButton({
@@ -23,6 +24,7 @@ export default function AddToCartButton({
   categoryName,
   variantId,
   variantName,
+  variantOptions,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [added, setAdded] = useState(false);
@@ -37,6 +39,7 @@ export default function AddToCartButton({
       imageUrl,
       categoryName,
       variantName,
+      variantOptions,
     });
 
     setAdded(true);

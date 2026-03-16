@@ -26,6 +26,12 @@ type OptionGroup = {
   values: string[];
 };
 
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type ProductFormInitialData = {
   id: string;
   name: string;
@@ -35,6 +41,9 @@ type ProductFormInitialData = {
   stock: number;
   featured: boolean;
   categoryId: string;
+  tags: {
+    id: string;
+  }[];
   images: {
     url: string;
   }[];
@@ -116,7 +125,9 @@ function buildOptionGroupsFromVariants(
 export default function ProductForm({
   categories,
   initialData,
+  tags,
 }: {
+  tags: Tag[];
   categories: Category[];
   initialData?: ProductFormInitialData;
 }) {
@@ -719,6 +730,34 @@ export default function ProductForm({
                     </option>
                   ))}
                 </select>
+              </div>
+
+              <div className="space-y-2">
+                <p className="text-sm uppercase tracking-[0.14em]">Tags</p>
+
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {tags.map((tag) => {
+                    const checked = !!initialData?.tags.some(
+                      (item) => item.id === tag.id,
+                    );
+
+                    return (
+                      <label
+                        key={tag.id}
+                        className="flex items-center gap-3 border border-black/10 bg-[#f6f1e8] px-4 py-3"
+                      >
+                        <input
+                          type="checkbox"
+                          name="tagIds"
+                          value={tag.id}
+                          defaultChecked={checked}
+                          className="h-4 w-4"
+                        />
+                        <span className="text-sm">{tag.name}</span>
+                      </label>
+                    );
+                  })}
+                </div>
               </div>
 
               <label className="flex items-center gap-3 text-sm uppercase tracking-[0.14em]">

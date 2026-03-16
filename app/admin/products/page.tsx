@@ -33,7 +33,7 @@ export default async function AdminProductsPage() {
     redirect("/login");
   }
 
-  const products: ProductRow[] = await prisma.product.findMany({
+  const products = await prisma.product.findMany({
     include: {
       category: true,
       images: {
@@ -42,6 +42,7 @@ export default async function AdminProductsPage() {
         },
       },
       variants: true,
+      tags: true,
     },
     orderBy: {
       createdAt: "desc",

@@ -10,12 +10,14 @@ export default async function NewAdminProductPage() {
     redirect("/login");
   }
 
-  const categories = await prisma.category.findMany({
-    orderBy: {
-      name: "asc",
-    },
-  });
-
+  const [categories, tags] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.tag.findMany({
+      orderBy: { name: "asc" },
+    }),
+  ]);
   return (
     <main className="min-h-screen bg-[#f6f1e8] px-6 py-28 text-black sm:px-8 lg:px-12">
       <div className="mx-auto max-w-[1000px]">
@@ -28,7 +30,7 @@ export default async function NewAdminProductPage() {
         </h1>
 
         <div className="mt-10">
-          <ProductForm categories={categories} />
+          <ProductForm tags={tags} categories={categories} />
         </div>
       </div>
     </main>

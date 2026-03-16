@@ -9,8 +9,14 @@ const adapter = new PrismaPg({
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
+ 
+
+  await prisma.variantOption.deleteMany();
+  await prisma.productVariant.deleteMany();
   await prisma.productImage.deleteMany();
   await prisma.product.deleteMany();
+
+  await prisma.tag.deleteMany();
   await prisma.category.deleteMany();
 
   const categories = await Promise.all([
@@ -46,9 +52,28 @@ async function main() {
     }),
   ]);
 
+  const tags = await Promise.all([
+    prisma.tag.create({ data: { name: "Beds", slug: "beds" } }),
+    prisma.tag.create({ data: { name: "Toys", slug: "toys" } }),
+    prisma.tag.create({ data: { name: "Treats", slug: "treats" } }),
+    prisma.tag.create({ data: { name: "Bowls", slug: "bowls" } }),
+    prisma.tag.create({ data: { name: "Grooming", slug: "grooming" } }),
+    prisma.tag.create({ data: { name: "Travel", slug: "travel" } }),
+    prisma.tag.create({
+      data: { name: "Orthopedic", slug: "orthopedic" },
+    }),
+    prisma.tag.create({ data: { name: "Eco", slug: "eco" } }),
+    prisma.tag.create({ data: { name: "Indoor", slug: "indoor" } }),
+    prisma.tag.create({ data: { name: "Outdoor", slug: "outdoor" } }),
+    prisma.tag.create({ data: { name: "Feeding", slug: "feeding" } }),
+    prisma.tag.create({ data: { name: "Comfort", slug: "comfort" } }),
+  ]);
+
   const categoryMap = Object.fromEntries(
-    categories.map((category) => [category.slug, category.id])
+    categories.map((category) => [category.slug, category.id]),
   );
+
+  const tagMap = Object.fromEntries(tags.map((tag) => [tag.slug, tag.id]));
 
   const products = [
     {
@@ -60,10 +85,52 @@ async function main() {
       stock: 14,
       featured: true,
       categorySlug: "dogs",
+      tagSlugs: ["beds", "orthopedic", "comfort"],
       images: [
-        { url: "/products/dog-bed-1.jpg", alt: "Orthopedic dog bed front", order: 0 },
-        { url: "/products/dog-bed-2.jpg", alt: "Orthopedic dog bed side", order: 1 },
-        { url: "/products/dog-bed-3.jpg", alt: "Orthopedic dog bed detail", order: 2 },
+        {
+          url: "/products/dog-bed-1.jpg",
+          alt: "Orthopedic dog bed front",
+          order: 0,
+        },
+        {
+          url: "/products/dog-bed-2.jpg",
+          alt: "Orthopedic dog bed side",
+          order: 1,
+        },
+        {
+          url: "/products/dog-bed-3.jpg",
+          alt: "Orthopedic dog bed detail",
+          order: 2,
+        },
+      ],
+      variants: [
+        {
+          name: "Small / Beige",
+          price: 799,
+          stock: 5,
+          options: [
+            { name: "Size", value: "Small" },
+            { name: "Color", value: "Beige" },
+          ],
+        },
+        {
+          name: "Medium / Beige",
+          price: 899,
+          stock: 4,
+          options: [
+            { name: "Size", value: "Medium" },
+            { name: "Color", value: "Beige" },
+          ],
+        },
+        {
+          name: "Large / Grey",
+          price: 999,
+          stock: 5,
+          options: [
+            { name: "Size", value: "Large" },
+            { name: "Color", value: "Grey" },
+          ],
+        },
       ],
     },
     {
@@ -75,9 +142,18 @@ async function main() {
       stock: 38,
       featured: true,
       categorySlug: "dogs",
+      tagSlugs: ["treats", "feeding", "outdoor"],
       images: [
-        { url: "/products/dog-treats-1.jpg", alt: "Natural dog treats pack", order: 0 },
-        { url: "/products/dog-treats-2.jpg", alt: "Natural dog treats close-up", order: 1 },
+        {
+          url: "/products/dog-treats-1.jpg",
+          alt: "Natural dog treats pack",
+          order: 0,
+        },
+        {
+          url: "/products/dog-treats-2.jpg",
+          alt: "Natural dog treats close-up",
+          order: 1,
+        },
       ],
     },
     {
@@ -89,9 +165,38 @@ async function main() {
       stock: 22,
       featured: false,
       categorySlug: "dogs",
+      tagSlugs: ["toys", "outdoor"],
       images: [
-        { url: "/products/rope-toy-1.jpg", alt: "Interactive rope toy", order: 0 },
-        { url: "/products/rope-toy-2.jpg", alt: "Interactive rope toy detail", order: 1 },
+        {
+          url: "/products/rope-toy-1.jpg",
+          alt: "Interactive rope toy",
+          order: 0,
+        },
+        {
+          url: "/products/rope-toy-2.jpg",
+          alt: "Interactive rope toy detail",
+          order: 1,
+        },
+      ],
+      variants: [
+        {
+          name: "Black",
+          price: null,
+          stock: 9,
+          options: [{ name: "Color", value: "Black" }],
+        },
+        {
+          name: "Red",
+          price: null,
+          stock: 7,
+          options: [{ name: "Color", value: "Red" }],
+        },
+        {
+          name: "Blue",
+          price: null,
+          stock: 6,
+          options: [{ name: "Color", value: "Blue" }],
+        },
       ],
     },
     {
@@ -103,9 +208,32 @@ async function main() {
       stock: 26,
       featured: true,
       categorySlug: "cats",
+      tagSlugs: ["bowls", "feeding", "eco"],
       images: [
-        { url: "/products/cat-bowl-1.jpg", alt: "Ceramic cat bowl front", order: 0 },
-        { url: "/products/cat-bowl-2.jpg", alt: "Ceramic cat bowl angle", order: 1 },
+        {
+          url: "/products/cat-bowl-1.jpg",
+          alt: "Ceramic cat bowl front",
+          order: 0,
+        },
+        {
+          url: "/products/cat-bowl-2.jpg",
+          alt: "Ceramic cat bowl angle",
+          order: 1,
+        },
+      ],
+      variants: [
+        {
+          name: "Beige",
+          price: null,
+          stock: 12,
+          options: [{ name: "Color", value: "Beige" }],
+        },
+        {
+          name: "Black",
+          price: null,
+          stock: 14,
+          options: [{ name: "Color", value: "Black" }],
+        },
       ],
     },
     {
@@ -117,10 +245,23 @@ async function main() {
       stock: 9,
       featured: true,
       categorySlug: "cats",
+      tagSlugs: ["toys", "indoor", "comfort"],
       images: [
-        { url: "/products/cat-tower-1.jpg", alt: "Cat scratching tower", order: 0 },
-        { url: "/products/cat-tower-2.jpg", alt: "Cat scratching tower detail", order: 1 },
-        { url: "/products/cat-tower-3.jpg", alt: "Cat scratching tower side", order: 2 },
+        {
+          url: "/products/cat-tower-1.jpg",
+          alt: "Cat scratching tower",
+          order: 0,
+        },
+        {
+          url: "/products/cat-tower-2.jpg",
+          alt: "Cat scratching tower detail",
+          order: 1,
+        },
+        {
+          url: "/products/cat-tower-3.jpg",
+          alt: "Cat scratching tower side",
+          order: 2,
+        },
       ],
     },
     {
@@ -132,9 +273,18 @@ async function main() {
       stock: 41,
       featured: false,
       categorySlug: "cats",
+      tagSlugs: ["toys", "indoor"],
       images: [
-        { url: "/products/feather-wand-1.jpg", alt: "Feather teaser wand", order: 0 },
-        { url: "/products/feather-wand-2.jpg", alt: "Feather teaser wand detail", order: 1 },
+        {
+          url: "/products/feather-wand-1.jpg",
+          alt: "Feather teaser wand",
+          order: 0,
+        },
+        {
+          url: "/products/feather-wand-2.jpg",
+          alt: "Feather teaser wand detail",
+          order: 1,
+        },
       ],
     },
     {
@@ -146,9 +296,18 @@ async function main() {
       stock: 12,
       featured: true,
       categorySlug: "small-pets",
+      tagSlugs: ["beds", "comfort", "indoor"],
       images: [
-        { url: "/products/small-pet-house-1.jpg", alt: "Small pet hideout front", order: 0 },
-        { url: "/products/small-pet-house-2.jpg", alt: "Small pet hideout side", order: 1 },
+        {
+          url: "/products/small-pet-house-1.jpg",
+          alt: "Small pet hideout front",
+          order: 0,
+        },
+        {
+          url: "/products/small-pet-house-2.jpg",
+          alt: "Small pet hideout side",
+          order: 1,
+        },
       ],
     },
     {
@@ -160,9 +319,18 @@ async function main() {
       stock: 19,
       featured: false,
       categorySlug: "small-pets",
+      tagSlugs: ["toys", "eco", "indoor"],
       images: [
-        { url: "/products/chew-set-1.jpg", alt: "Wood chew toy set", order: 0 },
-        { url: "/products/chew-set-2.jpg", alt: "Wood chew toy set detail", order: 1 },
+        {
+          url: "/products/chew-set-1.jpg",
+          alt: "Wood chew toy set",
+          order: 0,
+        },
+        {
+          url: "/products/chew-set-2.jpg",
+          alt: "Wood chew toy set detail",
+          order: 1,
+        },
       ],
     },
     {
@@ -174,9 +342,18 @@ async function main() {
       stock: 11,
       featured: false,
       categorySlug: "birds",
+      tagSlugs: ["comfort", "indoor"],
       images: [
-        { url: "/products/bird-perch-1.jpg", alt: "Bird perch stand", order: 0 },
-        { url: "/products/bird-perch-2.jpg", alt: "Bird perch stand detail", order: 1 },
+        {
+          url: "/products/bird-perch-1.jpg",
+          alt: "Bird perch stand",
+          order: 0,
+        },
+        {
+          url: "/products/bird-perch-2.jpg",
+          alt: "Bird perch stand detail",
+          order: 1,
+        },
       ],
     },
     {
@@ -188,9 +365,18 @@ async function main() {
       stock: 34,
       featured: true,
       categorySlug: "birds",
+      tagSlugs: ["feeding", "eco"],
       images: [
-        { url: "/products/bird-seed-1.jpg", alt: "Premium bird seed mix", order: 0 },
-        { url: "/products/bird-seed-2.jpg", alt: "Premium bird seed mix pack", order: 1 },
+        {
+          url: "/products/bird-seed-1.jpg",
+          alt: "Premium bird seed mix",
+          order: 0,
+        },
+        {
+          url: "/products/bird-seed-2.jpg",
+          alt: "Premium bird seed mix pack",
+          order: 1,
+        },
       ],
     },
     {
@@ -202,9 +388,18 @@ async function main() {
       stock: 24,
       featured: false,
       categorySlug: "fish",
+      tagSlugs: ["eco", "indoor"],
       images: [
-        { url: "/products/fish-plants-1.jpg", alt: "Aquarium plant set", order: 0 },
-        { url: "/products/fish-plants-2.jpg", alt: "Aquarium plant detail", order: 1 },
+        {
+          url: "/products/fish-plants-1.jpg",
+          alt: "Aquarium plant set",
+          order: 0,
+        },
+        {
+          url: "/products/fish-plants-2.jpg",
+          alt: "Aquarium plant detail",
+          order: 1,
+        },
       ],
     },
     {
@@ -216,9 +411,18 @@ async function main() {
       stock: 27,
       featured: false,
       categorySlug: "fish",
+      tagSlugs: ["eco", "indoor"],
       images: [
-        { url: "/products/fish-gravel-1.jpg", alt: "Fish tank gravel mix", order: 0 },
-        { url: "/products/fish-gravel-2.jpg", alt: "Fish tank gravel close-up", order: 1 },
+        {
+          url: "/products/fish-gravel-1.jpg",
+          alt: "Fish tank gravel mix",
+          order: 0,
+        },
+        {
+          url: "/products/fish-gravel-2.jpg",
+          alt: "Fish tank gravel close-up",
+          order: 1,
+        },
       ],
     },
   ];
@@ -233,8 +437,24 @@ async function main() {
         stock: product.stock,
         featured: product.featured,
         categoryId: categoryMap[product.categorySlug],
+        tags: {
+          connect: product.tagSlugs.map((slug) => ({
+            id: tagMap[slug],
+          })),
+        },
         images: {
           create: product.images,
+        },
+        variants: {
+          create:
+            product.variants?.map((variant) => ({
+              name: variant.name,
+              price: variant.price ?? null,
+              stock: variant.stock,
+              options: {
+                create: variant.options,
+              },
+            })) ?? [],
         },
       },
     });

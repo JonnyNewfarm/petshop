@@ -14,6 +14,7 @@ export type CartItem = {
   quantity: number;
   categoryName?: string;
   variantName?: string | null;
+  variantOptions?: { name: string; value: string }[];
 };
 
 type CartStore = {

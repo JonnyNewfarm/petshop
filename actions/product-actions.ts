@@ -66,6 +66,7 @@ export async function createProduct(
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
+    const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
 
     if (!name || !slug || !description || !categoryId) {
       return { error: "Please fill in all required fields." };
@@ -89,6 +90,9 @@ export async function createProduct(
         stock,
         featured,
         categoryId,
+        tags: {
+  connect: tagIds.map((id) => ({ id })),
+},
         images: {
           create: parsedImageUrls.map((url, index) => ({
             url,
@@ -138,6 +142,8 @@ export async function updateProduct(
     const stock = Number(formData.get("stock") || 0);
     const featured = formData.get("featured") === "on";
     const categoryId = String(formData.get("categoryId") || "").trim();
+        const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
+
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
@@ -167,6 +173,9 @@ export async function updateProduct(
         stock,
         featured,
         categoryId,
+        tags: {
+  set: tagIds.map((id) => ({ id })),
+},
         images: {
           deleteMany: {},
           create: parsedImageUrls.map((url, index) => ({

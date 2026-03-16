@@ -55,34 +55,31 @@ export default async function EditProductPage({
 
   const { id } = await params;
 
-  const [categories, product]: [Category[], ProductWithRelations | null] =
-    await Promise.all([
-      prisma.category.findMany({
-        orderBy: {
-          name: "asc",
+  const [categories, tags, product] = await Promise.all([
+    prisma.category.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.tag.findMany({
+      orderBy: { name: "asc" },
+    }),
+    prisma.product.findUnique({
+      where: { id },
+      include: {
+        images: {
+          orderBy: { order: "asc" },
         },
-      }),
-      prisma.product.findUnique({
-        where: {
-          id,
-        },
-        include: {
-          images: {
-            orderBy: {
-              order: "asc",
-            },
+        variants: {
+          include: {
+            options: true,
           },
-          variants: {
-            include: {
-              options: true,
-            },
-            orderBy: {
-              createdAt: "asc",
-            },
+          orderBy: {
+            createdAt: "asc",
           },
         },
-      }),
-    ]);
+        tags: true,
+      },
+    }),
+  ]);
 
   if (!product) {
     notFound();
@@ -102,6 +99,7 @@ export default async function EditProductPage({
         <div className="mt-10">
           <ProductForm
             categories={categories}
+            tags={tags}
             initialData={{
               id: product.id,
               name: product.name,
@@ -122,6 +120,9 @@ export default async function EditProductPage({
                   name: option.name,
                   value: option.value,
                 })),
+              })),
+              tags: product.tags.map((tag) => ({
+                id: tag.id,
               })),
             }}
           />

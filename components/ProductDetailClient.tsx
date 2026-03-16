@@ -164,6 +164,7 @@ export default function ProductDetailsClient({
           productId={product.id}
           variantId={selectedVariant?.id ?? null}
           variantName={selectedVariant?.name ?? null}
+          variantOptions={selectedVariant?.options ?? []}
           slug={product.slug}
           name={product.name}
           price={displayPrice}

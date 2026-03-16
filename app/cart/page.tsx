@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/app/store/cart-store";
 
@@ -11,6 +12,37 @@ export default function CartPage() {
   const increaseQuantity = useCartStore((state) => state.increaseQuantity);
   const decreaseQuantity = useCartStore((state) => state.decreaseQuantity);
   const subtotal = useCartStore((state) => state.getSubtotal());
+
+  const [loadingCheckout, setLoadingCheckout] = useState(false);
+
+  async function handleCheckout() {
+    try {
+      setLoadingCheckout(true);
+
+      const response = await fetch("/api/checkout", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          items,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.url) {
+        throw new Error("Checkout failed");
+      }
+
+      window.location.href = data.url;
+    } catch (error) {
+      console.error(error);
+      alert("Could not start checkout.");
+    } finally {
+      setLoadingCheckout(false);
+    }
+  }
 
   return (
     <main className="min-h-screen bg-[#f6f1e8] px-6 py-28 text-black sm:px-8 lg:px-12">
@@ -129,9 +161,11 @@ export default function CartPage() {
 
               <button
                 type="button"
-                className="mt-8 w-full border border-black bg-black px-6 py-4 text-sm uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
+                onClick={handleCheckout}
+                disabled={loadingCheckout}
+                className="mt-8 w-full border border-black bg-black px-6 py-4 text-sm uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black disabled:opacity-50"
               >
-                Checkout
+                {loadingCheckout ? "Loading..." : "Checkout"}
               </button>
 
               <Link

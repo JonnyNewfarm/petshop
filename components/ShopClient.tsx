@@ -13,6 +13,11 @@ type Product = {
     name: string;
     slug: string;
   };
+  tags: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
   images: {
     id: string;
     url: string;
@@ -30,12 +35,24 @@ const categories = [
   { label: "Fish", value: "fish" },
 ];
 
+const tags = [
+  { label: "Beds", value: "beds" },
+  { label: "Toys", value: "toys" },
+  { label: "Treats", value: "treats" },
+  { label: "Bowls", value: "bowls" },
+  { label: "Grooming", value: "grooming" },
+  { label: "Travel", value: "travel" },
+  { label: "Orthopedic", value: "orthopedic" },
+  { label: "Eco", value: "eco" },
+];
+
 export default function ShopClient() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const selectedCategory = searchParams.get("category") || "all";
+  const selectedTag = searchParams.get("tag") || "";
 
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,10 +62,17 @@ export default function ShopClient() {
       try {
         setLoading(true);
 
-        const query =
-          selectedCategory !== "all"
-            ? `?category=${encodeURIComponent(selectedCategory)}`
-            : "";
+        const params = new URLSearchParams();
+
+        if (selectedCategory !== "all") {
+          params.set("category", selectedCategory);
+        }
+
+        if (selectedTag) {
+          params.set("tag", selectedTag);
+        }
+
+        const query = params.toString() ? `?${params.toString()}` : "";
 
         const response = await fetch(`/api/products${query}`, {
           cache: "no-store",
@@ -69,7 +93,7 @@ export default function ShopClient() {
     };
 
     fetchProducts();
-  }, [selectedCategory]);
+  }, [selectedCategory, selectedTag]);
 
   const heading = useMemo(() => {
     const current = categories.find((cat) => cat.value === selectedCategory);
@@ -87,6 +111,23 @@ export default function ShopClient() {
 
     const queryString = params.toString();
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
+  const handleTagChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (selectedTag === value) {
+      params.delete("tag");
+    } else {
+      params.set("tag", value);
+    }
+
+    const queryString = params.toString();
+    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
+  const clearFilters = () => {
+    router.push(pathname);
   };
 
   return (
@@ -107,53 +148,98 @@ export default function ShopClient() {
           </p>
         </div>
 
-        <div className="mb-10 flex flex-wrap gap-3">
-          {categories.map((category) => {
-            const active = selectedCategory === category.value;
+        <div className="space-y-6">
+          <div>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
+              Categories
+            </p>
 
-            return (
-              <button
-                key={category.value}
-                onClick={() => handleCategoryChange(category.value)}
-                className={`border px-5 py-3 text-[12px] uppercase tracking-[0.18em] transition ${
-                  active
-                    ? "border-black bg-black text-[#f6f1e8]"
-                    : "border-black/10 bg-white text-black hover:border-black"
-                }`}
-              >
-                {category.label}
-              </button>
-            );
-          })}
+            <div className="flex flex-wrap gap-3">
+              {categories.map((category) => {
+                const active = selectedCategory === category.value;
+
+                return (
+                  <button
+                    key={category.value}
+                    onClick={() => handleCategoryChange(category.value)}
+                    className={`border px-5 py-3 text-[12px] uppercase tracking-[0.18em] transition ${
+                      active
+                        ? "border-black bg-black text-[#f6f1e8]"
+                        : "border-black/10 bg-white text-black hover:border-black"
+                    }`}
+                  >
+                    {category.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          <div>
+            <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
+              Tags
+            </p>
+
+            <div className="flex flex-wrap gap-3">
+              {tags.map((tag) => {
+                const active = selectedTag === tag.value;
+
+                return (
+                  <button
+                    key={tag.value}
+                    onClick={() => handleTagChange(tag.value)}
+                    className={`border px-5 py-3 text-[12px] uppercase tracking-[0.18em] transition ${
+                      active
+                        ? "border-black bg-black text-[#f6f1e8]"
+                        : "border-black/10 bg-white text-black hover:border-black"
+                    }`}
+                  >
+                    {tag.label}
+                  </button>
+                );
+              })}
+
+              {(selectedCategory !== "all" || selectedTag) && (
+                <button
+                  onClick={clearFilters}
+                  className="border border-black/10 bg-white px-5 py-3 text-[12px] uppercase tracking-[0.18em] text-black transition hover:border-black"
+                >
+                  Clear filters
+                </button>
+              )}
+            </div>
+          </div>
         </div>
 
-        {loading ? (
-          <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
-            Loading products...
-          </div>
-        ) : products.length === 0 ? (
-          <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
-            No products found.
-          </div>
-        ) : (
-          <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-            {products.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={{
-                  id: product.id,
-                  name: product.name,
-                  slug: product.slug,
-                  price: product.price,
-                  imageUrl: product.images[0]?.url ?? "/placeholder.jpg",
-                  category: {
-                    name: product.category.name,
-                  },
-                }}
-              />
-            ))}
-          </div>
-        )}
+        <div className="mt-10">
+          {loading ? (
+            <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
+              Loading products...
+            </div>
+          ) : products.length === 0 ? (
+            <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
+              No products found.
+            </div>
+          ) : (
+            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+              {products.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={{
+                    id: product.id,
+                    name: product.name,
+                    slug: product.slug,
+                    price: product.price,
+                    imageUrl: product.images[0]?.url ?? "/placeholder.jpg",
+                    category: {
+                      name: product.category.name,
+                    },
+                  }}
+                />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
