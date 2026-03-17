@@ -10,8 +10,8 @@ export default function Footer() {
           <a href="/shop" className="transition-opacity hover:opacity-60">
             shop
           </a>
-          <a href="/about" className="transition-opacity hover:opacity-60">
-            about
+          <a href="/cart" className="transition-opacity hover:opacity-60">
+            Cart
           </a>
           <a href="/contact" className="transition-opacity hover:opacity-60">
             contact

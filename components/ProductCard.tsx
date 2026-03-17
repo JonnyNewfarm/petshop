@@ -17,29 +17,85 @@ type ProductCardProps = {
 
 export default function ProductCard({ product }: ProductCardProps) {
   return (
-    <Link
-      href={`/shop/${product.slug}`}
-      className="group block border border-black/10 bg-white"
-    >
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#f3efe8]">
+    <Link href={`/shop/${product.slug}`} className="group block">
+      {/* IMAGE */}
+      <div className="relative aspect-[0.82] overflow-hidden bg-[#e7e2db]">
         <Image
           src={product.imageUrl}
           alt={product.name}
           fill
-          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+          className="
+            object-cover
+            transition
+            duration-[1200ms]
+            ease-[cubic-bezier(.19,1,.22,1)]
+            group-hover:scale-[1.06]
+          "
+        />
+
+        {/* subtle overlay on hover */}
+        <div
+          className="
+          pointer-events-none
+          absolute inset-0
+          bg-black/0
+          transition
+          duration-500
+          group-hover:bg-black/10
+        "
         />
       </div>
 
-      <div className="p-4">
-        <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+      {/* INFO */}
+      <div className="pt-5">
+        <p
+          className="
+          text-[10px]
+          uppercase
+          tracking-[0.22em]
+          text-black/45
+        "
+        >
           {product.category.name}
         </p>
 
-        <h3 className="mt-2 text-lg font-medium text-black">{product.name}</h3>
+        <h3
+          className="
+            mt-2
+            text-[1rem]
+            font-semibold
+            uppercase
+            leading-[1.05]
+            tracking-[-0.01em]
+            transition
+            duration-300
+            group-hover:translate-x-[6px]
+          "
+        >
+          {product.name}
+        </h3>
 
-        <p className="mt-3 text-sm text-black/70">
-          {formatPrice(product.price)}
-        </p>
+        <div className="mt-3 flex items-center justify-between">
+          <p className="text-[13px] tracking-[-0.01em] text-black/75">
+            {formatPrice(product.price)}
+          </p>
+
+          {/* arrow micro interaction */}
+          <span
+            className="
+            text-[11px]
+            uppercase
+            tracking-[0.18em]
+            opacity-0
+            transition
+            duration-300
+            group-hover:opacity-100
+            group-hover:translate-x-1
+          "
+          >
+            View →
+          </span>
+        </div>
       </div>
     </Link>
   );

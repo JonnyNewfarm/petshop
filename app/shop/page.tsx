@@ -1,5 +1,6 @@
 import { Suspense } from "react";
 import ShopClient from "@/components/ShopClient";
+import ScrollSection from "@/components/SmoothScroll";
 
 function ShopPageFallback() {
   return (
@@ -15,8 +16,10 @@ function ShopPageFallback() {
 
 export default function ShopPage() {
   return (
-    <Suspense fallback={<ShopPageFallback />}>
-      <ShopClient />
-    </Suspense>
+    <ScrollSection>
+      <Suspense fallback={<ShopPageFallback />}>
+        <ShopClient />
+      </Suspense>
+    </ScrollSection>
   );
 }

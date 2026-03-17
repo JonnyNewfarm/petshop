@@ -47,12 +47,23 @@ export default async function AdminPage() {
             </p>
             <h2 className="mt-3 text-2xl font-medium">Add new product</h2>
           </Link>
-
           <Link
             href="/admin/orders"
-            className="text-sm uppercase tracking-[0.14em] text-black/65 transition hover:text-black"
+            className="border border-black/10 bg-white p-6 transition hover:border-black"
           >
-            Orders
+            <p className="text-sm uppercase tracking-[0.18em] text-black/45">
+              Orders
+            </p>
+            <h2 className="mt-3 text-2xl font-medium">Wiew orders</h2>
+          </Link>
+          <Link
+            href="/admin/contact"
+            className="border border-black/10 bg-white p-6 transition hover:border-black"
+          >
+            <p className="text-sm uppercase tracking-[0.18em] text-black/45">
+              Messages
+            </p>
+            <h2 className="mt-3 text-2xl font-medium">Contact inbox</h2>
           </Link>
         </div>
       </div>

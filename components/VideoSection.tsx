@@ -35,7 +35,7 @@ export default function VideoSection() {
       const tl = gsap.timeline({
         scrollTrigger: {
           trigger: sectionRef.current,
-          start: "top 75%",
+          start: "top 95%",
           once: true,
         },
       });
@@ -134,7 +134,7 @@ export default function VideoSection() {
             <div
               ref={l1}
               style={{ fontFamily: "Mango" }}
-              className="text-black text-[clamp(4.3rem,13vw,11.5rem)] uppercase leading-[0.8]"
+              className="text-black text-[clamp(4rem,12vw,10rem)] uppercase leading-[0.8]"
             >
               Better
             </div>
@@ -142,7 +142,7 @@ export default function VideoSection() {
             <div
               ref={l2}
               style={{ fontFamily: "Mango" }}
-              className="text-black text-[clamp(4.3rem,13vw,11.5rem)] uppercase leading-[0.8]"
+              className="text-black text-[clamp(4rem,12vw,10rem)] uppercase leading-[0.8]"
             >
               things for pets
             </div>
@@ -160,7 +160,7 @@ export default function VideoSection() {
               style={{ fontFamily: "Mango" }}
               className="ml-[28vw] text-black text-[clamp(4.3rem,13vw,11.5rem)] uppercase leading-[0.8]"
             >
-              calm living
+              happy homes
             </div>
           </div>
         </div>

@@ -49,9 +49,15 @@ export default function TrainCardsSection() {
         const railW = rail.scrollWidth;
 
         // start helt utenfor høyre side
-        const startX = viewportW;
+        let startX;
 
-        // hvor langt railen må flyttes for at siste card skal komme helt gjennom
+        if (viewportW >= 1200) {
+          startX = viewportW * 0.72; // stor desktop
+        } else if (viewportW >= 768) {
+          startX = viewportW * 0.85; // tablet litt tidligere
+        } else {
+          startX = viewportW; // mobil som før
+        } // hvor langt railen må flyttes for at siste card skal komme helt gjennom
         const endX = -(railW - viewportW + viewportW * 0.12);
 
         gsap.set(rail, { x: startX });
@@ -99,7 +105,7 @@ export default function TrainCardsSection() {
       <div ref={pinRef} className="relative h-screen overflow-hidden">
         {/* FØRSTE TEKST */}
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
-          <div className="text-center">
+          <div className="text-left">
             <div className="overflow-hidden">
               <span
                 ref={line1Ref}
@@ -114,9 +120,9 @@ export default function TrainCardsSection() {
               <span
                 ref={line2Ref}
                 style={{ fontFamily: "Mango" }}
-                className="block font-semibold uppercase text-[clamp(6rem,14vw,14rem)] leading-[0.85] will-change-transform"
+                className="block font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.85] will-change-transform"
               >
-                for pets
+                you need
               </span>
             </div>
 
@@ -126,7 +132,7 @@ export default function TrainCardsSection() {
                 style={{ fontFamily: "Mango" }}
                 className="block font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.85] will-change-transform"
               >
-                at home
+                for pets
               </span>
             </div>
           </div>

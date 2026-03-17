@@ -37,7 +37,7 @@ export default function PawCursor() {
         transform: "translate(-50%, -50%)",
       }}
     >
-      <img src="/paw.svg" className="w-3 h-3" />
+      <img src="/paw.svg" className="w-4 h-4" />
     </div>
   );
 }

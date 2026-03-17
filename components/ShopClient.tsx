@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
+import FilterSelect from "@/components/FilterSelect";
 
 type Product = {
   id: string;
@@ -26,6 +27,15 @@ type Product = {
   }[];
 };
 
+type Pagination = {
+  page: number;
+  limit: number;
+  totalProducts: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+};
+
 const categories = [
   { label: "All", value: "all" },
   { label: "Dogs", value: "dogs" },
@@ -36,6 +46,7 @@ const categories = [
 ];
 
 const tags = [
+  { label: "All tags", value: "all-tags" },
   { label: "Beds", value: "beds" },
   { label: "Toys", value: "toys" },
   { label: "Treats", value: "treats" },
@@ -53,9 +64,25 @@ export default function ShopClient() {
 
   const selectedCategory = searchParams.get("category") || "all";
   const selectedTag = searchParams.get("tag") || "";
+  const selectedSearch = searchParams.get("search") || "";
+  const currentPage = Number(searchParams.get("page") || "1");
 
+  const [searchInput, setSearchInput] = useState(selectedSearch);
   const [products, setProducts] = useState<Product[]>([]);
+  const [pagination, setPagination] = useState<Pagination>({
+    page: 1,
+    limit: 9,
+    totalProducts: 0,
+    totalPages: 1,
+    hasNextPage: false,
+    hasPreviousPage: false,
+  });
   const [loading, setLoading] = useState(true);
+  const [filtersOpen, setFiltersOpen] = useState(false);
+
+  useEffect(() => {
+    setSearchInput(selectedSearch);
+  }, [selectedSearch]);
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -72,6 +99,13 @@ export default function ShopClient() {
           params.set("tag", selectedTag);
         }
 
+        if (selectedSearch) {
+          params.set("search", selectedSearch);
+        }
+
+        params.set("page", String(currentPage));
+        params.set("limit", "9");
+
         const query = params.toString() ? `?${params.toString()}` : "";
 
         const response = await fetch(`/api/products${query}`, {
@@ -83,7 +117,8 @@ export default function ShopClient() {
         }
 
         const data = await response.json();
-        setProducts(data);
+        setProducts(data.products);
+        setPagination(data.pagination);
       } catch (error) {
         console.error(error);
         setProducts([]);
@@ -93,153 +128,405 @@ export default function ShopClient() {
     };
 
     fetchProducts();
-  }, [selectedCategory, selectedTag]);
+  }, [selectedCategory, selectedTag, selectedSearch, currentPage]);
 
   const heading = useMemo(() => {
     const current = categories.find((cat) => cat.value === selectedCategory);
     return current?.label || "Shop";
   }, [selectedCategory]);
 
-  const handleCategoryChange = (value: string) => {
+  const selectedTagLabel = useMemo(() => {
+    return tags.find((tag) => tag.value === selectedTag)?.label || "";
+  }, [selectedTag]);
+
+  const updateUrl = (updates: Record<string, string | null>) => {
     const params = new URLSearchParams(searchParams.toString());
 
-    if (value === "all") {
-      params.delete("category");
-    } else {
-      params.set("category", value);
-    }
+    Object.entries(updates).forEach(([key, value]) => {
+      if (!value) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
 
     const queryString = params.toString();
     router.push(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
+  const handleCategoryChange = (value: string) => {
+    updateUrl({
+      category: value === "all" ? null : value,
+      page: "1",
+    });
   };
 
   const handleTagChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
+    updateUrl({
+      tag: value === "all-tags" ? null : value,
+      page: "1",
+    });
+  };
 
-    if (selectedTag === value) {
-      params.delete("tag");
-    } else {
-      params.set("tag", value);
-    }
+  const handleSearchSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    const queryString = params.toString();
-    router.push(queryString ? `${pathname}?${queryString}` : pathname);
+    updateUrl({
+      search: searchInput.trim() || null,
+      page: "1",
+    });
+  };
+
+  const clearSearch = () => {
+    setSearchInput("");
+    updateUrl({
+      search: null,
+      page: "1",
+    });
+  };
+
+  const handlePageChange = (page: number) => {
+    updateUrl({
+      page: String(page),
+    });
   };
 
   const clearFilters = () => {
+    setSearchInput("");
     router.push(pathname);
   };
 
+  const hasActiveFilters =
+    selectedCategory !== "all" || !!selectedTag || !!selectedSearch;
+
   return (
-    <main className="min-h-screen bg-[#dddad5] px-6 py-28 text-black sm:px-8 lg:px-12">
-      <div className="mx-auto max-w-[1400px]">
-        <div className="mb-10">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
-            Shop
-          </p>
+    <main className="min-h-screen bg-[#dddad5] text-black">
+      <div className="mx-auto max-w-[1600px] px-6 pb-20 pt-28 sm:px-8 lg:px-12">
+        <section className="border-b border-black/10 pb-14 lg:pb-20">
+          <div className="grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+            <div className="max-w-[980px]">
+              <p className="text-[11px] uppercase tracking-[0.24em] text-black/45">
+                Curated shop
+              </p>
 
-          <h1 className="mt-4 text-[clamp(2.5rem,6vw,5.5rem)] font-semibold uppercase leading-[0.9] tracking-[-0.05em]">
-            {heading === "All" ? "Pet essentials" : heading}
-          </h1>
+              <h1
+                style={{ fontFamily: "Mango" }}
+                className="mt-5 text-[clamp(3.4rem,9vw,9rem)] uppercase leading-[0.88] tracking-[-0.02em]"
+              >
+                {heading === "All" ? "Pet essentials" : heading}
+              </h1>
 
-          <p className="mt-4 max-w-[620px] text-base leading-7 text-black/65">
-            Explore thoughtfully selected products for dogs, cats, small pets,
-            birds and fish.
-          </p>
-        </div>
+              <p className="mt-6 max-w-[620px] text-[15px] leading-7 text-black/62 md:text-base">
+                Explore thoughtfully selected products for dogs, cats, small
+                pets, birds and fish — designed for everyday life with pets.
+              </p>
+            </div>
 
-        <div className="space-y-6">
-          <div>
-            <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
-              Categories
-            </p>
+            <div className="flex flex-col justify-end">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-8 border-t border-black/10 pt-6 sm:grid-cols-3 lg:grid-cols-2">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-black/40">
+                    Products
+                  </p>
+                  <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
+                    {loading ? "..." : pagination.totalProducts}
+                  </p>
+                </div>
 
-            <div className="flex flex-wrap gap-3">
-              {categories.map((category) => {
-                const active = selectedCategory === category.value;
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-black/40">
+                    Category
+                  </p>
+                  <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
+                    {heading}
+                  </p>
+                </div>
 
-                return (
-                  <button
-                    key={category.value}
-                    onClick={() => handleCategoryChange(category.value)}
-                    className={`border px-5 py-3 text-[12px] uppercase tracking-[0.18em] transition ${
-                      active
-                        ? "border-black bg-black text-[#f6f1e8]"
-                        : "border-black/10 bg-white text-black hover:border-black"
-                    }`}
-                  >
-                    {category.label}
-                  </button>
-                );
-              })}
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.2em] text-black/40">
+                    Selection
+                  </p>
+                  <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
+                    2026
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
+        </section>
 
-          <div>
-            <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
-              Tags
-            </p>
+        <section className="grid gap-12 pt-10 lg:grid-cols-[320px_minmax(0,1fr)] lg:gap-12 lg:pt-12">
+          <aside className="relative lg:sticky lg:top-24 lg:self-start">
+            <div className="border border-black/10 bg-[#e6e2dc]">
+              <button
+                type="button"
+                onClick={() => setFiltersOpen((prev) => !prev)}
+                className="flex w-full items-center justify-between px-5 py-5 text-left sm:px-6 lg:pointer-events-none"
+                aria-expanded={filtersOpen}
+              >
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+                    Filters
+                  </p>
+                  <h2 className="mt-2 text-[1.15rem] uppercase tracking-[-0.03em]">
+                    Refine selection
+                  </h2>
+                </div>
 
-            <div className="flex flex-wrap gap-3">
-              {tags.map((tag) => {
-                const active = selectedTag === tag.value;
+                <div className="flex items-center gap-4 lg:hidden">
+                  {hasActiveFilters && (
+                    <span className="text-[10px] uppercase tracking-[0.18em] text-black/45">
+                      Active
+                    </span>
+                  )}
+                  <span className="text-lg leading-none">
+                    {filtersOpen ? "−" : "+"}
+                  </span>
+                </div>
+              </button>
 
-                return (
+              <div
+                className={`overflow-hidden transition-[max-height,opacity] duration-300 ease-out lg:max-h-none lg:opacity-100 ${
+                  filtersOpen
+                    ? "max-h-[1200px] opacity-100"
+                    : "max-h-0 opacity-0"
+                } lg:block`}
+              >
+                <div className="border-t border-black/10 px-5 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+                  <div className="mb-8 flex items-end justify-between gap-4 border-b border-black/10 pb-5">
+                    <div>
+                      <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+                        Search & filters
+                      </p>
+                      <p className="mt-2 text-sm leading-6 text-black/58">
+                        Narrow the collection with category, tag, or search.
+                      </p>
+                    </div>
+
+                    {hasActiveFilters && (
+                      <button
+                        onClick={clearFilters}
+                        className="text-[11px] uppercase tracking-[0.18em] text-black/55 transition hover:text-black"
+                      >
+                        Reset
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-8">
+                    <div>
+                      <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
+                        Search
+                      </p>
+
+                      <form onSubmit={handleSearchSubmit} className="space-y-3">
+                        <input
+                          type="text"
+                          value={searchInput}
+                          onChange={(e) => setSearchInput(e.target.value)}
+                          placeholder="Search products..."
+                          className="w-full border border-black/10 bg-[#f3efe8] px-4 py-4 text-sm outline-none placeholder:text-black/35 focus:border-black"
+                        />
+
+                        <div className="flex gap-3">
+                          <button
+                            type="submit"
+                            className="flex-1 border border-black bg-black px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
+                          >
+                            Search
+                          </button>
+
+                          {selectedSearch && (
+                            <button
+                              type="button"
+                              onClick={clearSearch}
+                              className="border border-black/10 bg-[#f3efe8] px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black"
+                            >
+                              Clear
+                            </button>
+                          )}
+                        </div>
+                      </form>
+                    </div>
+
+                    <FilterSelect
+                      label="Category"
+                      value={selectedCategory}
+                      options={categories}
+                      onValueChange={handleCategoryChange}
+                      placeholder="Select category"
+                    />
+
+                    <FilterSelect
+                      label="Tag"
+                      value={selectedTag || "all-tags"}
+                      options={tags}
+                      onValueChange={handleTagChange}
+                      placeholder="All tags"
+                    />
+
+                    {hasActiveFilters && (
+                      <div className="border-t border-black/10 pt-5">
+                        <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
+                          Active filters
+                        </p>
+
+                        <div className="flex flex-wrap gap-2.5">
+                          {selectedCategory !== "all" && (
+                            <button
+                              onClick={() => handleCategoryChange("all")}
+                              className="bg-[#f3efe8] px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] transition hover:bg-black hover:text-[#f6f1e8]"
+                            >
+                              {heading} ×
+                            </button>
+                          )}
+
+                          {selectedTag && (
+                            <button
+                              onClick={() => handleTagChange("all-tags")}
+                              className="bg-[#f3efe8] px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] transition hover:bg-black hover:text-[#f6f1e8]"
+                            >
+                              {selectedTagLabel} ×
+                            </button>
+                          )}
+
+                          {selectedSearch && (
+                            <button
+                              onClick={clearSearch}
+                              className="bg-[#f3efe8] px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] transition hover:bg-black hover:text-[#f6f1e8]"
+                            >
+                              {selectedSearch} ×
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </aside>
+
+          <div className="min-w-0">
+            <div className="mb-8 flex flex-col gap-4 border-b border-black/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+                  Collection
+                </p>
+                <h2 className="mt-2 text-[1.4rem] uppercase tracking-[-0.04em]">
+                  {heading === "All" ? "All products" : `${heading} selection`}
+                </h2>
+              </div>
+
+              <div className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+                {loading
+                  ? "Loading..."
+                  : `${pagination.totalProducts} products`}
+              </div>
+            </div>
+
+            {loading ? (
+              <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+                {Array.from({ length: 6 }).map((_, i) => (
+                  <div
+                    key={i}
+                    className="aspect-[0.82] animate-pulse bg-[#e7e2db]"
+                  />
+                ))}
+              </div>
+            ) : products.length === 0 ? (
+              <div className="flex min-h-[420px] items-center justify-center border border-black/10 bg-[#e6e2dc] px-6 text-center">
+                <div>
+                  <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+                    No results
+                  </p>
+                  <h3 className="mt-3 text-2xl uppercase tracking-[-0.04em]">
+                    No products found
+                  </h3>
+                  <p className="mt-3 text-sm leading-7 text-black/60">
+                    Try another category, tag, or search term to explore more
+                    products.
+                  </p>
                   <button
-                    key={tag.value}
-                    onClick={() => handleTagChange(tag.value)}
-                    className={`border px-5 py-3 text-[12px] uppercase tracking-[0.18em] transition ${
-                      active
-                        ? "border-black bg-black text-[#f6f1e8]"
-                        : "border-black/10 bg-white text-black hover:border-black"
-                    }`}
+                    onClick={clearFilters}
+                    className="mt-6 border border-black bg-black px-6 py-3 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
                   >
-                    {tag.label}
+                    Clear filters
                   </button>
-                );
-              })}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+                  {products.map((product) => (
+                    <div key={product.id} className="group">
+                      <ProductCard
+                        product={{
+                          id: product.id,
+                          name: product.name,
+                          slug: product.slug,
+                          price: product.price,
+                          imageUrl:
+                            product.images[0]?.url ?? "/placeholder.jpg",
+                          category: {
+                            name: product.category.name,
+                          },
+                        }}
+                      />
+                    </div>
+                  ))}
+                </div>
 
-              {(selectedCategory !== "all" || selectedTag) && (
-                <button
-                  onClick={clearFilters}
-                  className="border border-black/10 bg-white px-5 py-3 text-[12px] uppercase tracking-[0.18em] text-black transition hover:border-black"
-                >
-                  Clear filters
-                </button>
-              )}
-            </div>
+                {pagination.totalPages > 1 && (
+                  <div className="mt-14 flex flex-col items-center gap-5 border-t border-black/10 pt-10">
+                    <div className="text-[11px] uppercase tracking-[0.22em] text-black/40">
+                      Page {pagination.page} of {pagination.totalPages}
+                    </div>
+
+                    <div className="flex flex-wrap items-center justify-center gap-2.5">
+                      <button
+                        onClick={() => handlePageChange(pagination.page - 1)}
+                        disabled={!pagination.hasPreviousPage}
+                        className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
+                      >
+                        Previous
+                      </button>
+
+                      {Array.from(
+                        { length: pagination.totalPages },
+                        (_, index) => index + 1,
+                      ).map((page) => {
+                        const active = page === pagination.page;
+
+                        return (
+                          <button
+                            key={page}
+                            onClick={() => handlePageChange(page)}
+                            className={`min-w-[46px] px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
+                              active
+                                ? "bg-black text-[#f6f1e8]"
+                                : "border border-black/10 bg-[#f3efe8] text-black hover:border-black"
+                            }`}
+                          >
+                            {page}
+                          </button>
+                        );
+                      })}
+
+                      <button
+                        onClick={() => handlePageChange(pagination.page + 1)}
+                        disabled={!pagination.hasNextPage}
+                        className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </div>
-
-        <div className="mt-10">
-          {loading ? (
-            <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
-              Loading products...
-            </div>
-          ) : products.length === 0 ? (
-            <div className="py-20 text-sm uppercase tracking-[0.18em] text-black/45">
-              No products found.
-            </div>
-          ) : (
-            <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
-              {products.map((product) => (
-                <ProductCard
-                  key={product.id}
-                  product={{
-                    id: product.id,
-                    name: product.name,
-                    slug: product.slug,
-                    price: product.price,
-                    imageUrl: product.images[0]?.url ?? "/placeholder.jpg",
-                    category: {
-                      name: product.category.name,
-                    },
-                  }}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        </section>
       </div>
     </main>
   );
