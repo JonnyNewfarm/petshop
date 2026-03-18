@@ -252,11 +252,11 @@ export default function CartPage() {
 
                 <div className="px-6 py-6 sm:px-8">
                   {shipping === 0 ? (
-                    <div className="mb-6 border border-black/10 bg-white px-4 py-4 text-sm text-black/70">
+                    <div className="mb-6 text-sm text-black/70">
                       You’ve unlocked free shipping.
                     </div>
                   ) : (
-                    <div className="mb-6 border border-black/10 bg-white px-4 py-4 text-sm text-black/70">
+                    <div className="mb-6  text-sm text-black/70">
                       You are {formatPrice(amountUntilFreeShipping)} away from
                       free shipping.
                     </div>
