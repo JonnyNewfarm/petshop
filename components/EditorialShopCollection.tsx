@@ -92,7 +92,6 @@ export default function EditorialShopSection() {
       className="bg-[#dddad5] text-black px-6 md:px-10 py-36"
     >
       <div className="max-w-[1600px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-24">
-        {/* LEFT */}
         <div>
           <div
             ref={titleRef}
@@ -126,6 +125,7 @@ export default function EditorialShopSection() {
               <Link className="underline" href="/shop?category=small-pets">
                 small companions
               </Link>
+              s
             </li>
             <li>
               <Link className="underline" href="/shop?category=fish">
@@ -135,7 +135,6 @@ export default function EditorialShopSection() {
           </ul>
         </div>
 
-        {/* RIGHT */}
         <div ref={textRef} className="max-w-[520px]">
           <p className="text-sm leading-relaxed uppercase">
             Toys, treats, walk gear, bowls, soft beds and everyday favorites for

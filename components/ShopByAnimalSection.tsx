@@ -31,13 +31,34 @@ export default function TrainCardsSection() {
         },
       });
 
-      intro.to([line1Ref.current, line2Ref.current, line3Ref.current], {
+      intro.to(line1Ref.current, {
         yPercent: 0,
         opacity: 1,
-        duration: 0.95,
-        stagger: 0.08,
+        duration: 0.9,
         ease: "power3.out",
       });
+
+      intro.to(
+        line2Ref.current,
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: "power3.out",
+        },
+        "-=0.72",
+      );
+
+      intro.to(
+        line3Ref.current,
+        {
+          yPercent: 0,
+          opacity: 1,
+          duration: 0.9,
+          ease: "power3.out",
+        },
+        "-=0.72",
+      );
 
       const rail = railRef.current;
       const section = sectionRef.current;
@@ -48,16 +69,16 @@ export default function TrainCardsSection() {
         const viewportW = window.innerWidth;
         const railW = rail.scrollWidth;
 
-        // start helt utenfor høyre side
         let startX;
 
         if (viewportW >= 1200) {
-          startX = viewportW * 0.72; // stor desktop
+          startX = viewportW * 0.72;
         } else if (viewportW >= 768) {
-          startX = viewportW * 0.85; // tablet litt tidligere
+          startX = viewportW * 0.85;
         } else {
-          startX = viewportW; // mobil som før
-        } // hvor langt railen må flyttes for at siste card skal komme helt gjennom
+          startX = viewportW;
+        }
+
         const endX = -(railW - viewportW + viewportW * 0.12);
 
         gsap.set(rail, { x: startX });
@@ -75,22 +96,46 @@ export default function TrainCardsSection() {
         });
 
         tl.to(
-          [line1Ref.current, line2Ref.current, line3Ref.current],
+          line1Ref.current,
           {
+            x: -90,
+            y: -26,
+            rotation: -3,
             opacity: 0,
-            yPercent: -55,
-            ease: "none",
-            stagger: 0.015,
+            ease: "power2.out",
           },
           0,
-        ).to(
-          rail,
-          {
-            x: endX,
-            ease: "none",
-          },
-          0,
-        );
+        )
+          .to(
+            line2Ref.current,
+            {
+              x: 70,
+              y: -12,
+              rotation: 2,
+              opacity: 0,
+              ease: "power2.out",
+            },
+            0,
+          )
+          .to(
+            line3Ref.current,
+            {
+              x: -50,
+              y: 18,
+              rotation: -2,
+              opacity: 0,
+              ease: "power2.out",
+            },
+            0,
+          )
+          .to(
+            rail,
+            {
+              x: endX,
+              ease: "none",
+            },
+            0.04,
+          );
       };
 
       createAnimation();
@@ -103,34 +148,33 @@ export default function TrainCardsSection() {
   return (
     <section ref={sectionRef} className="relative bg-[#dddad5] text-black">
       <div ref={pinRef} className="relative h-screen overflow-hidden">
-        {/* FØRSTE TEKST */}
         <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
           <div className="text-left">
-            <div className="overflow-hidden">
+            <div className="">
               <span
                 ref={line1Ref}
                 style={{ fontFamily: "Mango" }}
-                className="block font-semibold uppercase text-[clamp(6rem,12vw,12rem)] leading-[0.85] will-change-transform"
+                className="block translate-x-[-0.15em] font-semibold uppercase text-[clamp(6rem,12vw,12rem)] leading-[0.82] will-change-transform"
               >
                 Everything
               </span>
             </div>
 
-            <div className="overflow-hidden">
+            <div className="">
               <span
                 ref={line2Ref}
                 style={{ fontFamily: "Mango" }}
-                className="block font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.85] will-change-transform"
+                className="block translate-x-[0.28em] font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.82] will-change-transform"
               >
                 you need
               </span>
             </div>
 
-            <div className="overflow-hidden">
+            <div className="">
               <span
                 ref={line3Ref}
                 style={{ fontFamily: "Mango" }}
-                className="block font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.85] will-change-transform"
+                className="block translate-x-[0.05em] font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.82] will-change-transform"
               >
                 for pets
               </span>
@@ -138,29 +182,28 @@ export default function TrainCardsSection() {
           </div>
         </div>
 
-        {/* 3 CARDS FRA HØYRE MOT VENSTRE */}
         <div className="absolute inset-0 z-20 flex items-center">
           <div
             ref={railRef}
-            className="flex w-max gap-4 sm:gap-6 pl-[6vw] sm:pl-[10vw] will-change-transform"
+            className="flex w-max gap-4 pl-[6vw] will-change-transform sm:gap-6 sm:pl-[10vw]"
           >
             <TrainCard
               title="Dogs"
               text="Walks, sleep and everyday essentials."
               image="/dogs.jpg"
-              href="/dogs"
+              href="/shop?category=dogs&page=1"
             />
             <TrainCard
               title="Cats"
               text="Comfort, play and indoor living."
-              image="/dogs.jpg"
-              href="/cats"
+              image="/cat.jpg"
+              href="/shop?category=cats&page=1"
             />
             <TrainCard
               title="All Products"
               text="Explore the full collection."
-              image="/dogs.jpg"
-              href="/products"
+              image="/all.jpg"
+              href="/shop"
             />
           </div>
         </div>
@@ -183,7 +226,7 @@ function TrainCard({
   return (
     <a
       href={href}
-      className="group relative h-[64vh] w-[78vw] sm:w-[58vw] lg:w-[34vw] min-w-0 sm:min-w-[320px] lg:min-w-[380px] shrink-0 overflow-hidden border border-black/10 bg-[#e7e3de]"
+      className="group relative h-[64vh] w-[78vw] min-w-0 shrink-0 overflow-hidden border border-black/10 bg-[#e7e3de] sm:w-[58vw] sm:min-w-[320px] lg:h-[70vh] lg:w-[34vw] lg:min-w-[380px]"
     >
       <div className="absolute inset-0">
         <img src={image} alt={title} className="h-full w-full object-cover" />

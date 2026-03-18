@@ -148,7 +148,6 @@ export default function HeroSection() {
           0.08,
         )
 
-        // PET -> DOG
         .to(
           petRef.current,
           {
@@ -174,7 +173,6 @@ export default function HeroSection() {
           0.18,
         )
 
-        // DOG -> CAT
         .to(
           dogRef.current,
           {
@@ -200,7 +198,6 @@ export default function HeroSection() {
           0.38,
         )
 
-        // SHOP -> NOW
         .to(
           shopRef.current,
           {

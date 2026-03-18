@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
       0,
     );
 
-    const freeShippingThreshold = 5999; // 499 USD cents if you're using usd
+    const freeShippingThreshold = 5999; 
     const shippingAmount = subtotal >= freeShippingThreshold ? 0 : 499;
 
     const session = await stripe.checkout.sessions.create({

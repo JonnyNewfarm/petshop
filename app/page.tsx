@@ -41,7 +41,7 @@ export const metadata: Metadata = {
     siteName: "Petsaco",
     images: [
       {
-        url: "/og-image.jpg", // create a 1200x630 image
+        url: "/og-image.jpg",
         width: 1200,
         height: 630,
         alt: "Petsaco online pet store",

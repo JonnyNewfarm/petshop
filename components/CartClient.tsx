@@ -15,8 +15,8 @@ export default function CartPage() {
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
 
-  const freeShippingThreshold = 6000; // $60 hvis prisene dine er i cents
-  const standardShipping = 500; // $5 i cents
+  const freeShippingThreshold = 6000;
+  const standardShipping = 500;
 
   const shipping = subtotal >= freeShippingThreshold ? 0 : standardShipping;
   const total = subtotal + shipping;

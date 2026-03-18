@@ -18,7 +18,6 @@ type ProductCardProps = {
 export default function ProductCard({ product }: ProductCardProps) {
   return (
     <Link href={`/shop/${product.slug}`} className="group block">
-      {/* IMAGE */}
       <div className="relative aspect-[0.82] overflow-hidden bg-[#e7e2db]">
         <Image
           src={product.imageUrl}
@@ -33,7 +32,6 @@ export default function ProductCard({ product }: ProductCardProps) {
           "
         />
 
-        {/* subtle overlay on hover */}
         <div
           className="
           pointer-events-none
@@ -46,7 +44,6 @@ export default function ProductCard({ product }: ProductCardProps) {
         />
       </div>
 
-      {/* INFO */}
       <div className="pt-5">
         <p
           className="
@@ -80,7 +77,6 @@ export default function ProductCard({ product }: ProductCardProps) {
             {formatPrice(product.price)}
           </p>
 
-          {/* arrow micro interaction */}
           <span
             className="
             text-[11px]

@@ -69,7 +69,7 @@ export default function VideoSection() {
         .to(
           l2.current,
           {
-            xPercent: -3,
+            xPercent: -2,
             yPercent: -10,
             duration: 1.15,
             ease: "power2.out",
@@ -125,7 +125,7 @@ export default function VideoSection() {
             playsInline
             className="h-full w-full object-cover object-[65%_center]"
           >
-            <source src="/dogs8.mp4" type="video/mp4" />
+            <source src="/dog1.mp4" type="video/mp4" />
           </video>
         </div>
 
