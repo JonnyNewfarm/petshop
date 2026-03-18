@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductDetailsClient from "@/components/ProductDetailClient";
@@ -44,6 +45,69 @@ type ProductWithRelations = {
   images: ProductImage[];
   variants: ProductVariant[];
 };
+
+export async function generateMetadata({
+  params,
+}: ProductPageProps): Promise<Metadata> {
+  const { slug } = await params;
+
+  const product = await prisma.product.findUnique({
+    where: { slug },
+    include: {
+      category: true,
+      images: {
+        orderBy: {
+          order: "asc",
+        },
+      },
+    },
+  });
+
+  if (!product) {
+    return {
+      title: "Product Not Found",
+      description: "The product you are looking for could not be found.",
+      robots: {
+        index: false,
+        follow: false,
+      },
+    };
+  }
+
+  const productUrl = `https://petsaco.com/product/${product.slug}`;
+  const imageUrl = product.images[0]?.url || "/placeholder.jpg";
+
+  const cleanDescription =
+    product.description?.trim() ||
+    `Shop ${product.name} at Petsaco. Explore premium pet products for everyday comfort, play and care.`;
+
+  return {
+    title: `${product.name} | Petsaco`,
+    description: cleanDescription,
+    alternates: {
+      canonical: `/product/${product.slug}`,
+    },
+    openGraph: {
+      title: `${product.name} | Petsaco`,
+      description: cleanDescription,
+      url: productUrl,
+      siteName: "Petsaco",
+      type: "website",
+      images: [
+        {
+          url: imageUrl,
+          alt: product.images[0]?.alt || product.name,
+        },
+      ],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${product.name} | Petsaco`,
+      description: cleanDescription,
+      images: [imageUrl],
+    },
+  };
+}
 
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;

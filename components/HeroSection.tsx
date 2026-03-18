@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Link from "next/link";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -396,7 +397,7 @@ export default function HeroSection() {
                   }}
                   className="block text-[clamp(1.3rem,2.1vw,1.9rem)] uppercase tracking-[0.18em] will-change-[transform,opacity]"
                 >
-                  shop
+                  <Link href={"/shop"}>shop</Link>
                 </span>
 
                 <span
@@ -408,7 +409,7 @@ export default function HeroSection() {
                   }}
                   className="mt-1 block text-[clamp(2.8rem,4.6vw,4.6rem)] font-medium uppercase tracking-[0.08em] will-change-[transform,opacity]"
                 >
-                  now
+                  <Link href={"/shop"}> now</Link>
                 </span>
               </div>
             </div>

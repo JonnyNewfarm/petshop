@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import ScrollSection from "@/components/SmoothScroll";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Payment Successful",
+  description:
+    "Your order has been successfully placed at Petsaco. Thank you for shopping with us.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function CheckoutSuccessPage() {
   return (

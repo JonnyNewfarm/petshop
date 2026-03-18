@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/app/store/cart-store";
 
@@ -14,6 +14,17 @@ export default function CartPage() {
   const subtotal = useCartStore((state) => state.getSubtotal());
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
+
+  const freeShippingThreshold = 6000; // $60 hvis prisene dine er i cents
+  const standardShipping = 500; // $5 i cents
+
+  const shipping = subtotal >= freeShippingThreshold ? 0 : standardShipping;
+  const total = subtotal + shipping;
+  const amountUntilFreeShipping = Math.max(freeShippingThreshold - subtotal, 0);
+
+  const totalQuantity = useMemo(() => {
+    return items.reduce((sum, item) => sum + item.quantity, 0);
+  }, [items]);
 
   async function handleCheckout() {
     try {
@@ -56,7 +67,7 @@ export default function CartPage() {
 
               <h1
                 style={{ fontFamily: "Mango" }}
-                className="mt-5 text-[clamp(3.4rem,9vw,9rem)] uppercase leading-[0.88] tracking-[-0.05em]"
+                className="mt-5 text-[clamp(3.4rem,9vw,9rem)] uppercase leading-[0.88] tracking-[-0.02em]"
               >
                 Your cart
               </h1>
@@ -74,7 +85,7 @@ export default function CartPage() {
                     Items
                   </p>
                   <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
-                    {items.length}
+                    {totalQuantity}
                   </p>
                 </div>
 
@@ -83,16 +94,16 @@ export default function CartPage() {
                     Total
                   </p>
                   <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
-                    {formatPrice(subtotal)}
+                    {formatPrice(total)}
                   </p>
                 </div>
 
                 <div>
                   <p className="text-[11px] uppercase tracking-[0.2em] text-black/40">
-                    Selection
+                    Shipping
                   </p>
                   <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
-                    2026
+                    {shipping === 0 ? "Free" : formatPrice(shipping)}
                   </p>
                 </div>
               </div>
@@ -137,7 +148,7 @@ export default function CartPage() {
                 </div>
 
                 <div className="text-[11px] uppercase tracking-[0.18em] text-black/45">
-                  {items.length} items
+                  {totalQuantity} items
                 </div>
               </div>
 
@@ -168,7 +179,7 @@ export default function CartPage() {
                         <Link
                           href={`/shop/${item.slug}`}
                           style={{ fontFamily: "Mango" }}
-                          className="mt-3 block text-[clamp(1.5rem,2.2vw,2.4rem)] uppercase leading-[0.92] tracking-[-0.04em]"
+                          className="mt-3 block text-[clamp(1.5rem,2.2vw,2.4rem)] uppercase leading-[0.92] tracking-[-0.01em]"
                         >
                           {item.name}
                         </Link>
@@ -240,6 +251,17 @@ export default function CartPage() {
                 </div>
 
                 <div className="px-6 py-6 sm:px-8">
+                  {shipping === 0 ? (
+                    <div className="mb-6 border border-black/10 bg-white px-4 py-4 text-sm text-black/70">
+                      You’ve unlocked free shipping.
+                    </div>
+                  ) : (
+                    <div className="mb-6 border border-black/10 bg-white px-4 py-4 text-sm text-black/70">
+                      You are {formatPrice(amountUntilFreeShipping)} away from
+                      free shipping.
+                    </div>
+                  )}
+
                   <div className="space-y-4 border-b border-black/10 pb-6">
                     <div className="flex items-center justify-between text-sm text-black/65">
                       <span>Subtotal</span>
@@ -248,7 +270,9 @@ export default function CartPage() {
 
                     <div className="flex items-center justify-between text-sm text-black/65">
                       <span>Shipping</span>
-                      <span>Calculated at checkout</span>
+                      <span>
+                        {shipping === 0 ? "Free" : formatPrice(shipping)}
+                      </span>
                     </div>
                   </div>
 
@@ -258,12 +282,12 @@ export default function CartPage() {
                         Total
                       </p>
                       <p className="mt-2 text-[1.9rem] leading-none tracking-[-0.05em]">
-                        {formatPrice(subtotal)}
+                        {formatPrice(total)}
                       </p>
                     </div>
 
                     <p className="max-w-[120px] text-right text-[10px] uppercase tracking-[0.18em] text-black/40">
-                      Taxes and shipping handled in checkout
+                      Taxes handled in checkout
                     </p>
                   </div>
 

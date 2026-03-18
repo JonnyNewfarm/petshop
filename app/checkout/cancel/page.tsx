@@ -1,5 +1,16 @@
+import type { Metadata } from "next";
 import ScrollSection from "@/components/SmoothScroll";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Payment Cancelled",
+  description:
+    "Your payment was cancelled and no order was completed. Return to your cart or continue shopping at Petsaco.",
+  robots: {
+    index: false,
+    follow: false,
+  },
+};
 
 export default function CheckoutCancelPage() {
   return (

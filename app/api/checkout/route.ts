@@ -10,8 +10,7 @@ export async function POST(request: NextRequest) {
       variantId?: string | null;
       name: string;
       variantName?: string | null;
-        variantOptions?: { name: string; value: string }[];
-
+      variantOptions?: { name: string; value: string }[];
       price: number;
       quantity: number;
       imageUrl?: string;
@@ -23,6 +22,14 @@ export async function POST(request: NextRequest) {
         { status: 400 },
       );
     }
+
+    const subtotal = items.reduce(
+      (total, item) => total + item.price * item.quantity,
+      0,
+    );
+
+    const freeShippingThreshold = 5999; // 499 USD cents if you're using usd
+    const shippingAmount = subtotal >= freeShippingThreshold ? 0 : 499;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -41,6 +48,19 @@ export async function POST(request: NextRequest) {
           unit_amount: item.price,
         },
       })),
+      shipping_options: [
+        {
+          shipping_rate_data: {
+            type: "fixed_amount",
+            fixed_amount: {
+              amount: shippingAmount,
+              currency: "usd",
+            },
+            display_name:
+              shippingAmount === 0 ? "Free shipping" : "Standard shipping",
+          },
+        },
+      ],
       success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
       billing_address_collection: "required",
@@ -51,18 +71,18 @@ export async function POST(request: NextRequest) {
         enabled: true,
       },
       metadata: {
-  cart: JSON.stringify(
-    items.map((item) => ({
-      productId: item.productId,
-      variantId: item.variantId ?? null,
-      name: item.name,
-      variantName: item.variantName ?? null,
-      variantOptions: item.variantOptions ?? [],
-      price: item.price,
-      quantity: item.quantity,
-    })),
-  ),
-},
+        cart: JSON.stringify(
+          items.map((item) => ({
+            productId: item.productId,
+            variantId: item.variantId ?? null,
+            name: item.name,
+            variantName: item.variantName ?? null,
+            variantOptions: item.variantOptions ?? [],
+            price: item.price,
+            quantity: item.quantity,
+          })),
+        ),
+      },
     });
 
     return NextResponse.json({ url: session.url });
