@@ -19,17 +19,26 @@ export async function POST(request: NextRequest) {
     if (!items || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
         { error: "No cart items provided." },
-        { status: 400 },
+        { status: 400 }
       );
     }
 
     const subtotal = items.reduce(
       (total, item) => total + item.price * item.quantity,
-      0,
+      0
     );
 
-    const freeShippingThreshold = 5999; 
+    const freeShippingThreshold = 5999;
     const shippingAmount = subtotal >= freeShippingThreshold ? 0 : 499;
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL;
+
+    if (!appUrl) {
+      return NextResponse.json(
+        { error: "NEXT_PUBLIC_APP_URL is missing." },
+        { status: 500 }
+      );
+    }
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -42,7 +51,7 @@ export async function POST(request: NextRequest) {
               ? `${item.name} — ${item.variantName}`
               : item.name,
             images: item.imageUrl
-              ? [`${process.env.NEXT_PUBLIC_APP_URL}${item.imageUrl}`]
+              ? [`${appUrl}${item.imageUrl}`]
               : [],
           },
           unit_amount: item.price,
@@ -61,8 +70,8 @@ export async function POST(request: NextRequest) {
           },
         },
       ],
-      success_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/checkout/cancel`,
+      success_url: `${appUrl}/checkout/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${appUrl}/checkout/cancel`,
       billing_address_collection: "required",
       shipping_address_collection: {
         allowed_countries: ["NO", "SE", "DK", "GB", "DE", "FR", "NL", "US"],
@@ -70,27 +79,20 @@ export async function POST(request: NextRequest) {
       phone_number_collection: {
         enabled: true,
       },
+
       metadata: {
-        cart: JSON.stringify(
-          items.map((item) => ({
-            productId: item.productId,
-            variantId: item.variantId ?? null,
-            name: item.name,
-            variantName: item.variantName ?? null,
-            variantOptions: item.variantOptions ?? [],
-            price: item.price,
-            quantity: item.quantity,
-          })),
-        ),
+        itemCount: String(items.length),
+        subtotal: String(subtotal),
+        shippingAmount: String(shippingAmount),
       },
     });
 
     return NextResponse.json({ url: session.url });
   } catch (error) {
-    console.error(error);
+    console.error("Stripe checkout error:", error);
     return NextResponse.json(
       { error: "Failed to create checkout session." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 }

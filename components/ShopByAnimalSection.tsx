@@ -1,251 +1,285 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Image from "next/image";
+import Link from "next/link";
+import { AnimatePresence, motion } from "framer-motion";
+import { useState } from "react";
+import MagneticComp from "./MagneticComp";
 
-gsap.registerPlugin(ScrollTrigger);
+const items = [
+  {
+    id: "01",
+    title: "For Dogs",
+    image: "/dogs.jpg",
+    label: "Premium Essentials",
+    description:
+      "Thoughtfully selected products for play, comfort and everyday care — designed for dogs and the people who love them.",
+    href: "/shop?category=dogs",
+  },
+  {
+    id: "02",
+    title: "For Cats",
+    image: "/cat.jpg",
+    label: "Curated Daily Care",
+    description:
+      "A refined selection of cat essentials, from soft resting pieces to playful details and functional everyday favorites.",
+    href: "/shop?category=cats",
+  },
+  {
+    id: "03",
+    title: "For Every Pet",
+    image: "/all.jpg",
+    label: "Shop The Collection",
+    description:
+      "Explore a complete universe of elevated pet products with a focus on quality, comfort and considered design.",
+    href: "/shop",
+  },
+];
 
-export default function TrainCardsSection() {
-  const sectionRef = useRef<HTMLElement | null>(null);
-  const pinRef = useRef<HTMLDivElement | null>(null);
-
-  const line1Ref = useRef<HTMLSpanElement | null>(null);
-  const line2Ref = useRef<HTMLSpanElement | null>(null);
-  const line3Ref = useRef<HTMLSpanElement | null>(null);
-
-  const railRef = useRef<HTMLDivElement | null>(null);
-
-  useLayoutEffect(() => {
-    const ctx = gsap.context(() => {
-      gsap.set([line1Ref.current, line2Ref.current, line3Ref.current], {
-        yPercent: 110,
-        opacity: 0,
-      });
-
-      const intro = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top 78%",
-          once: true,
-        },
-      });
-
-      intro.to(line1Ref.current, {
-        yPercent: 0,
-        opacity: 1,
-        duration: 0.9,
-        ease: "power3.out",
-      });
-
-      intro.to(
-        line2Ref.current,
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: "power3.out",
-        },
-        "-=0.72",
-      );
-
-      intro.to(
-        line3Ref.current,
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration: 0.9,
-          ease: "power3.out",
-        },
-        "-=0.72",
-      );
-
-      const rail = railRef.current;
-      const section = sectionRef.current;
-
-      if (!rail || !section) return;
-
-      const createAnimation = () => {
-        const viewportW = window.innerWidth;
-        const railW = rail.scrollWidth;
-
-        let startX;
-
-        if (viewportW >= 1200) {
-          startX = viewportW * 0.72;
-        } else if (viewportW >= 768) {
-          startX = viewportW * 0.85;
-        } else {
-          startX = viewportW;
-        }
-
-        const endX = -(railW - viewportW + viewportW * 0.12);
-
-        gsap.set(rail, { x: startX });
-
-        const tl = gsap.timeline({
-          scrollTrigger: {
-            trigger: section,
-            start: "top top",
-            end: "+=1600",
-            scrub: 1,
-            pin: pinRef.current,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-
-        tl.to(
-          line1Ref.current,
-          {
-            x: -90,
-            y: -26,
-            rotation: -3,
-            opacity: 0,
-            ease: "power2.out",
-          },
-          0,
-        )
-          .to(
-            line2Ref.current,
-            {
-              x: 70,
-              y: -12,
-              rotation: 2,
-              opacity: 0,
-              ease: "power2.out",
-            },
-            0,
-          )
-          .to(
-            line3Ref.current,
-            {
-              x: -50,
-              y: 18,
-              rotation: -2,
-              opacity: 0,
-              ease: "power2.out",
-            },
-            0,
-          )
-          .to(
-            rail,
-            {
-              x: endX,
-              ease: "none",
-            },
-            0.04,
-          );
-      };
-
-      createAnimation();
-      ScrollTrigger.refresh();
-    }, sectionRef);
-
-    return () => ctx.revert();
-  }, []);
+export default function AnimalsPage() {
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
 
   return (
-    <section ref={sectionRef} className="relative bg-[#dddad5] text-black">
-      <div ref={pinRef} className="relative h-screen overflow-hidden">
-        <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center px-6">
-          <div className="text-left">
-            <div className="">
-              <span
-                ref={line1Ref}
-                style={{ fontFamily: "Mango" }}
-                className="block translate-x-[-0.15em] font-semibold uppercase text-[clamp(6rem,12vw,12rem)] leading-[0.82] will-change-transform"
-              >
-                Everything
+    <section className="relative min-h-screen w-full bg-[#dddad5]">
+      <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 px-5 pb-24 pt-20 md:grid-cols-[360px_1fr] md:px-8 xl:px-12">
+        <div className="md:sticky md:top-0 md:flex md:h-screen md:flex-col md:justify-between md:py-10">
+          <div>
+            <div className="mb-8 flex items-start gap-3">
+              <span className="text-[11px] uppercase tracking-[0.18em] text-color/45">
+                03
               </span>
+              <p
+                style={{ fontFamily: "Mango" }}
+                className="text-[20px] uppercase tracking-[0.22em] text-color/70 md:text-[26px]"
+              >
+                Pet Collections
+              </p>
             </div>
 
-            <div className="">
-              <span
-                ref={line2Ref}
+            <div className="max-w-[280px] space-y-5">
+              <p
                 style={{ fontFamily: "Mango" }}
-                className="block translate-x-[0.28em] font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.82] will-change-transform"
+                className="text-[clamp(2.9rem,5.3vw,5.4rem)] uppercase leading-[0.9] tracking-[-0.01em] text-color"
               >
-                you need
-              </span>
-            </div>
+                Curated
+                <br />
+                for modern
+                <br />
+                pet living
+              </p>
 
-            <div className="">
-              <span
-                ref={line3Ref}
-                style={{ fontFamily: "Mango" }}
-                className="block translate-x-[0.05em] font-semibold uppercase text-[clamp(5rem,12vw,12rem)] leading-[0.82] will-change-transform"
-              >
-                for pets
-              </span>
+              <p className="max-w-[260px] text-sm uppercase leading-[1.7] tracking-[0.14em] text-color/50">
+                Elevated essentials for pets, presented through a refined and
+                editorial shopping experience.
+              </p>
             </div>
+          </div>
+
+          <div className="mt-14 md:mt-0">
+            <Link
+              href="/shop"
+              className="inline-block text-[13px] uppercase tracking-[0.18em] text-color/55 transition hover:text-color"
+            >
+              View — Shop
+            </Link>
           </div>
         </div>
 
-        <div className="absolute inset-0 z-20 flex items-center">
-          <div
-            ref={railRef}
-            className="flex w-max gap-4 pl-[6vw] will-change-transform sm:gap-6 sm:pl-[10vw]"
-          >
-            <TrainCard
-              title="Dogs"
-              text="Walks, sleep and everyday essentials."
-              image="/dogs.jpg"
-              href="/shop?category=dogs&page=1"
+        <div className="mt-14 space-y-12 md:mt-0 md:space-y-6">
+          {items.map((item, index) => (
+            <StoreImageBlock
+              key={item.id}
+              item={item}
+              index={index}
+              hoveredId={hoveredId}
+              setHoveredId={setHoveredId}
             />
-            <TrainCard
-              title="Cats"
-              text="Comfort, play and indoor living."
-              image="/cat.jpg"
-              href="/shop?category=cats&page=1"
-            />
-            <TrainCard
-              title="All Products"
-              text="Explore the full collection."
-              image="/all.jpg"
-              href="/shop"
-            />
-          </div>
+          ))}
         </div>
       </div>
     </section>
   );
 }
 
-function TrainCard({
-  title,
-  text,
-  image,
-  href,
+function StoreImageBlock({
+  item,
+  index,
+  hoveredId,
+  setHoveredId,
 }: {
-  title: string;
-  text: string;
-  image: string;
-  href: string;
+  item: {
+    id: string;
+    title: string;
+    image: string;
+    label: string;
+    description: string;
+    href: string;
+  };
+  index: number;
+  hoveredId: string | null;
+  setHoveredId: (id: string | null) => void;
 }) {
+  const alignClass =
+    index % 2 === 0 ? "md:ml-0 md:mr-auto" : "md:ml-auto md:mr-0";
+
+  const isActive = hoveredId === item.id;
+  const isDimmed = hoveredId !== null && hoveredId !== item.id;
+
   return (
-    <a
-      href={href}
-      className="group relative h-[64vh] w-[78vw] min-w-0 shrink-0 overflow-hidden border border-black/10 bg-[#e7e3de] sm:w-[58vw] sm:min-w-[320px] lg:h-[70vh] lg:w-[34vw] lg:min-w-[380px]"
+    <motion.article
+      initial={{ opacity: 0, y: 24, filter: "blur(10px)" }}
+      whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      animate={{
+        y:
+          typeof window !== "undefined" && window.innerWidth < 768
+            ? index === 1
+              ? 55
+              : -55
+            : 0,
+      }}
+      viewport={{ once: true, amount: 0.18 }}
+      transition={{
+        opacity: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+        filter: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+        y: {
+          duration:
+            typeof window !== "undefined" && window.innerWidth < 768
+              ? 2.2
+              : 0.8,
+          ease: [0.22, 1, 0.36, 1],
+        },
+      }}
+      className={`relative w-full max-w-[820px] ${alignClass}`}
+      onHoverStart={() => setHoveredId(item.id)}
+      onHoverEnd={() => setHoveredId(null)}
     >
-      <div className="absolute inset-0">
-        <img src={image} alt={title} className="h-full w-full object-cover" />
-      </div>
+      <div className="mb-4 flex items-end justify-between gap-4">
+        <div>
+          <p className="text-[11px] uppercase tracking-[0.2em] text-color/40">
+            {item.id}
+          </p>
+        </div>
 
-      <div className="absolute inset-0 bg-black/20" />
-
-      <div className="relative flex h-full flex-col justify-end p-8 text-white">
-        <h3
-          style={{ fontFamily: "Mango" }}
-          className="text-[clamp(2.2rem,4vw,4.5rem)] uppercase leading-[0.9]"
-        >
-          {title}
-        </h3>
-
-        <p className="mt-3 max-w-[18rem] text-sm leading-relaxed text-white/85">
-          {text}
+        <p className="hidden max-w-[220px] text-right text-[11px] uppercase leading-[1.7] tracking-[0.16em] text-color/40 md:block">
+          {item.label}
         </p>
       </div>
-    </a>
+
+      <MagneticComp>
+        <Link href={item.href} className="group block">
+          <motion.div
+            animate={{
+              scale: isDimmed ? 0.9 : 1,
+              filter: isDimmed ? "blur(5px)" : "blur(0px)",
+              opacity: isDimmed ? 0.38 : 1,
+            }}
+            transition={{
+              duration: 0.6,
+              ease: [0.22, 1, 0.36, 1],
+            }}
+            className="will-change-transform"
+          >
+            <div className="relative overflow-hidden border border-white/8">
+              <div className="relative aspect-[16/10] w-full min-h-[240px] md:min-h-0">
+                <motion.div
+                  animate={{
+                    scale: isActive ? 1.018 : 1,
+                  }}
+                  transition={{
+                    duration: 0.8,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="absolute inset-0"
+                >
+                  <Image
+                    src={item.image}
+                    alt={item.title}
+                    fill
+                    priority={index === 0}
+                    className="object-cover"
+                    sizes="(max-width: 768px) 100vw, 820px"
+                  />
+                </motion.div>
+
+                <motion.div
+                  animate={{
+                    opacity: isActive ? 0.08 : 0.16,
+                  }}
+                  transition={{
+                    duration: 0.4,
+                    ease: [0.22, 1, 0.36, 1],
+                  }}
+                  className="absolute inset-0 bg-black"
+                />
+              </div>
+            </div>
+
+            <div className="mt-4 border-b border-white/10 pb-5 md:pb-6">
+              <div className="grid gap-4 md:grid-cols-[minmax(0,1fr)_150px] md:items-start md:gap-8">
+                <div className="min-h-[88px] md:min-h-[96px]">
+                  <p className="mb-2 text-[10px] uppercase tracking-[0.18em] text-color/42 md:hidden">
+                    {item.label}
+                  </p>
+
+                  <p
+                    style={{ fontFamily: "Mango" }}
+                    className="text-[27px] uppercase  tracking-[0.19em] "
+                  >
+                    {item.title}
+                  </p>
+
+                  <AnimatePresence initial={false} mode="wait">
+                    {isActive && (
+                      <motion.p
+                        key={`description-${item.id}`}
+                        initial={{
+                          opacity: 0,
+                          y: 10,
+                          filter: "blur(8px)",
+                        }}
+                        animate={{
+                          opacity: 1,
+                          y: 0,
+                          filter: "blur(0px)",
+                        }}
+                        exit={{
+                          opacity: 0,
+                          y: 8,
+                          filter: "blur(6px)",
+                        }}
+                        transition={{
+                          duration: 0.3,
+                          ease: [0.22, 1, 0.36, 1],
+                        }}
+                        className="mt-3 max-w-[560px] text-sm leading-[1.7] text-color/70 md:text-[14px]"
+                      >
+                        {item.description}
+                      </motion.p>
+                    )}
+                  </AnimatePresence>
+                </div>
+
+                <div className="hidden md:block md:text-right">
+                  <motion.p
+                    animate={{
+                      opacity: isActive ? 1 : 0,
+                      x: isActive ? 0 : -8,
+                      filter: isActive ? "blur(0px)" : "blur(6px)",
+                    }}
+                    transition={{
+                      duration: 0.3,
+                      ease: [0.22, 1, 0.36, 1],
+                    }}
+                    className="text-[11px] uppercase tracking-[0.18em] text-color/55"
+                  >
+                    Discover →
+                  </motion.p>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        </Link>
+      </MagneticComp>
+    </motion.article>
   );
 }
