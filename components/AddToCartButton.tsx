@@ -13,6 +13,7 @@ type AddToCartButtonProps = {
   variantId?: string | null;
   variantName?: string | null;
   variantOptions?: { name: string; value: string }[];
+  disabled?: boolean;
 };
 
 export default function AddToCartButton({
@@ -25,11 +26,14 @@ export default function AddToCartButton({
   variantId,
   variantName,
   variantOptions,
+  disabled = false,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
   const [added, setAdded] = useState(false);
 
   const handleAddToCart = () => {
+    if (disabled) return;
+
     addItem({
       productId,
       variantId,
@@ -53,7 +57,8 @@ export default function AddToCartButton({
     <button
       type="button"
       onClick={handleAddToCart}
-      className="inline-flex items-center justify-center border border-black bg-black px-7 py-4 text-sm font-medium uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
+      disabled={disabled}
+      className="inline-flex items-center justify-center border border-black bg-black px-7 py-4 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
     >
       {added ? "Added" : "Add to cart"}
     </button>

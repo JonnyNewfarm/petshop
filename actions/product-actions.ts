@@ -23,6 +23,10 @@ function parseImageUrls(raw: string) {
     .filter(Boolean);
 }
 
+function normalizeStock(value: unknown) {
+  return Number(value) > 0 ? 1 : 0;
+}
+
 function parseVariants(raw: string): ParsedVariant[] {
   if (!raw.trim()) return [];
 
@@ -31,7 +35,7 @@ function parseVariants(raw: string): ParsedVariant[] {
   return parsed.map((variant) => ({
     name: variant.name,
     price: typeof variant.price === "number" ? variant.price : null,
-    stock: typeof variant.stock === "number" ? variant.stock : 0,
+    stock: normalizeStock(variant.stock ?? 0),
     options: (variant.options ?? []).map((option) => ({
       name: option.name,
       value: option.value,
@@ -60,13 +64,19 @@ export async function createProduct(
     const slug = String(formData.get("slug") || "").trim();
     const description = String(formData.get("description") || "").trim();
     const price = Number(formData.get("price") || 0);
-    const stock = Number(formData.get("stock") || 0);
+    const stock = normalizeStock(formData.get("stock") || 0);
     const featured = formData.get("featured") === "on";
     const categoryId = String(formData.get("categoryId") || "").trim();
+    const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
+
+    const sizeGuideEnabled = formData.get("sizeGuideEnabled") === "on";
+    const sizeGuideTitle = String(formData.get("sizeGuideTitle") || "").trim();
+    const sizeGuideContent = String(
+      formData.get("sizeGuideContent") || "",
+    ).trim();
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
-    const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
 
     if (!name || !slug || !description || !categoryId) {
       return { error: "Please fill in all required fields." };
@@ -90,9 +100,12 @@ export async function createProduct(
         stock,
         featured,
         categoryId,
+        sizeGuideEnabled,
+        sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
+        sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
         tags: {
-  connect: tagIds.map((id) => ({ id })),
-},
+          connect: tagIds.map((id) => ({ id })),
+        },
         images: {
           create: parsedImageUrls.map((url, index) => ({
             url,
@@ -104,7 +117,7 @@ export async function createProduct(
           create: parsedVariants.map((variant) => ({
             name: variant.name,
             price: variant.price ?? null,
-            stock: variant.stock ?? 0,
+            stock: normalizeStock(variant.stock ?? 0),
             options: {
               create: (variant.options ?? []).map((option) => ({
                 name: option.name,
@@ -139,11 +152,16 @@ export async function updateProduct(
     const slug = String(formData.get("slug") || "").trim();
     const description = String(formData.get("description") || "").trim();
     const price = Number(formData.get("price") || 0);
-    const stock = Number(formData.get("stock") || 0);
+    const stock = normalizeStock(formData.get("stock") || 0);
     const featured = formData.get("featured") === "on";
     const categoryId = String(formData.get("categoryId") || "").trim();
-        const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
+    const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
 
+    const sizeGuideEnabled = formData.get("sizeGuideEnabled") === "on";
+    const sizeGuideTitle = String(formData.get("sizeGuideTitle") || "").trim();
+    const sizeGuideContent = String(
+      formData.get("sizeGuideContent") || "",
+    ).trim();
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
@@ -173,9 +191,12 @@ export async function updateProduct(
         stock,
         featured,
         categoryId,
+        sizeGuideEnabled,
+        sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
+        sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
         tags: {
-  set: tagIds.map((id) => ({ id })),
-},
+          set: tagIds.map((id) => ({ id })),
+        },
         images: {
           deleteMany: {},
           create: parsedImageUrls.map((url, index) => ({
@@ -189,7 +210,7 @@ export async function updateProduct(
           create: parsedVariants.map((variant) => ({
             name: variant.name,
             price: variant.price ?? null,
-            stock: variant.stock ?? 0,
+            stock: normalizeStock(variant.stock ?? 0),
             options: {
               create: (variant.options ?? []).map((option) => ({
                 name: option.name,
@@ -205,6 +226,7 @@ export async function updateProduct(
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}/edit`);
     revalidatePath("/shop");
+    revalidatePath(`/shop/${slug}`);
 
     return { success: true };
   } catch (error) {
@@ -216,13 +238,25 @@ export async function updateProduct(
 export async function deleteProduct(productId: string) {
   await requireAdmin();
 
-  await prisma.product.delete({
-    where: {
-      id: productId,
-    },
-  });
+  await prisma.$transaction(async (tx) => {
+    await tx.variantOption.deleteMany({
+      where: {
+        variant: {
+          productId,
+        },
+      },
+    });
 
-  revalidatePath("/admin");
-  revalidatePath("/admin/products");
-  revalidatePath("/shop");
+    await tx.productVariant.deleteMany({
+      where: {
+        productId,
+      },
+    });
+
+    await tx.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+  });
 }

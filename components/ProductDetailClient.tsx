@@ -28,31 +28,45 @@ type ProductDetailsClientProps = {
     stock: number;
     imageUrl: string;
     categoryName: string;
+    sizeGuideEnabled: boolean;
+    sizeGuideTitle: string | null;
+    sizeGuideContent: string | null;
     variants: Variant[];
   };
+  selectedVariantId: string | null;
+  onVariantChange: (variantId: string | null) => void;
+  onColorChange: (colorValue: string | null) => void;
 };
+
+type SelectedOptions = Record<string, string>;
+
+function normalize(value: string) {
+  return value.trim().toLowerCase();
+}
+
+function isColorOption(name: string) {
+  const normalized = normalize(name);
+  return normalized === "color" || normalized === "colour";
+}
+
+function variantMatchesOptions(
+  variant: Variant,
+  selectedOptions: SelectedOptions,
+) {
+  return Object.entries(selectedOptions).every(([optionName, optionValue]) =>
+    variant.options.some(
+      (option) => option.name === optionName && option.value === optionValue,
+    ),
+  );
+}
 
 export default function ProductDetailsClient({
   product,
+  selectedVariantId,
+  onVariantChange,
+  onColorChange,
 }: ProductDetailsClientProps) {
   const hasVariants = product.variants.length > 0;
-  const [selectedVariantId, setSelectedVariantId] = useState<string | null>(
-    product.variants[0]?.id ?? null,
-  );
-
-  const selectedVariant = useMemo(() => {
-    if (!hasVariants) return null;
-    return (
-      product.variants.find((variant) => variant.id === selectedVariantId) ??
-      product.variants[0] ??
-      null
-    );
-  }, [hasVariants, product.variants, selectedVariantId]);
-
-  const displayPrice = selectedVariant?.price ?? product.price;
-  const displayStock = hasVariants
-    ? (selectedVariant?.stock ?? 0)
-    : product.stock;
 
   const groupedOptions = useMemo(() => {
     if (!hasVariants) return [];
@@ -74,6 +88,52 @@ export default function ProductDetailsClient({
       values,
     }));
   }, [hasVariants, product.variants]);
+
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
+  const [showFullDescription, setShowFullDescription] = useState(false);
+
+  const paragraphs = product.description.split(/\n+/).filter(Boolean);
+
+  const visibleParagraphs = showFullDescription
+    ? paragraphs
+    : paragraphs.slice(0, 2);
+
+  const isExactSelectionComplete = useMemo(() => {
+    if (!hasVariants) return true;
+    return groupedOptions.every((group) => !!selectedOptions[group.name]);
+  }, [groupedOptions, hasVariants, selectedOptions]);
+
+  const selectedVariant = useMemo(() => {
+    if (!hasVariants) return null;
+    if (!isExactSelectionComplete) return null;
+
+    return (
+      product.variants.find((variant) =>
+        groupedOptions.every((group) => {
+          const selectedValue = selectedOptions[group.name];
+
+          return variant.options.some(
+            (option) =>
+              option.name === group.name && option.value === selectedValue,
+          );
+        }),
+      ) ?? null
+    );
+  }, [
+    groupedOptions,
+    hasVariants,
+    isExactSelectionComplete,
+    product.variants,
+    selectedOptions,
+  ]);
+
+  const displayPrice = selectedVariant?.price ?? product.price;
+  const displayStock = hasVariants
+    ? (selectedVariant?.stock ?? 0)
+    : product.stock;
+
+  const isSelectedVariantOutOfStock =
+    hasVariants && selectedVariant ? selectedVariant.stock <= 0 : false;
 
   return (
     <div className="border border-black/10 bg-[#e6e2dc]">
@@ -101,10 +161,10 @@ export default function ProductDetailsClient({
 
           <div className="text-right">
             <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
-              Stock
+              Availability
             </p>
             <p className="mt-2 text-sm uppercase tracking-[0.16em] text-black/70">
-              {displayStock > 0 ? `${displayStock} available` : "Out of stock"}
+              {displayStock > 0 ? "In stock" : "Out of stock"}
             </p>
           </div>
         </div>
@@ -116,22 +176,32 @@ export default function ProductDetailsClient({
             Description
           </p>
 
-          <p className="mt-4 max-w-[52ch] text-[15px] leading-7 text-black/65">
-            {product.description}
-          </p>
+          <div className="mt-4 max-w-[52ch] space-y-4 text-[15px] leading-7 text-black/65">
+            {visibleParagraphs.map((paragraph, i) => (
+              <p key={i}>{paragraph}</p>
+            ))}
+
+            {paragraphs.length > 2 && (
+              <button
+                type="button"
+                onClick={() => setShowFullDescription((prev) => !prev)}
+                className="mt-2 text-[11px] uppercase tracking-[0.18em] text-black/60 hover:text-black"
+              >
+                {showFullDescription ? "Read less" : "Read more"}
+              </button>
+            )}
+          </div>
         </div>
 
         {hasVariants && (
           <div className="border-b border-black/10 py-6">
-            <div className="mb-6 flex items-end justify-between gap-4">
-              <div>
-                <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
-                  Options
-                </p>
-                <p className="mt-2 text-sm leading-6 text-black/58">
-                  Choose a variant before adding to cart.
-                </p>
-              </div>
+            <div className="mb-6">
+              <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+                Options
+              </p>
+              <p className="mt-2 text-sm leading-6 text-black/58">
+                Choose a variant before adding to cart.
+              </p>
             </div>
 
             <div className="space-y-6">
@@ -143,34 +213,78 @@ export default function ProductDetailsClient({
 
                   <div className="flex flex-wrap gap-2.5">
                     {group.values.map((value) => {
+                      const nextSelectedOptions = {
+                        ...selectedOptions,
+                        [group.name]: value,
+                      };
+
                       const matchingVariant = product.variants.find((variant) =>
-                        variant.options.some(
-                          (option) =>
-                            option.name === group.name &&
-                            option.value === value,
-                        ),
+                        variantMatchesOptions(variant, nextSelectedOptions),
                       );
 
-                      const isActive = selectedVariant?.options.some(
-                        (option) =>
-                          option.name === group.name && option.value === value,
-                      );
+                      const isActive = selectedOptions[group.name] === value;
+                      const exists = !!matchingVariant;
+                      const outOfStock = matchingVariant
+                        ? matchingVariant.stock <= 0
+                        : true;
 
                       return (
                         <button
                           key={`${group.name}-${value}`}
                           type="button"
-                          onClick={() =>
-                            matchingVariant &&
-                            setSelectedVariantId(matchingVariant.id)
-                          }
+                          onClick={() => {
+                            if (!exists) return;
+
+                            const updatedOptions = {
+                              ...selectedOptions,
+                              [group.name]: value,
+                            };
+
+                            setSelectedOptions(updatedOptions);
+
+                            if (isColorOption(group.name)) {
+                              onColorChange(value);
+                            }
+
+                            const isComplete = groupedOptions.every(
+                              (optionGroup) =>
+                                !!updatedOptions[optionGroup.name],
+                            );
+
+                            if (!isComplete) {
+                              onVariantChange(null);
+                              return;
+                            }
+
+                            const exactVariant =
+                              product.variants.find((variant) =>
+                                groupedOptions.every((optionGroup) => {
+                                  const selectedValue =
+                                    updatedOptions[optionGroup.name];
+
+                                  return variant.options.some(
+                                    (option) =>
+                                      option.name === optionGroup.name &&
+                                      option.value === selectedValue,
+                                  );
+                                }),
+                              ) ?? null;
+
+                            onVariantChange(exactVariant?.id ?? null);
+                          }}
+                          disabled={!exists}
                           className={`px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
                             isActive
                               ? "bg-black text-[#f6f1e8]"
                               : "bg-[#f3efe8] text-black hover:bg-black hover:text-[#f6f1e8]"
-                          }`}
+                          } ${!exists ? "cursor-not-allowed opacity-30" : ""}`}
                         >
                           {value}
+                          {exists && outOfStock ? (
+                            <span className="ml-2 text-[10px] opacity-70">
+                              • Out of stock
+                            </span>
+                          ) : null}
                         </button>
                       );
                     })}
@@ -186,9 +300,33 @@ export default function ProductDetailsClient({
               <p className="mt-2 text-[1.05rem] uppercase tracking-[-0.02em] text-black">
                 {selectedVariant?.name ?? "No variant selected"}
               </p>
+
+              {!isExactSelectionComplete ? (
+                <p className="mt-2 text-sm text-black/55">
+                  Please choose all options.
+                </p>
+              ) : null}
+
+              {isSelectedVariantOutOfStock ? (
+                <p className="mt-2 text-sm text-red-600">
+                  This variant is currently out of stock.
+                </p>
+              ) : null}
             </div>
           </div>
         )}
+
+        {product.sizeGuideEnabled && product.sizeGuideContent ? (
+          <div className="border-b border-black/10 py-6">
+            <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+              {product.sizeGuideTitle || "Size guide"}
+            </p>
+
+            <div className="mt-4 whitespace-pre-line text-[15px] leading-7 text-black/65">
+              {product.sizeGuideContent}
+            </div>
+          </div>
+        ) : null}
 
         <div className="py-6">
           <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-b border-black/10 pb-6">
@@ -223,6 +361,11 @@ export default function ProductDetailsClient({
                 price={displayPrice}
                 imageUrl={product.imageUrl}
                 categoryName={product.categoryName}
+                disabled={
+                  (hasVariants &&
+                    (!isExactSelectionComplete || !selectedVariant)) ||
+                  isSelectedVariantOutOfStock
+                }
               />
 
               <a

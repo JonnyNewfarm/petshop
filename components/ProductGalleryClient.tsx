@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
 import Image from "next/image";
+import { useMemo } from "react";
 
 type ProductImage = {
   id: string;
@@ -13,71 +13,62 @@ type ProductImage = {
 type ProductGalleryClientProps = {
   productName: string;
   images: ProductImage[];
+  activeImageId: string | null;
+  onImageChange: (imageId: string) => void;
 };
 
 export default function ProductGalleryClient({
   productName,
   images,
+  activeImageId,
+  onImageChange,
 }: ProductGalleryClientProps) {
-  const [activeImageId, setActiveImageId] = useState<string | null>(
-    images[0]?.id ?? null,
-  );
+  const sortedImages = useMemo(() => {
+    return [...images].sort((a, b) => a.order - b.order);
+  }, [images]);
 
-  const activeImage = useMemo(() => {
-    return (
-      images.find((image) => image.id === activeImageId) ?? images[0] ?? null
-    );
-  }, [activeImageId, images]);
+  const activeImage =
+    sortedImages.find((image) => image.id === activeImageId) ??
+    sortedImages[0] ??
+    null;
 
-  if (!images.length) {
-    return (
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#e7e2db]" />
-    );
+  if (!activeImage) {
+    return <div className="aspect-[0.9] border border-black/10 bg-[#e7e2db]" />;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#e7e2db]">
-        {activeImage ? (
-          <Image
-            key={activeImage.id}
-            src={activeImage.url}
-            alt={activeImage.alt || productName}
-            fill
-            priority
-            className="object-cover"
-          />
-        ) : null}
+    <div className="min-w-0">
+      <div className="relative aspect-[0.9] overflow-hidden border border-black/10 bg-[#e7e2db]">
+        <Image
+          src={activeImage.url}
+          alt={activeImage.alt || productName}
+          fill
+          className="object-cover"
+          priority
+        />
       </div>
 
-      {images.length > 1 && (
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-          {images.map((image) => {
-            const isActive = image.id === activeImage?.id;
+      {sortedImages.length > 1 && (
+        <div className="mt-4 grid grid-cols-4 gap-4">
+          {sortedImages.map((image) => {
+            const isActive = image.id === activeImage.id;
 
             return (
               <button
                 key={image.id}
                 type="button"
-                onClick={() => setActiveImageId(image.id)}
-                className={`relative aspect-[0.9] overflow-hidden bg-[#e7e2db] transition ${
+                onClick={() => onImageChange(image.id)}
+                className={`relative aspect-square overflow-hidden border transition ${
                   isActive
-                    ? "ring-1 ring-black"
-                    : "opacity-85 hover:opacity-100"
+                    ? "border-black"
+                    : "border-black/10 hover:border-black/40"
                 }`}
-                aria-label={`View image ${image.order + 1} of ${productName}`}
               >
                 <Image
                   src={image.url}
                   alt={image.alt || productName}
                   fill
                   className="object-cover"
-                />
-
-                <span
-                  className={`pointer-events-none absolute inset-0 transition ${
-                    isActive ? "bg-black/0" : "bg-black/8"
-                  }`}
                 />
               </button>
             );

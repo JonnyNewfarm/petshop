@@ -10,10 +10,16 @@ type Category = {
   slug: string;
 };
 
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type GeneratedVariant = {
   name: string;
   price: number | "";
-  stock: number | "";
+  stock: number;
   options: {
     name: string;
     value: string;
@@ -26,12 +32,6 @@ type OptionGroup = {
   values: string[];
 };
 
-type Tag = {
-  id: string;
-  name: string;
-  slug: string;
-};
-
 type ProductFormInitialData = {
   id: string;
   name: string;
@@ -41,9 +41,9 @@ type ProductFormInitialData = {
   stock: number;
   featured: boolean;
   categoryId: string;
-  tags: {
-    id: string;
-  }[];
+  sizeGuideEnabled: boolean;
+  sizeGuideTitle: string | null;
+  sizeGuideContent: string | null;
   images: {
     url: string;
   }[];
@@ -55,6 +55,9 @@ type ProductFormInitialData = {
       name: string;
       value: string;
     }[];
+  }[];
+  tags: {
+    id: string;
   }[];
 };
 
@@ -124,11 +127,11 @@ function buildOptionGroupsFromVariants(
 
 export default function ProductForm({
   categories,
-  initialData,
   tags,
+  initialData,
 }: {
-  tags: Tag[];
   categories: Category[];
+  tags: Tag[];
   initialData?: ProductFormInitialData;
 }) {
   const router = useRouter();
@@ -144,6 +147,10 @@ export default function ProductForm({
 
   const [hasVariants, setHasVariants] = useState(
     initialData ? initialData.variants.length > 0 : false,
+  );
+
+  const [hasSizeGuide, setHasSizeGuide] = useState(
+    initialData?.sizeGuideEnabled ?? false,
   );
 
   const [optionGroups, setOptionGroups] = useState<OptionGroup[]>(
@@ -163,7 +170,7 @@ export default function ProductForm({
       ? initialData.variants.map((variant) => ({
           name: variant.name,
           price: variant.price ?? "",
-          stock: variant.stock,
+          stock: variant.stock > 0 ? 1 : 0,
           options: variant.options,
         }))
       : [],
@@ -268,7 +275,7 @@ export default function ProductForm({
         return {
           name,
           price: existing?.price ?? "",
-          stock: existing?.stock ?? "",
+          stock: existing?.stock ?? 1,
           options: combination,
         };
       });
@@ -307,7 +314,7 @@ export default function ProductForm({
       .map((variant) => ({
         name: variant.name.trim(),
         price: variant.price === "" ? null : Number(variant.price),
-        stock: variant.stock === "" ? 0 : Number(variant.stock),
+        stock: Number(variant.stock) > 0 ? 1 : 0,
         options: variant.options
           .map((option) => ({
             name: option.name.trim(),
@@ -390,6 +397,67 @@ export default function ProductForm({
                 />
               </div>
             </div>
+          </section>
+
+          <section className="border border-black/10 bg-white p-6">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+                  Extra
+                </p>
+                <h2 className="mt-2 text-2xl font-medium">Size guide</h2>
+              </div>
+
+              <label className="flex items-center gap-3 text-sm uppercase tracking-[0.14em]">
+                <input
+                  type="checkbox"
+                  name="sizeGuideEnabled"
+                  checked={hasSizeGuide}
+                  onChange={(e) => setHasSizeGuide(e.target.checked)}
+                />
+                Enable
+              </label>
+            </div>
+
+            {hasSizeGuide ? (
+              <div className="space-y-5">
+                <div className="space-y-2">
+                  <label
+                    htmlFor="sizeGuideTitle"
+                    className="text-sm uppercase tracking-[0.14em]"
+                  >
+                    Title
+                  </label>
+                  <input
+                    id="sizeGuideTitle"
+                    name="sizeGuideTitle"
+                    defaultValue={initialData?.sizeGuideTitle ?? "Size guide"}
+                    placeholder="Size guide"
+                    className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label
+                    htmlFor="sizeGuideContent"
+                    className="text-sm uppercase tracking-[0.14em]"
+                  >
+                    Content
+                  </label>
+                  <textarea
+                    id="sizeGuideContent"
+                    name="sizeGuideContent"
+                    rows={8}
+                    defaultValue={initialData?.sizeGuideContent ?? ""}
+                    placeholder={`XS - Chest 80–86 cm
+S - Chest 87–93 cm
+M - Chest 94–100 cm
+L - Chest 101–107 cm`}
+                    className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                  />
+                </div>
+              </div>
+            ) : null}
           </section>
 
           <section className="border border-black/10 bg-white p-6">
@@ -617,23 +685,22 @@ export default function ProductForm({
 
                           <div className="space-y-2">
                             <label className="text-sm uppercase tracking-[0.14em]">
-                              Stock
+                              Availability
                             </label>
-                            <input
-                              type="number"
-                              min="0"
+                            <select
                               value={variant.stock}
                               onChange={(e) =>
                                 updateGeneratedVariant(
                                   variantIndex,
                                   "stock",
-                                  e.target.value === ""
-                                    ? ""
-                                    : Number(e.target.value),
+                                  Number(e.target.value),
                                 )
                               }
                               className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
-                            />
+                            >
+                              <option value={1}>In stock</option>
+                              <option value={0}>Out of stock</option>
+                            </select>
                           </div>
 
                           <div className="flex items-end">
@@ -694,17 +761,17 @@ export default function ProductForm({
                   htmlFor="stock"
                   className="text-sm uppercase tracking-[0.14em]"
                 >
-                  Base stock
+                  Base availability
                 </label>
-                <input
+                <select
                   id="stock"
                   name="stock"
-                  type="number"
-                  min="0"
-                  required
-                  defaultValue={initialData?.stock ?? ""}
+                  defaultValue={initialData?.stock ? 1 : 0}
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
-                />
+                >
+                  <option value={1}>In stock</option>
+                  <option value={0}>Out of stock</option>
+                </select>
               </div>
 
               <div className="space-y-2">

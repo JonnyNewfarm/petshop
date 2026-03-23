@@ -40,8 +40,14 @@ type ProductWithRelations = {
   stock: number;
   featured: boolean;
   categoryId: string;
+  sizeGuideEnabled: boolean;
+  sizeGuideTitle: string | null;
+  sizeGuideContent: string | null;
   images: ProductImage[];
   variants: ProductVariant[];
+  tags: {
+    id: string;
+  }[];
 };
 
 export default async function EditProductPage({
@@ -109,6 +115,9 @@ export default async function EditProductPage({
               stock: product.stock,
               featured: product.featured,
               categoryId: product.categoryId,
+              sizeGuideEnabled: product.sizeGuideEnabled,
+              sizeGuideTitle: product.sizeGuideTitle,
+              sizeGuideContent: product.sizeGuideContent,
               images: product.images.map((image) => ({
                 url: image.url,
               })),

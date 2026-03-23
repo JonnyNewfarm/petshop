@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
-import ProductDetailsClient from "@/components/ProductDetailClient";
-import ProductGalleryClient from "@/components/ProductGalleryClient";
+import ProductViewClient from "@/components/ProductViewClient";
 import ScrollSection from "@/components/SmoothScroll";
 
 type ProductPageProps = {
@@ -39,6 +38,9 @@ type ProductWithRelations = {
   description: string;
   price: number;
   stock: number;
+  sizeGuideEnabled: boolean;
+  sizeGuideTitle: string | null;
+  sizeGuideContent: string | null;
   category: {
     name: string;
   };
@@ -195,38 +197,37 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </section>
 
           <section className="grid gap-12 pt-10 lg:grid-cols-[minmax(0,1.1fr)_480px] lg:gap-16 lg:pt-12">
-            <div className="min-w-0">
-              <ProductGalleryClient
-                productName={product.name}
-                images={product.images}
-              />
-            </div>
-
-            <div className="lg:sticky lg:top-24 lg:self-start">
-              <ProductDetailsClient
-                product={{
-                  id: product.id,
-                  slug: product.slug,
-                  name: product.name,
-                  description: product.description,
-                  price: product.price,
-                  stock: product.stock,
-                  imageUrl: product.images[0]?.url ?? "/placeholder.jpg",
-                  categoryName: product.category.name,
-                  variants: product.variants.map((variant) => ({
-                    id: variant.id,
-                    name: variant.name,
-                    price: variant.price,
-                    stock: variant.stock,
-                    options: variant.options.map((option) => ({
-                      id: option.id,
-                      name: option.name,
-                      value: option.value,
-                    })),
+            <ProductViewClient
+              product={{
+                id: product.id,
+                slug: product.slug,
+                name: product.name,
+                description: product.description,
+                price: product.price,
+                stock: product.stock,
+                categoryName: product.category.name,
+                sizeGuideEnabled: product.sizeGuideEnabled,
+                sizeGuideTitle: product.sizeGuideTitle,
+                sizeGuideContent: product.sizeGuideContent,
+                images: product.images.map((image) => ({
+                  id: image.id,
+                  url: image.url,
+                  alt: image.alt,
+                  order: image.order,
+                })),
+                variants: product.variants.map((variant) => ({
+                  id: variant.id,
+                  name: variant.name,
+                  price: variant.price,
+                  stock: variant.stock,
+                  options: variant.options.map((option) => ({
+                    id: option.id,
+                    name: option.name,
+                    value: option.value,
                   })),
-                }}
-              />
-            </div>
+                })),
+              }}
+            />
           </section>
         </div>
       </main>
