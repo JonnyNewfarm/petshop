@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ScrollSection from "@/components/SmoothScroll";
 import Link from "next/link";
 import CheckoutSuccessClient from "@/components/CheckoutSuccessClient";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: "Payment Successful",
@@ -16,7 +17,9 @@ export const metadata: Metadata = {
 export default function CheckoutSuccessPage() {
   return (
     <ScrollSection>
-      <CheckoutSuccessClient />
+      <Suspense fallback={null}>
+        <CheckoutSuccessClient />
+      </Suspense>
 
       <main className="min-h-screen bg-[#dddad5] text-black">
         <div className="mx-auto flex min-h-screen max-w-[1600px] items-center px-6 py-28 sm:px-8 lg:px-12">
