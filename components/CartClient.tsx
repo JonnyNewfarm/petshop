@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import { useCartStore } from "@/app/store/cart-store";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 export default function CartPage() {
   const items = useCartStore((state) => state.items);
@@ -29,6 +30,19 @@ export default function CartPage() {
   async function handleCheckout() {
     try {
       setLoadingCheckout(true);
+
+      trackMetaEvent("InitiateCheckout", {
+        currency: "NOK",
+        value: total / 100,
+        num_items: totalQuantity,
+        content_type: "product",
+        content_ids: items.map((item) => item.id),
+        contents: items.map((item) => ({
+          id: item.id,
+          quantity: item.quantity,
+          item_price: item.price / 100,
+        })),
+      });
 
       const response = await fetch("/api/checkout", {
         method: "POST",
