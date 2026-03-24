@@ -221,29 +221,8 @@ export default function ContactPageClient() {
                     href="mailto:hello@yourstore.com"
                     className="mt-2 block text-base tracking-[-0.02em] text-black transition hover:opacity-70"
                   >
-                    hello@yourstore.com
+                    sales@petsaco.com
                   </a>
-                </div>
-
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
-                    Phone
-                  </p>
-                  <a
-                    href="tel:+4700000000"
-                    className="mt-2 block text-base tracking-[-0.02em] text-black transition hover:opacity-70"
-                  >
-                    +47 00 00 00 00
-                  </a>
-                </div>
-
-                <div>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
-                    Location
-                  </p>
-                  <p className="mt-2 text-base tracking-[-0.02em] text-black/72">
-                    Oslo, Norway
-                  </p>
                 </div>
 
                 <div className="border-t border-black/10 pt-8">
