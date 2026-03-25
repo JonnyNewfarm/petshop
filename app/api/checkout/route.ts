@@ -28,8 +28,8 @@ export async function POST(request: NextRequest) {
       0
     );
 
-    const freeShippingThreshold = 5999;
-    const shippingAmount = subtotal >= freeShippingThreshold ? 0 : 499;
+    const freeShippingThreshold = 4900;
+    const shippingAmount = subtotal >= freeShippingThreshold ? 0 : 695;
 
     const appUrl = process.env.NEXT_PUBLIC_APP_URL;
 

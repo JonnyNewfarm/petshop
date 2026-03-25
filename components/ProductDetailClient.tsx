@@ -387,6 +387,12 @@ export default function ProductDetailsClient({
               >
                 Back to shop
               </a>
+              <div className="border-t border-black/10 pt-3">
+                <div className="space-y-1 text-[10px] uppercase tracking-[0.22em] text-black/45">
+                  <p>Free shipping on orders over $49</p>
+                  <p>Standard shipping: $6.95</p>
+                </div>
+              </div>
             </div>
           </div>
         </div>

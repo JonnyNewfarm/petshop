@@ -16,8 +16,12 @@ export default function CartPage() {
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
 
-  const freeShippingThreshold = 6000;
-  const standardShipping = 500;
+  const freeShippingThreshold = 4900;
+  const freeShippingProgress = Math.min(
+    (subtotal / freeShippingThreshold) * 100,
+    100,
+  );
+  const standardShipping = 695;
 
   const shipping = subtotal >= freeShippingThreshold ? 0 : standardShipping;
   const total = subtotal + shipping;
@@ -265,16 +269,25 @@ export default function CartPage() {
                 </div>
 
                 <div className="px-6 py-6 sm:px-8">
-                  {shipping === 0 ? (
-                    <div className="mb-6 text-sm text-black/70">
-                      You’ve unlocked free shipping.
+                  <div className="mb-6">
+                    {shipping === 0 ? (
+                      <div className="text-sm text-black/70">
+                        You’ve unlocked free shipping.
+                      </div>
+                    ) : (
+                      <div className="text-sm text-black/70">
+                        Add {formatPrice(amountUntilFreeShipping)} more to
+                        unlock free shipping.
+                      </div>
+                    )}
+
+                    <div className="mt-3 h-[6px] w-full overflow-hidden bg-black/10">
+                      <div
+                        className="h-full bg-black transition-all duration-500"
+                        style={{ width: `${freeShippingProgress}%` }}
+                      />
                     </div>
-                  ) : (
-                    <div className="mb-6  text-sm text-black/70">
-                      You are {formatPrice(amountUntilFreeShipping)} away from
-                      free shipping.
-                    </div>
-                  )}
+                  </div>
 
                   <div className="space-y-4 border-b border-black/10 pb-6">
                     <div className="flex items-center justify-between text-sm text-black/65">
