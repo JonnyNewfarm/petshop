@@ -45,6 +45,7 @@ export default function ProductGalleryClient({
           fill
           className="object-cover"
           priority
+          quality={100}
         />
       </div>
 

@@ -92,10 +92,7 @@ export default function RelatedProductsSection({
             variants={itemVariants}
             className="min-w-0 h-full"
           >
-            <Link
-              href={`/product/${product.slug}`}
-              className="group block h-full"
-            >
+            <Link href={`/shop/${product.slug}`} className="group block h-full">
               <motion.article
                 whileHover={{
                   y: -8,
