@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import ProductViewClient from "@/components/ProductViewClient";
 import ScrollSection from "@/components/SmoothScroll";
+import RelatedProductsSection from "@/components/RelatedProductsSection";
+import { formatPrice } from "@/lib/format";
 
 type ProductPageProps = {
   params: Promise<{
@@ -138,11 +140,114 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const relatedCandidates = await prisma.product.findMany({
+    where: {
+      category: {
+        name: product.category.name,
+      },
+      NOT: {
+        id: product.id,
+      },
+      OR: [
+        {
+          stock: {
+            gt: 0,
+          },
+        },
+        {
+          variants: {
+            some: {
+              stock: {
+                gt: 0,
+              },
+            },
+          },
+        },
+      ],
+    },
+    include: {
+      category: true,
+      images: {
+        orderBy: {
+          order: "asc",
+        },
+        take: 1,
+      },
+      variants: {
+        select: {
+          stock: true,
+        },
+      },
+    },
+    take: 12,
+  });
+
+  const relatedProducts = [...relatedCandidates]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, 4)
+    .map((item) => ({
+      id: item.id,
+      slug: item.slug,
+      name: item.name,
+      price: item.price,
+      categoryName: item.category.name,
+      imageUrl: item.images[0]?.url || "/placeholder.jpg",
+      imageAlt: item.images[0]?.alt || item.name,
+      inStock:
+        item.stock > 0 || item.variants.some((variant) => variant.stock > 0),
+    }));
+
   return (
     <ScrollSection>
       <main className="min-h-screen bg-[#dddad5] text-black">
-        <div className="mx-auto max-w-[1600px] px-6 pb-20 pt-28 sm:px-8 lg:px-12">
-          <section className="border-b border-black/10 pb-12 lg:pb-16">
+        <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-24 lg:px-12 lg:pt-28">
+          <section className="border-b border-black/10 pb-6 lg:hidden">
+            <div className="grid gap-5 mt-3 sm:mt-0">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.24em] text-black/45">
+                  {product.category.name}
+                </p>
+
+                <h1
+                  style={{ fontFamily: "Mango" }}
+                  className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.03em]"
+                >
+                  {product.name}
+                </h1>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3 border-t border-black/10 pt-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
+                    Price
+                  </p>
+                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                    {formatPrice(product.price)}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
+                    Images
+                  </p>
+                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                    {product.images.length}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
+                    Category
+                  </p>
+                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                    {product.category.name}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="hidden border-b border-black/10 pb-12 lg:block lg:pb-16">
             <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr] lg:items-end lg:gap-16">
               <div className="max-w-[980px]">
                 <p className="text-[11px] uppercase tracking-[0.24em] text-black/45">
@@ -196,7 +301,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
             </div>
           </section>
 
-          <section className="grid gap-12 pt-10 lg:grid-cols-[minmax(0,1.1fr)_480px] lg:gap-16 lg:pt-12">
+          <section className="pt-6 sm:pt-8 lg:pt-12">
             <ProductViewClient
               product={{
                 id: product.id,
@@ -229,6 +334,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
               }}
             />
           </section>
+
+          {relatedProducts.length > 0 ? (
+            <RelatedProductsSection
+              title="You may also like"
+              products={relatedProducts}
+            />
+          ) : null}
         </div>
       </main>
     </ScrollSection>

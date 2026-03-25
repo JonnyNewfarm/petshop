@@ -83,7 +83,7 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
   }
 
   return (
-    <>
+    <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_460px] lg:gap-12 xl:grid-cols-[minmax(0,1.12fr)_500px] xl:gap-16">
       <div className="min-w-0">
         <ProductGalleryClient
           productName={product.name}
@@ -114,6 +114,6 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
           onColorChange={handleColorChange}
         />
       </div>
-    </>
+    </div>
   );
 }

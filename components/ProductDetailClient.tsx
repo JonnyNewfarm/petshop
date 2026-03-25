@@ -128,55 +128,68 @@ export default function ProductDetailsClient({
   ]);
 
   const displayPrice = selectedVariant?.price ?? product.price;
-  const displayStock = hasVariants
-    ? (selectedVariant?.stock ?? 0)
-    : product.stock;
+
+  const hasAnyVariantInStock = hasVariants
+    ? product.variants.some((variant) => variant.stock > 0)
+    : false;
+
+  const availabilityLabel = hasVariants
+    ? selectedVariant
+      ? selectedVariant.stock > 0
+        ? "In stock"
+        : "Out of stock"
+      : hasAnyVariantInStock
+        ? "Choose options"
+        : "Out of stock"
+    : product.stock > 0
+      ? "In stock"
+      : "Out of stock";
 
   const isSelectedVariantOutOfStock =
     hasVariants && selectedVariant ? selectedVariant.stock <= 0 : false;
 
   return (
     <div className="border border-black/10 bg-[#e6e2dc]">
-      <div className="border-b border-black/10 px-6 py-6 sm:px-8">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+      <div className="border-b border-black/10 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
           {product.categoryName}
         </p>
 
         <h2
           style={{ fontFamily: "Mango" }}
-          className="mt-4 text-[clamp(2.3rem,4.8vw,4.8rem)] uppercase leading-[0.9] tracking-[-0.02em]"
+          className="mt-3 text-[clamp(1.8rem,8vw,4.8rem)] uppercase leading-[0.92] tracking-[-0.03em] sm:mt-4 sm:tracking-[-0.02em]"
         >
           {product.name}
         </h2>
 
-        <div className="mt-6 flex items-end justify-between gap-6 border-t border-black/10 pt-5">
+        <div className="mt-5 grid grid-cols-2 gap-4 border-t border-black/10 pt-4 sm:mt-6 sm:flex sm:items-end sm:justify-between sm:gap-6 sm:pt-5">
           <div>
             <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
               Price
             </p>
-            <p className="mt-2 text-[1.9rem] leading-none tracking-[-0.05em]">
+            <p className="mt-2 text-[1.55rem] leading-none tracking-[-0.05em] sm:text-[1.9rem]">
               {formatPrice(displayPrice)}
             </p>
           </div>
 
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
               Availability
             </p>
-            <p className="mt-2 text-sm uppercase tracking-[0.16em] text-black/70">
-              {displayStock > 0 ? "In stock" : "Out of stock"}
+            <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-black/70 sm:text-sm">
+              {availabilityLabel}
             </p>
           </div>
         </div>
       </div>
 
-      <div className="px-6 py-6 sm:px-8">
-        <div className="border-b border-black/10 pb-6">
-          <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+      <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <div className="border-b border-black/10 pb-5 sm:pb-6">
+          <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
             Description
           </p>
 
-          <div className="mt-4 max-w-[52ch] space-y-4 text-[15px] leading-7 text-black/65">
+          <div className="mt-4 max-w-[52ch] space-y-4 text-[14px] leading-6 text-black/65 sm:text-[15px] sm:leading-7">
             {visibleParagraphs.map((paragraph, i) => (
               <p key={i}>{paragraph}</p>
             ))}
@@ -194,9 +207,9 @@ export default function ProductDetailsClient({
         </div>
 
         {hasVariants && (
-          <div className="border-b border-black/10 py-6">
-            <div className="mb-6">
-              <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+          <div className="border-b border-black/10 py-5 sm:py-6">
+            <div className="mb-5 sm:mb-6">
+              <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
                 Options
               </p>
               <p className="mt-2 text-sm leading-6 text-black/58">
@@ -204,14 +217,14 @@ export default function ProductDetailsClient({
               </p>
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-5 sm:space-y-6">
               {groupedOptions.map((group) => (
                 <div key={group.name}>
-                  <p className="mb-3 text-[11px] uppercase tracking-[0.18em] text-black/45">
+                  <p className="mb-3 text-[10px] uppercase tracking-[0.18em] text-black/45 sm:text-[11px]">
                     {group.name}
                   </p>
 
-                  <div className="flex flex-wrap gap-2.5">
+                  <div className="flex flex-wrap gap-2">
                     {group.values.map((value) => {
                       const nextSelectedOptions = {
                         ...selectedOptions,
@@ -273,7 +286,7 @@ export default function ProductDetailsClient({
                             onVariantChange(exactVariant?.id ?? null);
                           }}
                           disabled={!exists}
-                          className={`px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
+                          className={`min-h-[44px] px-3 py-2.5 text-[10px] uppercase tracking-[0.18em] transition sm:px-4 sm:py-3 sm:text-[11px] ${
                             isActive
                               ? "bg-black text-[#f6f1e8]"
                               : "bg-[#f3efe8] text-black hover:bg-black hover:text-[#f6f1e8]"
@@ -293,12 +306,12 @@ export default function ProductDetailsClient({
               ))}
             </div>
 
-            <div className="mt-6 border-t border-black/10 pt-5">
-              <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+            <div className="mt-5 border-t border-black/10 pt-4 sm:mt-6 sm:pt-5">
+              <p className="text-[10px] uppercase tracking-[0.18em] text-black/45 sm:text-[11px]">
                 Selected variant
               </p>
-              <p className="mt-2 text-[1.05rem] uppercase tracking-[-0.02em] text-black">
-                {selectedVariant?.name ?? "No variant selected"}
+              <p className="mt-2 text-base uppercase tracking-[-0.02em] text-black sm:text-[1.05rem]">
+                {selectedVariant?.name ?? "Choose your options"}
               </p>
 
               {!isExactSelectionComplete ? (
@@ -317,24 +330,24 @@ export default function ProductDetailsClient({
         )}
 
         {product.sizeGuideEnabled && product.sizeGuideContent ? (
-          <div className="border-b border-black/10 py-6">
-            <p className="text-[11px] uppercase tracking-[0.22em] text-black/45">
+          <div className="border-b border-black/10 py-5 sm:py-6">
+            <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
               {product.sizeGuideTitle || "Size guide"}
             </p>
 
-            <div className="mt-4 whitespace-pre-line text-[15px] leading-7 text-black/65">
+            <div className="mt-4 whitespace-pre-line text-[14px] leading-6 text-black/65 sm:text-[15px] sm:leading-7">
               {product.sizeGuideContent}
             </div>
           </div>
         ) : null}
 
-        <div className="py-6">
-          <div className="grid grid-cols-2 gap-x-8 gap-y-6 border-b border-black/10 pb-6">
+        <div className="py-5 sm:py-6">
+          <div className="grid grid-cols-2 gap-x-6 gap-y-5 border-b border-black/10 pb-5 sm:gap-x-8 sm:gap-y-6 sm:pb-6">
             <div>
               <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
                 Category
               </p>
-              <p className="mt-2 text-base uppercase tracking-[-0.02em]">
+              <p className="mt-2 text-sm uppercase tracking-[-0.02em] sm:text-base">
                 {product.categoryName}
               </p>
             </div>
@@ -343,14 +356,14 @@ export default function ProductDetailsClient({
               <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
                 Product
               </p>
-              <p className="mt-2 text-base uppercase tracking-[-0.02em]">
+              <p className="mt-2 text-sm uppercase tracking-[-0.02em] sm:text-base">
                 Curated item
               </p>
             </div>
           </div>
 
-          <div className="pt-6">
-            <div className="flex flex-col gap-4">
+          <div className="pt-5 sm:pt-6">
+            <div className="flex flex-col gap-3 sm:gap-4">
               <AddToCartButton
                 productId={product.id}
                 variantId={selectedVariant?.id ?? null}
@@ -370,7 +383,7 @@ export default function ProductDetailsClient({
 
               <a
                 href="/shop"
-                className="inline-flex items-center justify-center border border-black/15 px-7 py-4 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black hover:bg-black hover:text-[#f6f1e8]"
+                className="inline-flex min-h-[48px] items-center justify-center border border-black/15 px-6 py-3.5 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black hover:bg-black hover:text-[#f6f1e8] sm:px-7 sm:py-4"
               >
                 Back to shop
               </a>
