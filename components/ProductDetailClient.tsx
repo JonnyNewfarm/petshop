@@ -388,9 +388,12 @@ export default function ProductDetailsClient({
                 Back to shop
               </a>
               <div className="border-t border-black/10 pt-3">
-                <div className="space-y-1 text-[10px] uppercase tracking-[0.22em] text-black/45">
+                <div className="space-y-1 text-[10px] uppercase tracking-[0.22em] text-black/80">
                   <p>Free shipping on orders over $49</p>
                   <p>Standard shipping: $6.95</p>
+                  <p>Estimated delivery: 7–15 business days</p>
+                  <p>Secure checkout with Stripe</p>
+                  <p>30-day money-back guarantee</p>
                 </div>
               </div>
             </div>
