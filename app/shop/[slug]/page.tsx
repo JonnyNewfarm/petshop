@@ -311,7 +311,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
                 <h1
                   style={{ fontFamily: "Mango" }}
-                  className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.03em]"
+                  className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.01em]"
                 >
                   {product.name}
                 </h1>
