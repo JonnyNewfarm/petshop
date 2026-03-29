@@ -37,9 +37,15 @@ type ProductFormInitialData = {
   name: string;
   slug: string;
   description: string;
+  shortDescription: string | null;
   price: number;
+  compareAtPrice: number | null;
   stock: number;
   featured: boolean;
+  badge: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  benefits: string[] | null;
   categoryId: string;
   sizeGuideEnabled: boolean;
   sizeGuideTitle: string | null;
@@ -327,6 +333,10 @@ export default function ProductForm({
     return cleanedVariants.length ? JSON.stringify(cleanedVariants) : "";
   }, [hasVariants, variants]);
 
+  const serializedBenefits = useMemo(() => {
+    return (initialData?.benefits ?? []).join("\n");
+  }, [initialData?.benefits]);
+
   return (
     <form action={formAction} className="space-y-10">
       {isEdit ? (
@@ -382,6 +392,23 @@ export default function ProductForm({
 
               <div className="space-y-2">
                 <label
+                  htmlFor="shortDescription"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  Short description
+                </label>
+                <textarea
+                  id="shortDescription"
+                  name="shortDescription"
+                  rows={3}
+                  defaultValue={initialData?.shortDescription ?? ""}
+                  placeholder="A refined everyday essential designed for comfort, durability and easy care."
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
                   htmlFor="description"
                   className="text-sm uppercase tracking-[0.14em]"
                 >
@@ -393,6 +420,43 @@ export default function ProductForm({
                   required
                   defaultValue={initialData?.description ?? ""}
                   rows={7}
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="benefits"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  Benefits / highlights
+                </label>
+                <textarea
+                  id="benefits"
+                  name="benefits"
+                  rows={5}
+                  defaultValue={serializedBenefits}
+                  placeholder={`Soft everyday comfort
+Easy to clean
+Durable materials
+Designed for modern pet homes`}
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+                <p className="text-xs text-black/45">One benefit per line.</p>
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="badge"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  Badge
+                </label>
+                <input
+                  id="badge"
+                  name="badge"
+                  defaultValue={initialData?.badge ?? ""}
+                  placeholder="Best seller"
                   className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
                 />
               </div>
@@ -758,6 +822,23 @@ L - Chest 101–107 cm`}
 
               <div className="space-y-2">
                 <label
+                  htmlFor="compareAtPrice"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  Compare at price (cents)
+                </label>
+                <input
+                  id="compareAtPrice"
+                  name="compareAtPrice"
+                  type="number"
+                  min="0"
+                  defaultValue={initialData?.compareAtPrice ?? ""}
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
                   htmlFor="stock"
                   className="text-sm uppercase tracking-[0.14em]"
                 >
@@ -836,6 +917,50 @@ L - Chest 101–107 cm`}
                 />
                 Featured product
               </label>
+            </div>
+          </section>
+
+          <section className="border border-black/10 bg-white p-6">
+            <div className="mb-6">
+              <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+                SEO
+              </p>
+              <h2 className="mt-2 text-2xl font-medium">Search metadata</h2>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2">
+                <label
+                  htmlFor="seoTitle"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  SEO title
+                </label>
+                <input
+                  id="seoTitle"
+                  name="seoTitle"
+                  defaultValue={initialData?.seoTitle ?? ""}
+                  placeholder="Orthopedic Dog Bed | Petsaco"
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label
+                  htmlFor="seoDescription"
+                  className="text-sm uppercase tracking-[0.14em]"
+                >
+                  SEO description
+                </label>
+                <textarea
+                  id="seoDescription"
+                  name="seoDescription"
+                  rows={4}
+                  defaultValue={initialData?.seoDescription ?? ""}
+                  placeholder="Premium orthopedic dog bed with soft support, durable materials and easy-care design."
+                  className="w-full border border-black/10 bg-[#f6f1e8] px-4 py-4 outline-none"
+                />
+              </div>
             </div>
           </section>
 

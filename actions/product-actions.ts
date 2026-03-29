@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
-
+import { Prisma } from "@prisma/client";
 type ProductActionState = {
   error?: string;
   success?: boolean;
@@ -20,6 +20,13 @@ function parseImageUrls(raw: string) {
   return raw
     .split("\n")
     .map((url) => url.trim())
+    .filter(Boolean);
+}
+
+function parseBenefits(raw: string) {
+  return raw
+    .split("\n")
+    .map((item) => item.trim())
     .filter(Boolean);
 }
 
@@ -63,9 +70,18 @@ export async function createProduct(
     const name = String(formData.get("name") || "").trim();
     const slug = String(formData.get("slug") || "").trim();
     const description = String(formData.get("description") || "").trim();
+    const shortDescription = String(
+      formData.get("shortDescription") || "",
+    ).trim();
     const price = Number(formData.get("price") || 0);
+    const compareAtPriceRaw = String(formData.get("compareAtPrice") || "").trim();
+    const compareAtPrice = compareAtPriceRaw ? Number(compareAtPriceRaw) : null;
     const stock = normalizeStock(formData.get("stock") || 0);
     const featured = formData.get("featured") === "on";
+    const badge = String(formData.get("badge") || "").trim();
+    const seoTitle = String(formData.get("seoTitle") || "").trim();
+    const seoDescription = String(formData.get("seoDescription") || "").trim();
+    const benefits = parseBenefits(String(formData.get("benefits") || ""));
     const categoryId = String(formData.get("categoryId") || "").trim();
     const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
 
@@ -96,10 +112,16 @@ export async function createProduct(
         name,
         slug,
         description,
+        shortDescription: shortDescription || null,
         price,
+        compareAtPrice:
+          compareAtPrice && compareAtPrice > 0 ? compareAtPrice : null,
         stock,
         featured,
-        categoryId,
+        badge: badge || null,
+        seoTitle: seoTitle || null,
+        seoDescription: seoDescription || null,
+benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
         sizeGuideEnabled,
         sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
         sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
@@ -151,9 +173,18 @@ export async function updateProduct(
     const name = String(formData.get("name") || "").trim();
     const slug = String(formData.get("slug") || "").trim();
     const description = String(formData.get("description") || "").trim();
+    const shortDescription = String(
+      formData.get("shortDescription") || "",
+    ).trim();
     const price = Number(formData.get("price") || 0);
+    const compareAtPriceRaw = String(formData.get("compareAtPrice") || "").trim();
+    const compareAtPrice = compareAtPriceRaw ? Number(compareAtPriceRaw) : null;
     const stock = normalizeStock(formData.get("stock") || 0);
     const featured = formData.get("featured") === "on";
+    const badge = String(formData.get("badge") || "").trim();
+    const seoTitle = String(formData.get("seoTitle") || "").trim();
+    const seoDescription = String(formData.get("seoDescription") || "").trim();
+    const benefits = parseBenefits(String(formData.get("benefits") || ""));
     const categoryId = String(formData.get("categoryId") || "").trim();
     const tagIds = formData.getAll("tagIds").map(String).filter(Boolean);
 
@@ -187,10 +218,16 @@ export async function updateProduct(
         name,
         slug,
         description,
+        shortDescription: shortDescription || null,
         price,
+        compareAtPrice:
+          compareAtPrice && compareAtPrice > 0 ? compareAtPrice : null,
         stock,
         featured,
-        categoryId,
+        badge: badge || null,
+        seoTitle: seoTitle || null,
+        seoDescription: seoDescription || null,
+benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
         sizeGuideEnabled,
         sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
         sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
@@ -226,6 +263,7 @@ export async function updateProduct(
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${productId}/edit`);
     revalidatePath("/shop");
+    revalidatePath(`/shop/${slug}`);
     revalidatePath(`/shop/${slug}`);
 
     return { success: true };

@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import ProductViewClient from "@/components/ProductViewClient";
 import ScrollSection from "@/components/SmoothScroll";
 import RelatedProductsSection from "@/components/RelatedProductsSection";
-import { formatPrice } from "@/lib/format";
 
 type ProductPageProps = {
   params: Promise<{
@@ -38,17 +37,38 @@ type ProductWithRelations = {
   slug: string;
   name: string;
   description: string;
+  shortDescription: string | null;
   price: number;
+  compareAtPrice: number | null;
   stock: number;
+  featured: boolean;
+  badge: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  benefits: string[] | null;
   sizeGuideEnabled: boolean;
   sizeGuideTitle: string | null;
   sizeGuideContent: string | null;
   category: {
     name: string;
+    slug: string;
   };
   images: ProductImage[];
   variants: ProductVariant[];
+  tags: {
+    id: string;
+    name: string;
+    slug: string;
+  }[];
 };
+
+function getProductBenefits(raw: unknown): string[] {
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((item) => String(item).trim())
+    .filter(Boolean)
+    .slice(0, 6);
+}
 
 export async function generateMetadata({
   params,
@@ -82,17 +102,19 @@ export async function generateMetadata({
   const imageUrl = product.images[0]?.url || "/placeholder.jpg";
 
   const cleanDescription =
+    product.seoDescription?.trim() ||
+    product.shortDescription?.trim() ||
     product.description?.trim() ||
     `Shop ${product.name} at Petsaco. Explore premium pet products for everyday comfort, play and care.`;
 
   return {
-    title: `${product.name} | Petsaco`,
+    title: product.seoTitle?.trim() || `${product.name} | Petsaco`,
     description: cleanDescription,
     alternates: {
       canonical: `/product/${product.slug}`,
     },
     openGraph: {
-      title: `${product.name} | Petsaco`,
+      title: product.seoTitle?.trim() || `${product.name} | Petsaco`,
       description: cleanDescription,
       url: productUrl,
       siteName: "Petsaco",
@@ -106,7 +128,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: `${product.name} | Petsaco`,
+      title: product.seoTitle?.trim() || `${product.name} | Petsaco`,
       description: cleanDescription,
       images: [imageUrl],
     },
@@ -116,10 +138,11 @@ export async function generateMetadata({
 export default async function ProductPage({ params }: ProductPageProps) {
   const { slug } = await params;
 
-  const product: ProductWithRelations | null = await prisma.product.findUnique({
+  const product = await prisma.product.findUnique({
     where: { slug },
     include: {
       category: true,
+      tags: true,
       images: {
         orderBy: {
           order: "asc",
@@ -140,33 +163,56 @@ export default async function ProductPage({ params }: ProductPageProps) {
     notFound();
   }
 
+  const productBenefits = getProductBenefits(product.benefits);
+
   const relatedCandidates = await prisma.product.findMany({
     where: {
-      category: {
-        name: product.category.name,
-      },
       NOT: {
         id: product.id,
       },
-      OR: [
+
+      AND: [
         {
-          stock: {
-            gt: 0,
-          },
+          OR: [
+            {
+              tags: {
+                some: {
+                  id: {
+                    in: product.tags.map((tag) => tag.id),
+                  },
+                },
+              },
+            },
+            {
+              categoryId: product.categoryId,
+            },
+          ],
         },
+
         {
-          variants: {
-            some: {
+          OR: [
+            {
               stock: {
                 gt: 0,
               },
             },
-          },
+            {
+              variants: {
+                some: {
+                  stock: {
+                    gt: 0,
+                  },
+                },
+              },
+            },
+          ],
         },
       ],
     },
+
     include: {
       category: true,
+      tags: true,
       images: {
         orderBy: {
           order: "asc",
@@ -179,27 +225,76 @@ export default async function ProductPage({ params }: ProductPageProps) {
         },
       },
     },
+
     take: 12,
   });
 
-  const relatedProducts = [...relatedCandidates]
-    .sort(() => Math.random() - 0.5)
+  const relatedProducts = relatedCandidates
+    .map((item) => {
+      const sharedTagCount = item.tags.filter((tag) =>
+        product.tags.some((currentTag) => currentTag.id === tag.id),
+      ).length;
+
+      const sameCategory = item.category.id === product.category.id ? 1 : 0;
+
+      return {
+        id: item.id,
+        slug: item.slug,
+        name: item.name,
+        price: item.price,
+        categoryName: item.category.name,
+        imageUrl: item.images[0]?.url || "/placeholder.jpg",
+        imageAlt: item.images[0]?.alt || item.name,
+        inStock:
+          item.stock > 0 || item.variants.some((variant) => variant.stock > 0),
+        score: sharedTagCount * 2 + sameCategory,
+      };
+    })
+    .sort((a, b) => b.score - a.score)
     .slice(0, 4)
-    .map((item) => ({
-      id: item.id,
-      slug: item.slug,
-      name: item.name,
-      price: item.price,
-      categoryName: item.category.name,
-      imageUrl: item.images[0]?.url || "/placeholder.jpg",
-      imageAlt: item.images[0]?.alt || item.name,
-      inStock:
-        item.stock > 0 || item.variants.some((variant) => variant.stock > 0),
-    }));
+    .map(({ score, ...rest }) => rest);
+
+  const productUrl = `https://petsaco.com/shop/${product.slug}`;
+  const imageUrl = product.images[0]?.url || "/placeholder.jpg";
+  const hasVariantInStock = product.variants.some(
+    (variant) => variant.stock > 0,
+  );
+  const availability =
+    product.stock > 0 || hasVariantInStock
+      ? "https://schema.org/InStock"
+      : "https://schema.org/OutOfStock";
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    description:
+      product.seoDescription || product.shortDescription || product.description,
+    image: product.images.map((image) => image.url),
+    sku: product.id,
+    category: product.category.name,
+    brand: {
+      "@type": "Brand",
+      name: "Petsaco",
+    },
+    offers: {
+      "@type": "Offer",
+      url: productUrl,
+      priceCurrency: "USD",
+      price: (product.price / 100).toFixed(2),
+      availability,
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
 
   return (
     <ScrollSection>
       <main className="min-h-screen bg-[#dddad5] text-black">
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+
         <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-24 lg:px-12 lg:pt-28">
           <section className="border-b border-black/10 pb-6 lg:hidden">
             <div className="grid gap-5 mt-3 sm:mt-0">
@@ -208,12 +303,24 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   {product.category.name}
                 </p>
 
+                {product.badge ? (
+                  <p className="mt-3 inline-flex yy px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70">
+                    {product.badge}
+                  </p>
+                ) : null}
+
                 <h1
                   style={{ fontFamily: "Mango" }}
                   className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.03em]"
                 >
                   {product.name}
                 </h1>
+
+                {product.shortDescription ? (
+                  <p className="mt-4 max-w-[62ch] text-sm leading-6 text-black/65">
+                    {product.shortDescription}
+                  </p>
+                ) : null}
               </div>
 
               <div className="grid grid-cols-3 gap-3 border-t border-black/10 pt-4">
@@ -222,7 +329,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     Price
                   </p>
                   <p className="mt-2 text-base leading-none tracking-[-0.03em]">
-                    {formatPrice(product.price)}
+                    ${(product.price / 100).toFixed(2)}
                   </p>
                 </div>
 
@@ -254,6 +361,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   Product
                 </p>
 
+                {product.badge ? (
+                  <p className="mt-5 inline-flex border border-black/15 px-3 py-1.5 text-[10px] uppercase tracking-[0.2em] text-black/70">
+                    {product.badge}
+                  </p>
+                ) : null}
+
                 <h1
                   style={{ fontFamily: "Mango" }}
                   className="mt-5 text-[clamp(3rem,8vw,8rem)] uppercase leading-[0.88] tracking-[-0.02em]"
@@ -262,10 +375,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </h1>
 
                 <p className="mt-6 max-w-[620px] text-[15px] leading-7 text-black/62 md:text-base">
-                  Thoughtfully selected essentials for modern pet living,
-                  designed to feel functional, refined and easy to live with
-                  every day.
+                  {product.shortDescription ||
+                    "Thoughtfully selected essentials for modern pet living, designed to feel functional, refined and easy to live with every day."}
                 </p>
+
+                {productBenefits.length > 0 ? (
+                  <div className="mt-8 flex flex-wrap gap-3">
+                    {productBenefits.map((benefit) => (
+                      <span
+                        key={benefit}
+                        className="border border-black/12 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-black/72"
+                      >
+                        {benefit}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
               </div>
 
               <div className="flex flex-col justify-end">
@@ -296,6 +421,15 @@ export default async function ProductPage({ params }: ProductPageProps) {
                       2026
                     </p>
                   </div>
+
+                  <div>
+                    <p className="text-[11px] uppercase tracking-[0.2em] text-black/40">
+                      Shipping
+                    </p>
+                    <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
+                      Fast
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -308,9 +442,13 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 slug: product.slug,
                 name: product.name,
                 description: product.description,
+                shortDescription: product.shortDescription,
                 price: product.price,
+                compareAtPrice: product.compareAtPrice,
                 stock: product.stock,
+                badge: product.badge,
                 categoryName: product.category.name,
+                benefits: productBenefits,
                 sizeGuideEnabled: product.sizeGuideEnabled,
                 sizeGuideTitle: product.sizeGuideTitle,
                 sizeGuideContent: product.sizeGuideContent,

@@ -31,9 +31,13 @@ type ProductViewClientProps = {
     slug: string;
     name: string;
     description: string;
+    shortDescription: string | null;
     price: number;
+    compareAtPrice: number | null;
     stock: number;
+    badge: string | null;
     categoryName: string;
+    benefits: string[];
     sizeGuideEnabled: boolean;
     sizeGuideTitle: string | null;
     sizeGuideContent: string | null;
@@ -100,10 +104,14 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
             slug: product.slug,
             name: product.name,
             description: product.description,
+            shortDescription: product.shortDescription,
             price: product.price,
+            compareAtPrice: product.compareAtPrice,
             stock: product.stock,
             imageUrl: displayedImageUrl,
+            badge: product.badge,
             categoryName: product.categoryName,
+            benefits: product.benefits,
             sizeGuideEnabled: product.sizeGuideEnabled,
             sizeGuideTitle: product.sizeGuideTitle,
             sizeGuideContent: product.sizeGuideContent,

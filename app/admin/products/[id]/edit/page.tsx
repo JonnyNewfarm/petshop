@@ -15,6 +15,12 @@ type Category = {
   slug: string;
 };
 
+type Tag = {
+  id: string;
+  name: string;
+  slug: string;
+};
+
 type ProductImage = {
   url: string;
 };
@@ -36,9 +42,15 @@ type ProductWithRelations = {
   name: string;
   slug: string;
   description: string;
+  shortDescription: string | null;
   price: number;
+  compareAtPrice: number | null;
   stock: number;
   featured: boolean;
+  badge: string | null;
+  seoTitle: string | null;
+  seoDescription: string | null;
+  benefits: unknown;
   categoryId: string;
   sizeGuideEnabled: boolean;
   sizeGuideTitle: string | null;
@@ -61,7 +73,11 @@ export default async function EditProductPage({
 
   const { id } = await params;
 
-  const [categories, tags, product] = await Promise.all([
+  const [categories, tags, product]: [
+    Category[],
+    Tag[],
+    ProductWithRelations | null,
+  ] = await Promise.all([
     prisma.category.findMany({
       orderBy: { name: "asc" },
     }),
@@ -111,9 +127,17 @@ export default async function EditProductPage({
               name: product.name,
               slug: product.slug,
               description: product.description,
+              shortDescription: product.shortDescription,
               price: product.price,
+              compareAtPrice: product.compareAtPrice,
               stock: product.stock,
               featured: product.featured,
+              badge: product.badge,
+              seoTitle: product.seoTitle,
+              seoDescription: product.seoDescription,
+              benefits: Array.isArray(product.benefits)
+                ? product.benefits.map((item) => String(item))
+                : [],
               categoryId: product.categoryId,
               sizeGuideEnabled: product.sizeGuideEnabled,
               sizeGuideTitle: product.sizeGuideTitle,

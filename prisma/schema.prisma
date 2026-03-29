@@ -24,6 +24,14 @@ model Product {
   stock       Int     @default(0)
   featured    Boolean @default(false)
 
+  shortDescription String?
+  compareAtPrice   Int?
+  badge            String?
+
+  seoTitle       String?
+  seoDescription String?
+  benefits       Json?
+
   categoryId       String
   category         Category @relation(fields: [categoryId], references: [id])
   sizeGuideEnabled Boolean  @default(false)
