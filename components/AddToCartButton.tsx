@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/app/store/cart-store";
 
@@ -15,6 +14,8 @@ type AddToCartButtonProps = {
   variantName?: string | null;
   variantOptions?: { name: string; value: string }[];
   disabled?: boolean;
+  label?: string;
+  onSuccess?: () => void;
 };
 
 export default function AddToCartButton({
@@ -28,16 +29,16 @@ export default function AddToCartButton({
   variantName,
   variantOptions,
   disabled = false,
+  label = "Add to cart",
+  onSuccess,
 }: AddToCartButtonProps) {
   const addItem = useCartStore((state) => state.addItem);
   const router = useRouter();
 
-  const [added, setAdded] = useState(false);
-
   const handleClick = () => {
     if (disabled) return;
 
-    if (added) {
+    if (label === "Continue to cart") {
       router.push("/cart");
       return;
     }
@@ -54,7 +55,7 @@ export default function AddToCartButton({
       variantOptions,
     });
 
-    setAdded(true);
+    onSuccess?.();
   };
 
   return (
@@ -64,7 +65,7 @@ export default function AddToCartButton({
       disabled={disabled}
       className="inline-flex items-center justify-center border border-black bg-black px-7 py-4 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black disabled:cursor-not-allowed disabled:opacity-40"
     >
-      {added ? "Continue to cart" : "Add to cart"}
+      {label}
     </button>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import AddToCartButton from "@/components/AddToCartButton";
 
@@ -71,6 +71,13 @@ export default function ProductDetailsClient({
   onColorChange,
 }: ProductDetailsClientProps) {
   const hasVariants = product.variants.length > 0;
+  const optionsRef = useRef<HTMLDivElement | null>(null);
+
+  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
+  const [showFullDescription, setShowFullDescription] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+  const [hasAddedToCart, setHasAddedToCart] = useState(false);
 
   const groupedOptions = useMemo(() => {
     if (!hasVariants) return [];
@@ -92,11 +99,6 @@ export default function ProductDetailsClient({
       values,
     }));
   }, [hasVariants, product.variants]);
-
-  const [selectedOptions, setSelectedOptions] = useState<SelectedOptions>({});
-  const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showDetails, setShowDetails] = useState(false);
-  const [showSizeGuide, setShowSizeGuide] = useState(false);
 
   const paragraphs = product.description.split(/\n+/).filter(Boolean);
 
@@ -155,9 +157,47 @@ export default function ProductDetailsClient({
   const isSelectedVariantOutOfStock =
     hasVariants && selectedVariant ? selectedVariant.stock <= 0 : false;
 
-  const isAddToCartDisabled =
-    (hasVariants && (!isExactSelectionComplete || !selectedVariant)) ||
-    isSelectedVariantOutOfStock;
+  const isSimpleProductOutOfStock = !hasVariants && product.stock <= 0;
+
+  const needsOptionSelection =
+    hasVariants && (!isExactSelectionComplete || !selectedVariant);
+
+  const isOutOfStock = hasVariants
+    ? isSelectedVariantOutOfStock
+    : isSimpleProductOutOfStock;
+
+  const isAddToCartDisabled = needsOptionSelection || isOutOfStock;
+
+  useEffect(() => {
+    setHasAddedToCart(false);
+  }, [product.id, selectedVariantId, selectedVariant?.id]);
+
+  const handleScrollToOptions = () => {
+    if (!optionsRef.current) return;
+
+    const yOffset = -80; // juster denne (header høyde etc)
+    const y =
+      optionsRef.current.getBoundingClientRect().top +
+      window.pageYOffset +
+      yOffset;
+
+    window.scrollTo({ top: y, behavior: "smooth" });
+  };
+
+  const desktopButtonLabel =
+    hasAddedToCart && !needsOptionSelection && !isOutOfStock
+      ? "Continue to cart"
+      : "Add to cart";
+
+  const mobileButtonLabel = needsOptionSelection
+    ? "Choose options"
+    : hasAddedToCart && !isOutOfStock
+      ? "Continue to cart"
+      : "Add to cart";
+
+  const handleAddToCartSuccess = () => {
+    setHasAddedToCart(true);
+  };
 
   return (
     <>
@@ -221,7 +261,10 @@ export default function ProductDetailsClient({
           </div>
 
           {hasVariants ? (
-            <div className="border-t border-black/10 pt-5 sm:pt-6 mt-5 sm:mt-6">
+            <div
+              ref={optionsRef}
+              className="mt-5 border-t border-black/10 pt-5 sm:mt-6 sm:pt-6"
+            >
               <div className="space-y-5 sm:space-y-6">
                 {groupedOptions.map((group) => (
                   <div key={group.name}>
@@ -260,6 +303,7 @@ export default function ProductDetailsClient({
                               };
 
                               setSelectedOptions(updatedOptions);
+                              setHasAddedToCart(false);
 
                               if (isColorOption(group.name)) {
                                 onColorChange(value);
@@ -335,7 +379,7 @@ export default function ProductDetailsClient({
             </div>
           ) : null}
 
-          <div className="border-t border-black/10 pt-5 sm:pt-6 mt-5 sm:mt-6">
+          <div className="mt-5 border-t border-black/10 pt-5 sm:mt-6 sm:pt-6">
             <div className="flex flex-col gap-3">
               <AddToCartButton
                 productId={product.id}
@@ -348,6 +392,8 @@ export default function ProductDetailsClient({
                 imageUrl={product.imageUrl}
                 categoryName={product.categoryName}
                 disabled={isAddToCartDisabled}
+                label={desktopButtonLabel}
+                onSuccess={handleAddToCartSuccess}
               />
 
               <p className="text-[10px] uppercase tracking-[0.18em] text-black/55">
@@ -444,18 +490,30 @@ export default function ProductDetailsClient({
           </div>
 
           <div className="w-[180px] shrink-0">
-            <AddToCartButton
-              productId={product.id}
-              variantId={selectedVariant?.id ?? null}
-              variantName={selectedVariant?.name ?? null}
-              variantOptions={selectedVariant?.options ?? []}
-              slug={product.slug}
-              name={product.name}
-              price={displayPrice}
-              imageUrl={product.imageUrl}
-              categoryName={product.categoryName}
-              disabled={isAddToCartDisabled}
-            />
+            {needsOptionSelection ? (
+              <button
+                type="button"
+                onClick={handleScrollToOptions}
+                className="flex min-h-[48px] w-full items-center justify-center bg-black px-6 py-3.5 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:opacity-90"
+              >
+                {mobileButtonLabel}
+              </button>
+            ) : (
+              <AddToCartButton
+                productId={product.id}
+                variantId={selectedVariant?.id ?? null}
+                variantName={selectedVariant?.name ?? null}
+                variantOptions={selectedVariant?.options ?? []}
+                slug={product.slug}
+                name={product.name}
+                price={displayPrice}
+                imageUrl={product.imageUrl}
+                categoryName={product.categoryName}
+                disabled={isOutOfStock}
+                label={mobileButtonLabel}
+                onSuccess={handleAddToCartSuccess}
+              />
+            )}
           </div>
         </div>
       </div>
