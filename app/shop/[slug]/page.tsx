@@ -156,6 +156,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
           createdAt: "asc",
         },
       },
+      reviews: {
+        orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
+      },
     },
   });
 
@@ -255,7 +258,6 @@ export default async function ProductPage({ params }: ProductPageProps) {
     .map(({ score, ...rest }) => rest);
 
   const productUrl = `https://petsaco.com/shop/${product.slug}`;
-  const imageUrl = product.images[0]?.url || "/placeholder.jpg";
   const hasVariantInStock = product.variants.some(
     (variant) => variant.stock > 0,
   );
@@ -285,6 +287,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
       availability,
       itemCondition: "https://schema.org/NewCondition",
     },
+    aggregateRating:
+      product.reviews.length > 0
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: (
+              product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+              product.reviews.length
+            ).toFixed(1),
+            reviewCount: product.reviews.length,
+          }
+        : undefined,
   };
 
   return (
@@ -297,7 +310,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
         <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-20 sm:px-6 sm:pb-20 sm:pt-24 lg:px-12 lg:pt-28">
           <section className="border-b border-black/10 pb-6 lg:hidden">
-            <div className="grid gap-5 mt-3 sm:mt-0">
+            <div className="mt-3 grid gap-5 sm:mt-0">
               <div>
                 <p className="text-[10px] uppercase tracking-[0.24em] text-black/45">
                   {product.category.name}
@@ -468,6 +481,20 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     name: option.name,
                     value: option.value,
                   })),
+                })),
+                reviews: product.reviews.map((review) => ({
+                  id: review.id,
+                  authorName: review.authorName,
+                  authorCountry: review.authorCountry,
+                  rating: review.rating,
+                  title: review.title,
+                  content: review.content,
+                  imageUrl: review.imageUrl,
+                  verified: review.verified,
+                  source: review.source,
+                  reviewDate: review.reviewDate
+                    ? review.reviewDate.toISOString()
+                    : null,
                 })),
               }}
             />

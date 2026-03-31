@@ -32,6 +32,8 @@ model Product {
   seoDescription String?
   benefits       Json?
 
+  reviews ProductReview[]
+
   categoryId       String
   category         Category @relation(fields: [categoryId], references: [id])
   sizeGuideEnabled Boolean  @default(false)
@@ -140,4 +142,24 @@ model ContactMessage {
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+}
+
+model ProductReview {
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  authorName    String
+  authorCountry String?
+  rating        Int
+  title         String?
+  content       String
+  imageUrl      String?
+  verified      Boolean   @default(false)
+  source        String?
+  reviewDate    DateTime?
+  sortOrder     Int       @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

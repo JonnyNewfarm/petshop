@@ -25,6 +25,19 @@ type ProductVariant = {
   options: ProductOption[];
 };
 
+type ProductReview = {
+  id: string;
+  authorName: string;
+  authorCountry: string | null;
+  rating: number;
+  title: string | null;
+  content: string;
+  imageUrl: string | null;
+  verified: boolean;
+  source: string | null;
+  reviewDate: string | null;
+};
+
 type ProductViewClientProps = {
   product: {
     id: string;
@@ -43,7 +56,9 @@ type ProductViewClientProps = {
     sizeGuideContent: string | null;
     images: ProductImage[];
     variants: ProductVariant[];
+    reviews: ProductReview[];
   };
+  onReviewsModalChange?: (open: boolean) => void;
 };
 
 function normalize(value: string) {
@@ -116,6 +131,7 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
             sizeGuideTitle: product.sizeGuideTitle,
             sizeGuideContent: product.sizeGuideContent,
             variants: product.variants,
+            reviews: product.reviews,
           }}
           selectedVariantId={selectedVariantId}
           onVariantChange={handleVariantChange}

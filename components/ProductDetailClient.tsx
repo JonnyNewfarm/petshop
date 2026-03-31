@@ -3,6 +3,8 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { formatPrice } from "@/lib/format";
 import AddToCartButton from "@/components/AddToCartButton";
+import { useSmoothScroller } from "@/components/SmoothScroll";
+import { AnimatePresence, motion } from "framer-motion";
 
 type VariantOption = {
   id: string;
@@ -16,6 +18,19 @@ type Variant = {
   price: number | null;
   stock: number;
   options: VariantOption[];
+};
+
+type ProductReview = {
+  id: string;
+  authorName: string;
+  authorCountry: string | null;
+  rating: number;
+  title: string | null;
+  content: string;
+  imageUrl: string | null;
+  verified: boolean;
+  source: string | null;
+  reviewDate: string | null;
 };
 
 type ProductDetailsClientProps = {
@@ -36,6 +51,7 @@ type ProductDetailsClientProps = {
     sizeGuideTitle: string | null;
     sizeGuideContent: string | null;
     variants: Variant[];
+    reviews: ProductReview[];
   };
   selectedVariantId: string | null;
   onVariantChange: (variantId: string | null) => void;
@@ -64,6 +80,24 @@ function variantMatchesOptions(
   );
 }
 
+function renderStars(rating: number) {
+  const safeRating = Math.max(0, Math.min(5, rating));
+  return "★".repeat(safeRating) + "☆".repeat(5 - safeRating);
+}
+
+function formatReviewDate(dateString: string | null) {
+  if (!dateString) return null;
+
+  const date = new Date(dateString);
+  if (Number.isNaN(date.getTime())) return null;
+
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  }).format(date);
+}
+
 export default function ProductDetailsClient({
   product,
   selectedVariantId,
@@ -78,6 +112,13 @@ export default function ProductDetailsClient({
   const [showDetails, setShowDetails] = useState(false);
   const [showSizeGuide, setShowSizeGuide] = useState(false);
   const [hasAddedToCart, setHasAddedToCart] = useState(false);
+  const { stop, start } = useSmoothScroller();
+
+  const [showReviewsModal, setShowReviewsModal] = useState(false);
+  const [selectedReviewImage, setSelectedReviewImage] = useState<{
+    url: string;
+    alt: string;
+  } | null>(null);
 
   const groupedOptions = useMemo(() => {
     if (!hasVariants) return [];
@@ -168,14 +209,52 @@ export default function ProductDetailsClient({
 
   const isAddToCartDisabled = needsOptionSelection || isOutOfStock;
 
+  const reviewCount = product.reviews.length;
+
+  const averageRating =
+    reviewCount > 0
+      ? (
+          product.reviews.reduce((sum, review) => sum + review.rating, 0) /
+          reviewCount
+        ).toFixed(1)
+      : null;
+
+  const featuredReview = product.reviews[0] ?? null;
+
   useEffect(() => {
     setHasAddedToCart(false);
   }, [product.id, selectedVariantId, selectedVariant?.id]);
 
+  useEffect(() => {
+    setShowReviewsModal(false);
+    setSelectedReviewImage(null);
+  }, [product.id]);
+
+  useEffect(() => {
+    const isLocked = showReviewsModal || !!selectedReviewImage;
+
+    const previousHtmlOverflow = document.documentElement.style.overflow;
+    const previousBodyOverflow = document.body.style.overflow;
+
+    if (isLocked) {
+      stop();
+      document.documentElement.style.overflow = "hidden";
+      document.body.style.overflow = "hidden";
+    } else {
+      start();
+    }
+
+    return () => {
+      document.documentElement.style.overflow = previousHtmlOverflow;
+      document.body.style.overflow = previousBodyOverflow;
+      start();
+    };
+  }, [showReviewsModal, selectedReviewImage, stop, start]);
+
   const handleScrollToOptions = () => {
     if (!optionsRef.current) return;
 
-    const yOffset = -80; // juster denne (header høyde etc)
+    const yOffset = -80;
     const y =
       optionsRef.current.getBoundingClientRect().top +
       window.pageYOffset +
@@ -220,6 +299,20 @@ export default function ProductDetailsClient({
                 <p className="mt-3 max-w-[52ch] text-[14px] leading-6 text-black/62 sm:text-[15px] sm:leading-7">
                   {product.shortDescription}
                 </p>
+              ) : null}
+
+              {reviewCount > 0 && averageRating ? (
+                <div className="mt-4 flex flex-wrap items-center gap-3">
+                  <p className="text-sm tracking-[0.02em] text-black/80">
+                    <span className="mr-2">
+                      {renderStars(Math.round(Number(averageRating)))}
+                    </span>
+                    {averageRating} / 5
+                  </p>
+                  <p className="text-[11px] uppercase tracking-[0.16em] text-black/45">
+                    {reviewCount} review{reviewCount === 1 ? "" : "s"}
+                  </p>
+                </div>
               ) : null}
             </div>
 
@@ -469,6 +562,101 @@ export default function ProductDetailsClient({
             ) : null}
           </div>
         ) : null}
+
+        {product.reviews.length > 0 ? (
+          <div className="border-t border-black/10">
+            <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
+                    Reviews
+                  </p>
+                  {averageRating ? (
+                    <div className="mt-2">
+                      <p className="text-lg tracking-[-0.03em] text-black">
+                        {averageRating} / 5
+                      </p>
+                      <p className="mt-1 text-sm text-black/65">
+                        {renderStars(Math.round(Number(averageRating)))} ·{" "}
+                        {reviewCount} review{reviewCount === 1 ? "" : "s"}
+                      </p>
+                    </div>
+                  ) : null}
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setShowReviewsModal(true)}
+                  className="inline-flex min-h-[44px] items-center justify-center border border-black/15 px-4 py-2.5 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black hover:bg-black hover:text-[#f6f1e8]"
+                >
+                  See all reviews
+                </button>
+              </div>
+
+              {featuredReview ? (
+                <button
+                  type="button"
+                  onClick={() => setShowReviewsModal(true)}
+                  className="mt-6 block w-full text-left"
+                >
+                  <article className="border border-black/10 bg-[#f3efe8] p-4 transition hover:border-black/20 sm:p-5">
+                    <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-sm text-black">
+                          {renderStars(featuredReview.rating)}
+                        </p>
+
+                        <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                          <p className="text-[11px] uppercase tracking-[0.16em] text-black/75">
+                            {featuredReview.authorName}
+                            {featuredReview.authorCountry
+                              ? ` · ${featuredReview.authorCountry}`
+                              : ""}
+                          </p>
+
+                          {featuredReview.verified ? (
+                            <p className="text-[10px] uppercase tracking-[0.16em] text-black/45">
+                              Verified
+                            </p>
+                          ) : null}
+                        </div>
+
+                        {featuredReview.title ? (
+                          <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
+                            {featuredReview.title}
+                          </h3>
+                        ) : null}
+
+                        <p className="mt-3 line-clamp-4 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
+                          {featuredReview.content}
+                        </p>
+
+                        <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-black/45">
+                          Tap to view all reviews
+                        </p>
+                      </div>
+
+                      {featuredReview.imageUrl ? (
+                        <div className="w-full shrink-0 sm:w-[140px]">
+                          <div className="flex h-[140px] w-full items-center justify-center overflow-hidden border border-black/10 bg-[#ebe6de]">
+                            <img
+                              src={featuredReview.imageUrl}
+                              alt={
+                                featuredReview.title ||
+                                featuredReview.authorName
+                              }
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  </article>
+                </button>
+              ) : null}
+            </div>
+          </div>
+        ) : null}
       </div>
 
       <div className="fixed inset-x-0 bottom-0 z-50 border-t border-black/10 bg-[#f6f1e8]/95 px-4 py-3 backdrop-blur lg:hidden">
@@ -517,6 +705,177 @@ export default function ProductDetailsClient({
           </div>
         </div>
       </div>
+
+      <AnimatePresence>
+        {showReviewsModal ? (
+          <motion.div
+            className="fixed inset-0 z-[100] bg-black/70"
+            onClick={() => setShowReviewsModal(false)}
+            role="dialog"
+            aria-modal="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.22, ease: "easeOut" }}
+          >
+            <div className="flex h-dvh w-full items-end justify-center sm:items-center sm:p-6">
+              <motion.div
+                className="flex h-[92dvh] w-full max-w-5xl flex-col overflow-hidden bg-[#f6f1e8] sm:h-[88dvh] sm:border sm:border-black/10"
+                onClick={(event) => event.stopPropagation()}
+                initial={{ y: 40, opacity: 0, scale: 0.985 }}
+                animate={{ y: 0, opacity: 1, scale: 1 }}
+                exit={{ y: 24, opacity: 0, scale: 0.985 }}
+                transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+              >
+                <div className="shrink-0 border-b border-black/10 px-4 py-4 sm:px-6">
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <p className="text-[10px] uppercase tracking-[0.22em] text-black/45">
+                        Customer reviews
+                      </p>
+                      {averageRating ? (
+                        <p className="mt-2 text-sm text-black/75">
+                          {renderStars(Math.round(Number(averageRating)))}{" "}
+                          {averageRating} · {reviewCount} review
+                          {reviewCount === 1 ? "" : "s"}
+                        </p>
+                      ) : null}
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setShowReviewsModal(false)}
+                      className="text-[11px] uppercase tracking-[0.18em] text-black/60 transition hover:text-black"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  data-modal-scroll
+                  className="min-h-0 flex-1 overflow-y-auto overscroll-y-contain touch-pan-y px-4 py-4 sm:px-6 sm:py-6"
+                >
+                  <div className="grid gap-4">
+                    {product.reviews.map((review) => {
+                      const formattedDate = formatReviewDate(review.reviewDate);
+
+                      return (
+                        <article
+                          key={review.id}
+                          className="border border-black/10 bg-[#f3efe8] p-4 sm:p-5"
+                        >
+                          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm text-black">
+                                {renderStars(review.rating)}
+                              </p>
+
+                              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1">
+                                <p className="text-[11px] uppercase tracking-[0.16em] text-black/75">
+                                  {review.authorName}
+                                  {review.authorCountry
+                                    ? ` · ${review.authorCountry}`
+                                    : ""}
+                                </p>
+
+                                {review.verified ? (
+                                  <p className="text-[10px] uppercase tracking-[0.16em] text-black/45">
+                                    Verified
+                                  </p>
+                                ) : null}
+
+                                {review.source ? (
+                                  <p className="text-[10px] uppercase tracking-[0.16em] text-black/35">
+                                    {review.source}
+                                  </p>
+                                ) : null}
+
+                                {formattedDate ? (
+                                  <p className="text-[10px] uppercase tracking-[0.16em] text-black/35">
+                                    {formattedDate}
+                                  </p>
+                                ) : null}
+                              </div>
+
+                              {review.title ? (
+                                <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
+                                  {review.title}
+                                </h3>
+                              ) : null}
+
+                              <p className="mt-3 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
+                                {review.content}
+                              </p>
+                            </div>
+
+                            {review.imageUrl ? (
+                              <div className="w-full shrink-0 sm:w-[160px]">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setSelectedReviewImage({
+                                      url: review.imageUrl as string,
+                                      alt: review.title || review.authorName,
+                                    })
+                                  }
+                                  className="group block w-full text-left"
+                                  aria-label={`Open review image from ${review.authorName}`}
+                                >
+                                  <div className="flex h-[160px] w-full items-center justify-center overflow-hidden border border-black/10 bg-[#ebe6de]">
+                                    <img
+                                      src={review.imageUrl}
+                                      alt={review.title || review.authorName}
+                                      className="h-full w-full object-cover transition duration-200 group-hover:scale-[1.02]"
+                                    />
+                                  </div>
+                                  <span className="mt-2 inline-block text-[10px] uppercase tracking-[0.16em] text-black/45">
+                                    View full size
+                                  </span>
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {selectedReviewImage ? (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setSelectedReviewImage(null)}
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="relative w-full max-w-5xl"
+            onClick={(event) => event.stopPropagation()}
+          >
+            <button
+              type="button"
+              onClick={() => setSelectedReviewImage(null)}
+              className="absolute right-0 top-[-44px] text-[11px] uppercase tracking-[0.18em] text-white/80 transition hover:text-white"
+            >
+              Close
+            </button>
+
+            <div className="flex max-h-[85vh] min-h-[280px] w-full items-center justify-center bg-[#f3efe8] p-3 sm:p-5">
+              <img
+                src={selectedReviewImage.url}
+                alt={selectedReviewImage.alt}
+                className="max-h-[80vh] w-auto max-w-full object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      ) : null}
     </>
   );
 }

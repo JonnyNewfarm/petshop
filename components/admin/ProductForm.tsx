@@ -32,6 +32,20 @@ type OptionGroup = {
   values: string[];
 };
 
+type EditableReview = {
+  id: string;
+  authorName: string;
+  authorCountry: string;
+  rating: number;
+  title: string;
+  content: string;
+  imageUrl: string;
+  verified: boolean;
+  source: string;
+  reviewDate: string;
+  sortOrder: number;
+};
+
 type ProductFormInitialData = {
   id: string;
   name: string;
@@ -61,6 +75,18 @@ type ProductFormInitialData = {
       name: string;
       value: string;
     }[];
+  }[];
+  reviews?: {
+    authorName: string;
+    authorCountry: string | null;
+    rating: number;
+    title: string | null;
+    content: string;
+    imageUrl: string | null;
+    verified: boolean;
+    source: string | null;
+    reviewDate?: string | null;
+    sortOrder?: number;
   }[];
   tags: {
     id: string;
@@ -131,6 +157,22 @@ function buildOptionGroupsFromVariants(
   }));
 }
 
+function createEmptyReview(index: number): EditableReview {
+  return {
+    id: `review-${Date.now()}-${index}`,
+    authorName: "",
+    authorCountry: "",
+    rating: 5,
+    title: "",
+    content: "",
+    imageUrl: "",
+    verified: false,
+    source: "online reviews",
+    reviewDate: "",
+    sortOrder: index,
+  };
+}
+
 export default function ProductForm({
   categories,
   tags,
@@ -178,6 +220,24 @@ export default function ProductForm({
           price: variant.price ?? "",
           stock: variant.stock > 0 ? 1 : 0,
           options: variant.options,
+        }))
+      : [],
+  );
+
+  const [reviews, setReviews] = useState<EditableReview[]>(
+    initialData?.reviews?.length
+      ? initialData.reviews.map((review, index) => ({
+          id: `review-${index}`,
+          authorName: review.authorName,
+          authorCountry: review.authorCountry ?? "",
+          rating: review.rating,
+          title: review.title ?? "",
+          content: review.content,
+          imageUrl: review.imageUrl ?? "",
+          verified: review.verified,
+          source: review.source ?? "online reviews",
+          reviewDate: review.reviewDate ? review.reviewDate.slice(0, 10) : "",
+          sortOrder: review.sortOrder ?? index,
         }))
       : [],
   );
@@ -306,6 +366,33 @@ export default function ProductForm({
     );
   };
 
+  const addReview = () => {
+    setReviews((prev) => [...prev, createEmptyReview(prev.length)]);
+  };
+
+  const removeReview = (reviewId: string) => {
+    setReviews((prev) =>
+      prev
+        .filter((review) => review.id !== reviewId)
+        .map((review, index) => ({
+          ...review,
+          sortOrder: index,
+        })),
+    );
+  };
+
+  const updateReview = <K extends keyof EditableReview>(
+    reviewId: string,
+    field: K,
+    value: EditableReview[K],
+  ) => {
+    setReviews((prev) =>
+      prev.map((review) =>
+        review.id === reviewId ? { ...review, [field]: value } : review,
+      ),
+    );
+  };
+
   const serializedImageUrls = useMemo(() => {
     return images
       .map((url) => url.trim())
@@ -337,6 +424,27 @@ export default function ProductForm({
     return (initialData?.benefits ?? []).join("\n");
   }, [initialData?.benefits]);
 
+  const serializedReviews = useMemo(() => {
+    const cleanedReviews = reviews
+      .map((review, index) => ({
+        authorName: review.authorName.trim(),
+        authorCountry: review.authorCountry.trim() || null,
+        rating: Math.max(1, Math.min(5, Number(review.rating) || 5)),
+        title: review.title.trim() || null,
+        content: review.content.trim(),
+        imageUrl: review.imageUrl.trim() || null,
+        verified: review.verified,
+        source: review.source.trim() || null,
+        reviewDate: review.reviewDate
+          ? new Date(`${review.reviewDate}T00:00:00.000Z`).toISOString()
+          : null,
+        sortOrder: index,
+      }))
+      .filter((review) => review.authorName && review.content);
+
+    return cleanedReviews.length ? JSON.stringify(cleanedReviews) : "";
+  }, [reviews]);
+
   return (
     <form action={formAction} className="space-y-10">
       {isEdit ? (
@@ -345,6 +453,7 @@ export default function ProductForm({
 
       <input type="hidden" name="imageUrls" value={serializedImageUrls} />
       <input type="hidden" name="variantsJson" value={serializedVariants} />
+      <input type="hidden" name="reviewsJson" value={serializedReviews} />
 
       <div className="grid gap-10 lg:grid-cols-[1.1fr_0.9fr]">
         <div className="space-y-10">
@@ -461,6 +570,211 @@ Designed for modern pet homes`}
                 />
               </div>
             </div>
+          </section>
+
+          <section className="border border-black/10 bg-white p-6">
+            <div className="mb-6 flex items-center justify-between gap-4">
+              <div>
+                <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+                  Social proof
+                </p>
+                <h2 className="mt-2 text-2xl font-medium">Reviews</h2>
+              </div>
+
+              <button
+                type="button"
+                onClick={addReview}
+                className="border border-black bg-black px-5 py-3 text-sm uppercase tracking-[0.14em] text-[#f6f1e8]"
+              >
+                Add review
+              </button>
+            </div>
+
+            {reviews.length === 0 ? (
+              <p className="text-sm text-black/55">No reviews added yet.</p>
+            ) : (
+              <div className="space-y-5">
+                {reviews.map((review, index) => (
+                  <div
+                    key={review.id}
+                    className="space-y-5 border border-black/10 bg-[#f6f1e8] p-5"
+                  >
+                    <div className="flex items-center justify-between gap-4">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-[0.18em] text-black/45">
+                          Review {index + 1}
+                        </p>
+                        <p className="mt-1 text-sm text-black/60">
+                          {review.authorName || "Unnamed review"}
+                        </p>
+                      </div>
+
+                      <button
+                        type="button"
+                        onClick={() => removeReview(review.id)}
+                        className="border border-black/10 px-4 py-3 text-sm uppercase tracking-[0.14em]"
+                      >
+                        Remove
+                      </button>
+                    </div>
+
+                    <div className="grid gap-5 sm:grid-cols-2">
+                      <div className="space-y-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Name
+                        </label>
+                        <input
+                          value={review.authorName}
+                          onChange={(e) =>
+                            updateReview(
+                              review.id,
+                              "authorName",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="Emma"
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Country
+                        </label>
+                        <input
+                          value={review.authorCountry}
+                          onChange={(e) =>
+                            updateReview(
+                              review.id,
+                              "authorCountry",
+                              e.target.value,
+                            )
+                          }
+                          placeholder="US"
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Rating
+                        </label>
+                        <select
+                          value={review.rating}
+                          onChange={(e) =>
+                            updateReview(
+                              review.id,
+                              "rating",
+                              Number(e.target.value),
+                            )
+                          }
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        >
+                          <option value={5}>5 stars</option>
+                          <option value={4}>4 stars</option>
+                          <option value={3}>3 stars</option>
+                          <option value={2}>2 stars</option>
+                          <option value={1}>1 star</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Date
+                        </label>
+                        <input
+                          type="date"
+                          value={review.reviewDate}
+                          onChange={(e) =>
+                            updateReview(
+                              review.id,
+                              "reviewDate",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Title
+                        </label>
+                        <input
+                          value={review.title}
+                          onChange={(e) =>
+                            updateReview(review.id, "title", e.target.value)
+                          }
+                          placeholder="Easy to use"
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Content
+                        </label>
+                        <textarea
+                          rows={5}
+                          value={review.content}
+                          onChange={(e) =>
+                            updateReview(review.id, "content", e.target.value)
+                          }
+                          placeholder="Makes bath time much easier and less messy."
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2 sm:col-span-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Image URL
+                        </label>
+                        <input
+                          value={review.imageUrl}
+                          onChange={(e) =>
+                            updateReview(review.id, "imageUrl", e.target.value)
+                          }
+                          placeholder="https://..."
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-sm uppercase tracking-[0.14em]">
+                          Source
+                        </label>
+                        <input
+                          value={review.source}
+                          onChange={(e) =>
+                            updateReview(review.id, "source", e.target.value)
+                          }
+                          placeholder="online reviews"
+                          className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                        />
+                      </div>
+
+                      <div className="flex items-end">
+                        <label className="flex min-h-[56px] w-full items-center gap-3 border border-black/10 bg-white px-4 py-4 text-sm uppercase tracking-[0.14em]">
+                          <input
+                            type="checkbox"
+                            checked={review.verified}
+                            onChange={(e) =>
+                              updateReview(
+                                review.id,
+                                "verified",
+                                e.target.checked,
+                              )
+                            }
+                            className="h-4 w-4"
+                          />
+                          Verified
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </section>
 
           <section className="border border-black/10 bg-white p-6">

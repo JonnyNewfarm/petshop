@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
 import { Prisma } from "@prisma/client";
+
 type ProductActionState = {
   error?: string;
   success?: boolean;
@@ -14,6 +15,19 @@ type ParsedVariant = {
   price?: number | null;
   stock?: number;
   options?: { name: string; value: string }[];
+};
+
+type ParsedReview = {
+  authorName: string;
+  authorCountry?: string | null;
+  rating: number;
+  title?: string | null;
+  content: string;
+  imageUrl?: string | null;
+  verified?: boolean;
+  source?: string | null;
+  reviewDate?: string | null;
+  sortOrder?: number;
 };
 
 function parseImageUrls(raw: string) {
@@ -48,6 +62,31 @@ function parseVariants(raw: string): ParsedVariant[] {
       value: option.value,
     })),
   }));
+}
+
+function parseReviews(raw: string): ParsedReview[] {
+  if (!raw.trim()) return [];
+
+  const parsed = JSON.parse(raw) as ParsedReview[];
+
+  return parsed
+    .map((review, index) => ({
+      authorName: String(review.authorName || "").trim(),
+      authorCountry: review.authorCountry
+        ? String(review.authorCountry).trim()
+        : null,
+      rating: Math.max(1, Math.min(5, Number(review.rating) || 5)),
+      title: review.title ? String(review.title).trim() : null,
+      content: String(review.content || "").trim(),
+      imageUrl: review.imageUrl ? String(review.imageUrl).trim() : null,
+      verified: Boolean(review.verified),
+      source: review.source ? String(review.source).trim() : null,
+      reviewDate: review.reviewDate ? String(review.reviewDate).trim() : null,
+      sortOrder: Number.isFinite(Number(review.sortOrder))
+        ? Number(review.sortOrder)
+        : index,
+    }))
+    .filter((review) => review.authorName && review.content);
 }
 
 async function requireAdmin() {
@@ -93,6 +132,7 @@ export async function createProduct(
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
+    const reviewsRaw = String(formData.get("reviewsJson") || "");
 
     if (!name || !slug || !description || !categoryId) {
       return { error: "Please fill in all required fields." };
@@ -105,6 +145,13 @@ export async function createProduct(
       parsedVariants = parseVariants(variantsRaw);
     } catch {
       return { error: "Variants data is invalid." };
+    }
+
+    let parsedReviews: ParsedReview[] = [];
+    try {
+      parsedReviews = parseReviews(reviewsRaw);
+    } catch {
+      return { error: "Reviews data is invalid." };
     }
 
     await prisma.product.create({
@@ -121,7 +168,8 @@ export async function createProduct(
         badge: badge || null,
         seoTitle: seoTitle || null,
         seoDescription: seoDescription || null,
-benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
+        benefits: benefits.length ? benefits : Prisma.JsonNull,
+        categoryId,
         sizeGuideEnabled,
         sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
         sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
@@ -146,6 +194,20 @@ benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
                 value: option.value,
               })),
             },
+          })),
+        },
+        reviews: {
+          create: parsedReviews.map((review) => ({
+            authorName: review.authorName,
+            authorCountry: review.authorCountry || null,
+            rating: review.rating,
+            title: review.title || null,
+            content: review.content,
+            imageUrl: review.imageUrl || null,
+            verified: review.verified ?? false,
+            source: review.source || null,
+            reviewDate: review.reviewDate ? new Date(review.reviewDate) : null,
+            sortOrder: review.sortOrder ?? 0,
           })),
         },
       },
@@ -196,6 +258,7 @@ export async function updateProduct(
 
     const imageUrlsRaw = String(formData.get("imageUrls") || "");
     const variantsRaw = String(formData.get("variantsJson") || "");
+    const reviewsRaw = String(formData.get("reviewsJson") || "");
 
     if (!productId || !name || !slug || !description || !categoryId) {
       return { error: "Please fill in all required fields." };
@@ -208,6 +271,13 @@ export async function updateProduct(
       parsedVariants = parseVariants(variantsRaw);
     } catch {
       return { error: "Variants data is invalid." };
+    }
+
+    let parsedReviews: ParsedReview[] = [];
+    try {
+      parsedReviews = parseReviews(reviewsRaw);
+    } catch {
+      return { error: "Reviews data is invalid." };
     }
 
     await prisma.product.update({
@@ -227,7 +297,8 @@ export async function updateProduct(
         badge: badge || null,
         seoTitle: seoTitle || null,
         seoDescription: seoDescription || null,
-benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
+        benefits: benefits.length ? benefits : Prisma.JsonNull,
+        categoryId,
         sizeGuideEnabled,
         sizeGuideTitle: sizeGuideEnabled ? sizeGuideTitle || "Size guide" : null,
         sizeGuideContent: sizeGuideEnabled ? sizeGuideContent || null : null,
@@ -256,6 +327,21 @@ benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
             },
           })),
         },
+        reviews: {
+          deleteMany: {},
+          create: parsedReviews.map((review) => ({
+            authorName: review.authorName,
+            authorCountry: review.authorCountry || null,
+            rating: review.rating,
+            title: review.title || null,
+            content: review.content,
+            imageUrl: review.imageUrl || null,
+            verified: review.verified ?? false,
+            source: review.source || null,
+            reviewDate: review.reviewDate ? new Date(review.reviewDate) : null,
+            sortOrder: review.sortOrder ?? 0,
+          })),
+        },
       },
     });
 
@@ -264,7 +350,7 @@ benefits: benefits.length ? benefits : Prisma.JsonNull,        categoryId,
     revalidatePath(`/admin/products/${productId}/edit`);
     revalidatePath("/shop");
     revalidatePath(`/shop/${slug}`);
-    revalidatePath(`/shop/${slug}`);
+    revalidatePath(`/product/${slug}`);
 
     return { success: true };
   } catch (error) {
@@ -286,6 +372,12 @@ export async function deleteProduct(productId: string) {
     });
 
     await tx.productVariant.deleteMany({
+      where: {
+        productId,
+      },
+    });
+
+    await tx.productReview.deleteMany({
       where: {
         productId,
       },

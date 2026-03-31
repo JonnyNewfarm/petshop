@@ -37,6 +37,19 @@ type ProductVariant = {
   options: ProductOption[];
 };
 
+type ProductReview = {
+  authorName: string;
+  authorCountry: string | null;
+  rating: number;
+  title: string | null;
+  content: string;
+  imageUrl: string | null;
+  verified: boolean;
+  source: string | null;
+  reviewDate: Date | null;
+  sortOrder: number;
+};
+
 type ProductWithRelations = {
   id: string;
   name: string;
@@ -57,6 +70,7 @@ type ProductWithRelations = {
   sizeGuideContent: string | null;
   images: ProductImage[];
   variants: ProductVariant[];
+  reviews: ProductReview[];
   tags: {
     id: string;
   }[];
@@ -97,6 +111,9 @@ export default async function EditProductPage({
           orderBy: {
             createdAt: "asc",
           },
+        },
+        reviews: {
+          orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
         },
         tags: true,
       },
@@ -153,6 +170,20 @@ export default async function EditProductPage({
                   name: option.name,
                   value: option.value,
                 })),
+              })),
+              reviews: product.reviews.map((review) => ({
+                authorName: review.authorName,
+                authorCountry: review.authorCountry,
+                rating: review.rating,
+                title: review.title,
+                content: review.content,
+                imageUrl: review.imageUrl,
+                verified: review.verified,
+                source: review.source,
+                reviewDate: review.reviewDate
+                  ? review.reviewDate.toISOString()
+                  : null,
+                sortOrder: review.sortOrder,
               })),
               tags: product.tags.map((tag) => ({
                 id: tag.id,
