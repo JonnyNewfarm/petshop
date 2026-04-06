@@ -317,14 +317,14 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </p>
 
                 {product.badge ? (
-                  <p className="mt-3 inline-flex yy px-3 py-1 text-[10px] uppercase tracking-[0.2em] text-black/70">
+                  <p className="mt-3 inline-flex  text-[10px] uppercase tracking-[0.2em] text-black/70">
                     {product.badge}
                   </p>
                 ) : null}
 
                 <h1
                   style={{ fontFamily: "Mango" }}
-                  className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.01em]"
+                  className="mt-3 text-[clamp(2.2rem,11vw,4.25rem)] uppercase leading-[0.9] tracking-[-0.001em]"
                 >
                   {product.name}
                 </h1>
