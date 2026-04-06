@@ -16,16 +16,8 @@ export default function CartPage() {
 
   const [loadingCheckout, setLoadingCheckout] = useState(false);
 
-  const freeShippingThreshold = 4900;
-  const freeShippingProgress = Math.min(
-    (subtotal / freeShippingThreshold) * 100,
-    100,
-  );
-  const standardShipping = 695;
-
-  const shipping = subtotal >= freeShippingThreshold ? 0 : standardShipping;
-  const total = subtotal + shipping;
-  const amountUntilFreeShipping = Math.max(freeShippingThreshold - subtotal, 0);
+  const shipping = 0;
+  const total = subtotal;
 
   const totalQuantity = useMemo(() => {
     return items.reduce((sum, item) => sum + item.quantity, 0);
@@ -36,7 +28,7 @@ export default function CartPage() {
       setLoadingCheckout(true);
 
       trackMetaEvent("InitiateCheckout", {
-        currency: "NOK",
+        currency: "USD",
         value: total / 100,
         num_items: totalQuantity,
         content_type: "product",
@@ -121,7 +113,7 @@ export default function CartPage() {
                     Shipping
                   </p>
                   <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
-                    {shipping === 0 ? "Free" : formatPrice(shipping)}
+                    Free
                   </p>
                 </div>
               </div>
@@ -270,21 +262,14 @@ export default function CartPage() {
 
                 <div className="px-6 py-6 sm:px-8">
                   <div className="mb-6">
-                    {shipping === 0 ? (
-                      <div className="text-sm text-black/70">
-                        You’ve unlocked free shipping.
-                      </div>
-                    ) : (
-                      <div className="text-sm text-black/70">
-                        Add {formatPrice(amountUntilFreeShipping)} more to
-                        unlock free shipping.
-                      </div>
-                    )}
+                    <div className="text-sm text-black/70">
+                      You’ve unlocked free shipping.
+                    </div>
 
                     <div className="mt-3 h-[6px] w-full overflow-hidden bg-black/10">
                       <div
                         className="h-full bg-black transition-all duration-500"
-                        style={{ width: `${freeShippingProgress}%` }}
+                        style={{ width: "100%" }}
                       />
                     </div>
                   </div>
@@ -297,9 +282,7 @@ export default function CartPage() {
 
                     <div className="flex items-center justify-between text-sm text-black/65">
                       <span>Shipping</span>
-                      <span>
-                        {shipping === 0 ? "Free" : formatPrice(shipping)}
-                      </span>
+                      <span>Free</span>
                     </div>
                   </div>
 

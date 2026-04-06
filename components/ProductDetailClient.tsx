@@ -489,8 +489,9 @@ export default function ProductDetailsClient({
                 onSuccess={handleAddToCartSuccess}
               />
 
-              <p className="text-[10px] uppercase tracking-[0.18em] text-black/55">
-                Free shipping over $49 · 30-day returns · Secure Stripe checkout
+              <p className="text-[10px] uppercase tracking-[0.18em] text-black/85">
+                Limited offer · Free shipping · 30-day returns · Secure Stripe
+                checkout
               </p>
 
               <a
