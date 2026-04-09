@@ -3,19 +3,21 @@
 import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useCartStore } from "@/app/store/cart-store";
+import { trackMetaEvent } from "@/lib/meta-pixel";
 
 export default function CheckoutSuccessClient() {
   const searchParams = useSearchParams();
   const clearCart = useCartStore((state) => state.clearCart);
-  const hasCleared = useRef(false);
+  const items = useCartStore((state) => state.items);
+  const hasHandled = useRef(false);
 
   useEffect(() => {
     const sessionId = searchParams.get("session_id");
 
     if (!sessionId) return;
-    if (hasCleared.current) return;
+    if (hasHandled.current) return;
 
-    async function verifyAndClear() {
+    async function verifyAndHandle() {
       try {
         const res = await fetch(
           `/api/checkout/verify?session_id=${sessionId}`,
@@ -30,16 +32,44 @@ export default function CheckoutSuccessClient() {
         const data = await res.json();
 
         if (data.paid) {
+          const storageKey = `petsaco_purchase_tracked_${sessionId}`;
+          const alreadyTracked = sessionStorage.getItem(storageKey);
+
+          if (!alreadyTracked) {
+            const totalValue =
+              typeof data.amountTotal === "number"
+                ? data.amountTotal / 100
+                : items.reduce(
+                    (total, item) => total + item.price * item.quantity,
+                    0,
+                  ) / 100;
+
+            trackMetaEvent("Purchase", {
+              currency: String(data.currency || "usd").toUpperCase(),
+              value: totalValue,
+              num_items: items.reduce((sum, item) => sum + item.quantity, 0),
+              content_type: "product",
+              content_ids: items.map((item) => item.id),
+              contents: items.map((item) => ({
+                id: item.id,
+                quantity: item.quantity,
+                item_price: item.price / 100,
+              })),
+            });
+
+            sessionStorage.setItem(storageKey, "true");
+          }
+
           clearCart();
-          hasCleared.current = true;
+          hasHandled.current = true;
         }
       } catch (error) {
         console.error("Failed to verify payment:", error);
       }
     }
 
-    verifyAndClear();
-  }, [searchParams, clearCart]);
+    verifyAndHandle();
+  }, [searchParams, clearCart, items]);
 
   return null;
 }
