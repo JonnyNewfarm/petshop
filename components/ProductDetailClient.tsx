@@ -17,6 +17,7 @@ type Variant = {
   name: string;
   price: number | null;
   stock: number;
+  compareAtPrice: number | null;
   options: VariantOption[];
 };
 
@@ -177,7 +178,8 @@ export default function ProductDetailsClient({
   ]);
 
   const displayPrice = selectedVariant?.price ?? product.price;
-  const displayCompareAtPrice = product.compareAtPrice;
+  const displayCompareAtPrice =
+    selectedVariant?.compareAtPrice ?? product.compareAtPrice;
 
   const hasAnyVariantInStock = hasVariants
     ? product.variants.some((variant) => variant.stock > 0)

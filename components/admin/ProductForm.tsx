@@ -19,6 +19,7 @@ type Tag = {
 type GeneratedVariant = {
   name: string;
   price: number | "";
+  compareAtPrice: number | "";
   stock: number;
   options: {
     name: string;
@@ -70,6 +71,7 @@ type ProductFormInitialData = {
   variants: {
     name: string;
     price: number | null;
+    compareAtPrice: number | null;
     stock: number;
     options: {
       name: string;
@@ -218,6 +220,7 @@ export default function ProductForm({
       ? initialData.variants.map((variant) => ({
           name: variant.name,
           price: variant.price ?? "",
+          compareAtPrice: variant.compareAtPrice ?? "",
           stock: variant.stock > 0 ? 1 : 0,
           options: variant.options,
         }))
@@ -341,6 +344,7 @@ export default function ProductForm({
         return {
           name,
           price: existing?.price ?? "",
+          compareAtPrice: existing?.compareAtPrice ?? "",
           stock: existing?.stock ?? 1,
           options: combination,
         };
@@ -407,6 +411,8 @@ export default function ProductForm({
       .map((variant) => ({
         name: variant.name.trim(),
         price: variant.price === "" ? null : Number(variant.price),
+        compareAtPrice:
+          variant.compareAtPrice === "" ? null : Number(variant.compareAtPrice),
         stock: Number(variant.stock) > 0 ? 1 : 0,
         options: variant.options
           .map((option) => ({
@@ -1013,7 +1019,7 @@ L - Chest 101–107 cm`}
                       {variants.map((variant, variantIndex) => (
                         <div
                           key={`${variant.name}-${variantIndex}`}
-                          className="grid gap-4 border border-black/10 bg-[#f6f1e8] p-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr_auto]"
+                          className="grid gap-4 border border-black/10 bg-[#f6f1e8] p-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr_0.8fr_auto]"
                         >
                           <div className="space-y-2">
                             <label className="text-sm uppercase tracking-[0.14em]">
@@ -1051,6 +1057,28 @@ L - Chest 101–107 cm`}
                                 updateGeneratedVariant(
                                   variantIndex,
                                   "price",
+                                  e.target.value === ""
+                                    ? ""
+                                    : Number(e.target.value),
+                                )
+                              }
+                              placeholder="Optional"
+                              className="w-full border border-black/10 bg-white px-4 py-4 outline-none"
+                            />
+                          </div>
+
+                          <div className="space-y-2">
+                            <label className="text-sm uppercase tracking-[0.14em]">
+                              Compare at price
+                            </label>
+                            <input
+                              type="number"
+                              min="0"
+                              value={variant.compareAtPrice}
+                              onChange={(e) =>
+                                updateGeneratedVariant(
+                                  variantIndex,
+                                  "compareAtPrice",
                                   e.target.value === ""
                                     ? ""
                                     : Number(e.target.value),

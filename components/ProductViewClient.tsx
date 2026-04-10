@@ -21,6 +21,7 @@ type ProductVariant = {
   id: string;
   name: string;
   price: number | null;
+  compareAtPrice: number | null;
   stock: number;
   options: ProductOption[];
 };

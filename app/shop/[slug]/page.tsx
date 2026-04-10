@@ -28,6 +28,7 @@ type ProductVariant = {
   id: string;
   name: string;
   price: number | null;
+  compareAtPrice: number | null;
   stock: number;
   options: ProductOption[];
 };
@@ -475,6 +476,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   id: variant.id,
                   name: variant.name,
                   price: variant.price,
+                  compareAtPrice: variant.compareAtPrice,
                   stock: variant.stock,
                   options: variant.options.map((option) => ({
                     id: option.id,

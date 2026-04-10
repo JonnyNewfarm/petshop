@@ -13,6 +13,7 @@ type ProductActionState = {
 type ParsedVariant = {
   name: string;
   price?: number | null;
+  compareAtPrice?: number | null;
   stock?: number;
   options?: { name: string; value: string }[];
 };
@@ -56,6 +57,10 @@ function parseVariants(raw: string): ParsedVariant[] {
   return parsed.map((variant) => ({
     name: variant.name,
     price: typeof variant.price === "number" ? variant.price : null,
+    compareAtPrice:
+      typeof variant.compareAtPrice === "number"
+        ? variant.compareAtPrice
+        : null,
     stock: normalizeStock(variant.stock ?? 0),
     options: (variant.options ?? []).map((option) => ({
       name: option.name,
@@ -187,6 +192,7 @@ export async function createProduct(
           create: parsedVariants.map((variant) => ({
             name: variant.name,
             price: variant.price ?? null,
+            compareAtPrice: variant.compareAtPrice ?? null,
             stock: normalizeStock(variant.stock ?? 0),
             options: {
               create: (variant.options ?? []).map((option) => ({
@@ -318,6 +324,7 @@ export async function updateProduct(
           create: parsedVariants.map((variant) => ({
             name: variant.name,
             price: variant.price ?? null,
+            compareAtPrice: variant.compareAtPrice ?? null,
             stock: normalizeStock(variant.stock ?? 0),
             options: {
               create: (variant.options ?? []).map((option) => ({
