@@ -476,6 +476,11 @@ export default function ProductDetailsClient({
 
           <div className="mt-5 border-t border-black/10 pt-5 sm:mt-6 sm:pt-6">
             <div className="flex flex-col gap-3">
+              <div className="mt-4 border border-black/10 bg-[#f3efe8] px-4 py-3">
+                <p className="text-[11px] uppercase tracking-[0.18em] text-black/80">
+                  Free Shipping Spring Sale
+                </p>
+              </div>
               <AddToCartButton
                 productId={product.id}
                 variantId={selectedVariant?.id ?? null}
