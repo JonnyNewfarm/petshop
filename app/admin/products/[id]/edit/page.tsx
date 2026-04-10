@@ -33,6 +33,7 @@ type ProductOption = {
 type ProductVariant = {
   name: string;
   price: number | null;
+  compareAtPrice: number | null;
   stock: number;
   options: ProductOption[];
 };
@@ -165,6 +166,7 @@ export default async function EditProductPage({
               variants: product.variants.map((variant) => ({
                 name: variant.name,
                 price: variant.price,
+                compareAtPrice: variant.compareAtPrice,
                 stock: variant.stock,
                 options: variant.options.map((option) => ({
                   name: option.name,
