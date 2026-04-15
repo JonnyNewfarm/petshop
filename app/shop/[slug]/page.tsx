@@ -342,9 +342,16 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
                     Price
                   </p>
-                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                  <p className="mt-1 text-base leading-none tracking-[-0.03em]">
                     ${(product.price / 100).toFixed(2)}
                   </p>
+
+                  {product.compareAtPrice &&
+                  product.compareAtPrice > product.price ? (
+                    <p className="mt-2 text-xs leading-none text-black/35 line-through">
+                      ${(product.compareAtPrice / 100).toFixed(2)}
+                    </p>
+                  ) : null}
                 </div>
 
                 <div>

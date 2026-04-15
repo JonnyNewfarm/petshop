@@ -270,18 +270,9 @@ export default function ProductDetailsClient({
 
     setSelectedOptions(initialOptions);
     onVariantChange(firstAvailableVariant.id);
-
-    const colorOption = firstAvailableVariant.options.find((option) =>
-      isColorOption(option.name),
-    );
-
-    if (colorOption) {
-      onColorChange(colorOption.value);
-    }
   }, [
     groupedOptions,
     hasVariants,
-    onColorChange,
     onVariantChange,
     product.variants,
     selectedOptions,
