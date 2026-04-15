@@ -505,7 +505,7 @@ export default function ProductDetailsClient({
             <div className="flex flex-col gap-3">
               <div className="border border-black/20 bg-[#f3efe8] px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-black">
-                  Free shipping ends April 19 — limited time
+                  Free shipping ends April 19 — don’t miss out{" "}
                 </p>
               </div>
 
