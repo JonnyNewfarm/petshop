@@ -191,7 +191,7 @@ export default function ProductDetailsClient({
         ? "In stock"
         : "Out of stock"
       : hasAnyVariantInStock
-        ? "Choose options"
+        ? "In stock"
         : "Out of stock"
     : product.stock > 0
       ? "In stock"
@@ -253,6 +253,40 @@ export default function ProductDetailsClient({
     };
   }, [showReviewsModal, selectedReviewImage, stop, start]);
 
+  useEffect(() => {
+    if (!hasVariants || groupedOptions.length === 0) return;
+    if (Object.keys(selectedOptions).length > 0) return;
+
+    const firstAvailableVariant =
+      product.variants.find((variant) => variant.stock > 0) ??
+      product.variants[0];
+
+    if (!firstAvailableVariant) return;
+
+    const initialOptions: SelectedOptions = {};
+    for (const option of firstAvailableVariant.options) {
+      initialOptions[option.name] = option.value;
+    }
+
+    setSelectedOptions(initialOptions);
+    onVariantChange(firstAvailableVariant.id);
+
+    const colorOption = firstAvailableVariant.options.find((option) =>
+      isColorOption(option.name),
+    );
+
+    if (colorOption) {
+      onColorChange(colorOption.value);
+    }
+  }, [
+    groupedOptions,
+    hasVariants,
+    onColorChange,
+    onVariantChange,
+    product.variants,
+    selectedOptions,
+  ]);
+
   const handleScrollToOptions = () => {
     if (!optionsRef.current) return;
 
@@ -280,6 +314,8 @@ export default function ProductDetailsClient({
     setHasAddedToCart(true);
   };
 
+  const heroDescription = product.shortDescription?.trim() || "";
+
   return (
     <>
       <div className="border border-black/10 bg-[#e6e2dc]">
@@ -297,9 +333,9 @@ export default function ProductDetailsClient({
                 {product.name}
               </h2>
 
-              {product.shortDescription ? (
+              {heroDescription ? (
                 <p className="mt-3 max-w-[52ch] text-[14px] leading-6 text-black/62 sm:text-[15px] sm:leading-7">
-                  {product.shortDescription}
+                  {heroDescription}
                 </p>
               ) : null}
 
@@ -476,11 +512,12 @@ export default function ProductDetailsClient({
 
           <div className="mt-5 border-t border-black/10 pt-5 sm:mt-6 sm:pt-6">
             <div className="flex flex-col gap-3">
-              <div className="mt-4 border border-black/10 bg-[#f3efe8] px-4 py-3">
+              <div className="border border-black/10 bg-[#f3efe8] px-4 py-3">
                 <p className="text-[11px] uppercase tracking-[0.18em] text-black/80">
-                  Free Shipping Spring Sale
+                  Free shipping available
                 </p>
               </div>
+
               <AddToCartButton
                 productId={product.id}
                 variantId={selectedVariant?.id ?? null}
@@ -497,8 +534,7 @@ export default function ProductDetailsClient({
               />
 
               <p className="text-[10px] uppercase tracking-[0.18em] text-black/85">
-                Limited offer · Free shipping · 30-day returns · Secure Stripe
-                checkout
+                Free shipping · 30-day returns · Secure checkout
               </p>
 
               <a
@@ -528,6 +564,19 @@ export default function ProductDetailsClient({
           {showDetails ? (
             <div className="border-t border-black/10 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
               <div className="max-w-[52ch] space-y-4 text-[14px] leading-6 text-black/65 sm:text-[15px] sm:leading-7">
+                {product.benefits.length > 0 ? (
+                  <div className="mt-2 mb-4">
+                    <p className="text-[11px] uppercase tracking-[0.16em] text-black/45">
+                      Highlights
+                    </p>
+
+                    <ul className="mt-3 space-y-2 text-[14px] leading-6 text-black/75">
+                      {product.benefits.slice(0, 4).map((benefit) => (
+                        <li key={benefit}>• {benefit}</li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 {visibleParagraphs.map((paragraph, i) => (
                   <p key={i}>{paragraph}</p>
                 ))}
