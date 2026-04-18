@@ -5,6 +5,12 @@ import { useSearchParams } from "next/navigation";
 import { useCartStore } from "@/app/store/cart-store";
 import { trackMetaEvent } from "@/lib/meta-pixel";
 
+declare global {
+  interface Window {
+    gtag?: (...args: any[]) => void;
+  }
+}
+
 export default function CheckoutSuccessClient() {
   const searchParams = useSearchParams();
   const clearCart = useCartStore((state) => state.clearCart);
@@ -44,8 +50,10 @@ export default function CheckoutSuccessClient() {
                     0,
                   ) / 100;
 
+            const currency = String(data.currency || "usd").toUpperCase();
+
             trackMetaEvent("Purchase", {
-              currency: String(data.currency || "usd").toUpperCase(),
+              currency,
               value: totalValue,
               num_items: items.reduce((sum, item) => sum + item.quantity, 0),
               content_type: "product",
@@ -56,6 +64,15 @@ export default function CheckoutSuccessClient() {
                 item_price: item.price / 100,
               })),
             });
+
+            if (typeof window !== "undefined" && window.gtag) {
+              window.gtag("event", "conversion", {
+                send_to: "AW-18099784617/Plm3CIO1zZ4cEKmX07ZD",
+                value: totalValue,
+                currency,
+                transaction_id: sessionId,
+              });
+            }
 
             sessionStorage.setItem(storageKey, "true");
           }
