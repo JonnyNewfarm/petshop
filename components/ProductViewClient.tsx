@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import ProductDetailsClient from "@/components/ProductDetailClient";
 import ProductGalleryClient from "@/components/ProductGalleryClient";
 
@@ -67,6 +67,23 @@ type ProductViewClientProps = {
 function normalize(value: string) {
   return value.trim().toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-");
 }
+
+function getMatchTokens(value: string) {
+  const normalized = normalize(value);
+
+  if (!normalized) return [];
+
+  const slashParts = normalized.split("/").filter(Boolean);
+  const parts = slashParts.length > 0 ? slashParts : [normalized];
+
+  const expanded = parts.flatMap((part) => {
+    const subParts = part.split("-").filter(Boolean);
+    return subParts.length > 0 ? [part, ...subParts] : [part];
+  });
+
+  return Array.from(new Set(expanded));
+}
+
 export default function ProductViewClient({ product }: ProductViewClientProps) {
   const sortedImages = useMemo(() => {
     return [...product.images].sort((a, b) => a.order - b.order);
@@ -84,44 +101,56 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
     sortedImages[0]?.url ??
     "/placeholder.jpg";
 
-  function handleVariantChange(variantId: string | null) {
+  const handleVariantChange = useCallback((variantId: string | null) => {
     setSelectedVariantId(variantId);
-  }
+  }, []);
 
-  function handleOptionsChange(selectedOptions: SelectedOptions) {
-    const selectedValues = Object.values(selectedOptions)
-      .map(normalize)
-      .filter(Boolean);
+  const handleOptionsChange = useCallback(
+    (selectedOptions: SelectedOptions) => {
+      const optionValues = Object.values(selectedOptions).filter(Boolean);
 
-    if (selectedValues.length === 0) return;
+      if (optionValues.length === 0) return;
 
-    const exactMatch = sortedImages.find((image) => {
-      const haystack = `${image.url} ${image.alt ?? ""}`.toLowerCase();
-      return selectedValues.every((value) => haystack.includes(value));
-    });
+      const tokenGroups = optionValues
+        .map((value) => getMatchTokens(value))
+        .filter((tokens) => tokens.length > 0);
 
-    if (exactMatch) {
-      setActiveImageId(exactMatch.id);
-      return;
-    }
+      if (tokenGroups.length === 0) return;
 
-    const bestMatch = sortedImages
-      .map((image) => {
+      const exactMatch = sortedImages.find((image) => {
         const haystack = `${image.url} ${image.alt ?? ""}`.toLowerCase();
 
-        const score = selectedValues.reduce((total, value) => {
-          return haystack.includes(value) ? total + 1 : total;
-        }, 0);
+        return tokenGroups.every((group) =>
+          group.some((token) => haystack.includes(token)),
+        );
+      });
 
-        return { image, score };
-      })
-      .filter((item) => item.score > 0)
-      .sort((a, b) => b.score - a.score)[0];
+      if (exactMatch) {
+        setActiveImageId(exactMatch.id);
+        return;
+      }
 
-    if (bestMatch) {
-      setActiveImageId(bestMatch.image.id);
-    }
-  }
+      const bestMatch = sortedImages
+        .map((image) => {
+          const haystack = `${image.url} ${image.alt ?? ""}`.toLowerCase();
+
+          const score = tokenGroups.reduce((total, group) => {
+            return group.some((token) => haystack.includes(token))
+              ? total + 1
+              : total;
+          }, 0);
+
+          return { image, score };
+        })
+        .filter((item) => item.score > 0)
+        .sort((a, b) => b.score - a.score)[0];
+
+      if (bestMatch) {
+        setActiveImageId(bestMatch.image.id);
+      }
+    },
+    [sortedImages],
+  );
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,1.08fr)_460px] lg:gap-12 xl:grid-cols-[minmax(0,1.12fr)_500px] xl:gap-16">

@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type ProductImage = {
   id: string;
@@ -34,6 +34,8 @@ export default function ProductGalleryClient({
   onImageChange,
 }: ProductGalleryClientProps) {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+  const desktopThumbRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const mobileThumbRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   const sortedImages = useMemo(() => {
     return [...images].sort((a, b) => a.order - b.order);
@@ -59,6 +61,25 @@ export default function ProductGalleryClient({
     const nextIndex = (activeIndex + 1) % sortedImages.length;
     onImageChange(sortedImages[nextIndex].id);
   }
+
+  useEffect(() => {
+    if (!activeImageId) return;
+
+    const desktopThumb = desktopThumbRefs.current[activeImageId];
+    const mobileThumb = mobileThumbRefs.current[activeImageId];
+
+    desktopThumb?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "nearest",
+    });
+
+    mobileThumb?.scrollIntoView({
+      behavior: "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }, [activeImageId]);
 
   useEffect(() => {
     if (!isFullscreenOpen) return;
@@ -106,7 +127,6 @@ export default function ProductGalleryClient({
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[78px_minmax(0,1fr)] lg:gap-6">
           {sortedImages.length > 1 && (
             <div className="order-2 lg:order-1">
-              {/* Desktop thumbnails */}
               <div className="hidden lg:block">
                 <div
                   style={{ scrollbarWidth: "none" }}
@@ -120,6 +140,9 @@ export default function ProductGalleryClient({
                       return (
                         <button
                           key={image.id}
+                          ref={(node) => {
+                            desktopThumbRefs.current[image.id] = node;
+                          }}
                           type="button"
                           onClick={() => onImageChange(image.id)}
                           className={`group relative aspect-square w-[78px] shrink-0 overflow-hidden border bg-[#e7e2db] transition ${
@@ -201,7 +224,6 @@ export default function ProductGalleryClient({
                 </div>
               </button>
 
-              {/* Mobile thumbnails */}
               {sortedImages.length > 1 && (
                 <div
                   style={{ scrollbarWidth: "none" }}
@@ -215,6 +237,9 @@ export default function ProductGalleryClient({
                       return (
                         <button
                           key={image.id}
+                          ref={(node) => {
+                            mobileThumbRefs.current[image.id] = node;
+                          }}
                           type="button"
                           onClick={() => onImageChange(image.id)}
                           className={`group relative aspect-square h-[84px] w-[84px] shrink-0 overflow-hidden border bg-[#e7e2db] transition ${

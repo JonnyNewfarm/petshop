@@ -34,6 +34,8 @@ type ProductReview = {
   reviewDate: string | null;
 };
 
+type SelectedOptions = Record<string, string>;
+
 type ProductDetailsClientProps = {
   product: {
     id: string;
@@ -58,12 +60,6 @@ type ProductDetailsClientProps = {
   onVariantChange: (variantId: string | null) => void;
   onOptionsChange: (selectedOptions: SelectedOptions) => void;
 };
-
-type SelectedOptions = Record<string, string>;
-
-function normalize(value: string) {
-  return value.trim().toLowerCase();
-}
 
 function variantMatchesOptions(
   variant: Variant,
@@ -266,8 +262,13 @@ export default function ProductDetailsClient({
 
     setSelectedOptions(initialOptions);
     onVariantChange(firstAvailableVariant.id);
-    onOptionsChange(initialOptions);
-  }, [hasVariants, groupedOptions, product.variants, selectedOptions]);
+  }, [
+    groupedOptions,
+    hasVariants,
+    onVariantChange,
+    product.variants,
+    selectedOptions,
+  ]);
 
   const handleScrollToOptions = () => {
     if (!optionsRef.current) return;
@@ -655,21 +656,21 @@ export default function ProductDetailsClient({
                               Verified
                             </p>
                           ) : null}
-
-                          {featuredReview.title ? (
-                            <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
-                              {featuredReview.title}
-                            </h3>
-                          ) : null}
-
-                          <p className="mt-3 line-clamp-4 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
-                            {featuredReview.content}
-                          </p>
-
-                          <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-black/45">
-                            Tap to view all reviews
-                          </p>
                         </div>
+
+                        {featuredReview.title ? (
+                          <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
+                            {featuredReview.title}
+                          </h3>
+                        ) : null}
+
+                        <p className="mt-3 line-clamp-4 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
+                          {featuredReview.content}
+                        </p>
+
+                        <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-black/45">
+                          Tap to view all reviews
+                        </p>
                       </div>
 
                       {featuredReview.imageUrl ? (
