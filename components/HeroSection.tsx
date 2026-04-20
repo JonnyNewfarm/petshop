@@ -298,7 +298,7 @@ export default function HeroSection() {
 
         <div
           ref={textWrapRef}
-          className="relative z-10 flex min-h-screen items-center px-6 py-16 md:px-10 md:py-20"
+          className="relative z-10 flex min-h-screen items-center px-6 py-16 md:px-10 md:py-14"
         >
           <div className="w-full text-white">
             <div className="w-full overflow-hidden">
