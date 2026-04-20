@@ -39,6 +39,8 @@ type ProductReview = {
   reviewDate: string | null;
 };
 
+type SelectedOptions = Record<string, string>;
+
 type ProductViewClientProps = {
   product: {
     id: string;
@@ -63,9 +65,8 @@ type ProductViewClientProps = {
 };
 
 function normalize(value: string) {
-  return value.trim().toLowerCase();
+  return value.trim().toLowerCase().replace(/\s+/g, "-").replace(/\//g, "-");
 }
-
 export default function ProductViewClient({ product }: ProductViewClientProps) {
   const sortedImages = useMemo(() => {
     return [...product.images].sort((a, b) => a.order - b.order);
@@ -87,18 +88,38 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
     setSelectedVariantId(variantId);
   }
 
-  function handleColorChange(colorValue: string | null) {
-    if (!colorValue) return;
+  function handleOptionsChange(selectedOptions: SelectedOptions) {
+    const selectedValues = Object.values(selectedOptions)
+      .map(normalize)
+      .filter(Boolean);
 
-    const selectedColor = normalize(colorValue);
+    if (selectedValues.length === 0) return;
 
-    const matchedImage = sortedImages.find((image) => {
+    const exactMatch = sortedImages.find((image) => {
       const haystack = `${image.url} ${image.alt ?? ""}`.toLowerCase();
-      return haystack.includes(selectedColor);
+      return selectedValues.every((value) => haystack.includes(value));
     });
 
-    if (matchedImage) {
-      setActiveImageId(matchedImage.id);
+    if (exactMatch) {
+      setActiveImageId(exactMatch.id);
+      return;
+    }
+
+    const bestMatch = sortedImages
+      .map((image) => {
+        const haystack = `${image.url} ${image.alt ?? ""}`.toLowerCase();
+
+        const score = selectedValues.reduce((total, value) => {
+          return haystack.includes(value) ? total + 1 : total;
+        }, 0);
+
+        return { image, score };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)[0];
+
+    if (bestMatch) {
+      setActiveImageId(bestMatch.image.id);
     }
   }
 
@@ -136,7 +157,7 @@ export default function ProductViewClient({ product }: ProductViewClientProps) {
           }}
           selectedVariantId={selectedVariantId}
           onVariantChange={handleVariantChange}
-          onColorChange={handleColorChange}
+          onOptionsChange={handleOptionsChange}
         />
       </div>
     </div>

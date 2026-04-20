@@ -106,51 +106,59 @@ export default function ProductGalleryClient({
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[78px_minmax(0,1fr)] lg:gap-6">
           {sortedImages.length > 1 && (
             <div className="order-2 lg:order-1">
-              <div className="hidden lg:flex lg:flex-col lg:gap-3">
-                {sortedImages.map((image) => {
-                  const isActive = image.id === activeImage.id;
-                  const isVideo = isVideoUrl(image.url);
+              {/* Desktop thumbnails */}
+              <div className="hidden lg:block">
+                <div
+                  style={{ scrollbarWidth: "none" }}
+                  className="max-h-[760px] overflow-y-auto  pr-2"
+                >
+                  <div className="flex flex-col gap-3">
+                    {sortedImages.map((image) => {
+                      const isActive = image.id === activeImage.id;
+                      const isVideo = isVideoUrl(image.url);
 
-                  return (
-                    <button
-                      key={image.id}
-                      type="button"
-                      onClick={() => onImageChange(image.id)}
-                      className={`group relative aspect-square overflow-hidden border bg-[#e7e2db] transition ${
-                        isActive
-                          ? "border-black"
-                          : "border-black/10 hover:border-black/40"
-                      }`}
-                      aria-label={`Select ${image.alt || productName} media`}
-                    >
-                      {isVideo ? (
-                        <>
-                          <video
-                            src={image.url}
-                            className="h-full w-full object-cover"
-                            muted
-                            playsInline
-                            preload="metadata"
-                          />
-                          <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
-                              ▶
-                            </div>
-                          </div>
-                        </>
-                      ) : (
-                        <Image
-                          src={image.url}
-                          alt={image.alt || productName}
-                          fill
-                          className="object-cover cursor-pointer transition duration-500 group-hover:scale-[1.03]"
-                          sizes="78px"
-                          quality={100}
-                        />
-                      )}
-                    </button>
-                  );
-                })}
+                      return (
+                        <button
+                          key={image.id}
+                          type="button"
+                          onClick={() => onImageChange(image.id)}
+                          className={`group relative aspect-square w-[78px] shrink-0 overflow-hidden border bg-[#e7e2db] transition ${
+                            isActive
+                              ? "border-black"
+                              : "border-black/10 hover:border-black/40"
+                          }`}
+                          aria-label={`Select ${image.alt || productName} media`}
+                        >
+                          {isVideo ? (
+                            <>
+                              <video
+                                src={image.url}
+                                className="h-full w-full object-cover"
+                                muted
+                                playsInline
+                                preload="metadata"
+                              />
+                              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
+                                  ▶
+                                </div>
+                              </div>
+                            </>
+                          ) : (
+                            <Image
+                              src={image.url}
+                              alt={image.alt || productName}
+                              fill
+                              className="cursor-pointer object-cover transition duration-500 group-hover:scale-[1.03]"
+                              sizes="78px"
+                              quality={100}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
               </div>
             </div>
           )}
@@ -180,7 +188,7 @@ export default function ProductGalleryClient({
                       src={activeImage.url}
                       alt={activeImage.alt || productName}
                       fill
-                      className="object-cover cursor-pointer"
+                      className="cursor-pointer object-cover"
                       priority
                       quality={100}
                       sizes="(max-width: 768px) 100vw, (max-width: 1280px) 58vw, 760px"
@@ -193,52 +201,58 @@ export default function ProductGalleryClient({
                 </div>
               </button>
 
+              {/* Mobile thumbnails */}
               {sortedImages.length > 1 && (
-                <div className="mt-4 grid grid-cols-4 gap-3 lg:hidden">
-                  {sortedImages.map((image) => {
-                    const isActive = image.id === activeImage.id;
-                    const isVideo = isVideoUrl(image.url);
+                <div
+                  style={{ scrollbarWidth: "none" }}
+                  className="mt-4 overflow-x-auto"
+                >
+                  <div className="flex gap-3 pb-1 lg:hidden">
+                    {sortedImages.map((image) => {
+                      const isActive = image.id === activeImage.id;
+                      const isVideo = isVideoUrl(image.url);
 
-                    return (
-                      <button
-                        key={image.id}
-                        type="button"
-                        onClick={() => onImageChange(image.id)}
-                        className={`group relative aspect-square overflow-hidden border bg-[#e7e2db] transition ${
-                          isActive
-                            ? "border-black"
-                            : "border-black/10 hover:border-black/40"
-                        }`}
-                        aria-label={`Select ${image.alt || productName} media`}
-                      >
-                        {isVideo ? (
-                          <>
-                            <video
-                              src={image.url}
-                              className="h-full w-full object-cover"
-                              muted
-                              playsInline
-                              preload="metadata"
-                            />
-                            <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
-                              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
-                                ▶
+                      return (
+                        <button
+                          key={image.id}
+                          type="button"
+                          onClick={() => onImageChange(image.id)}
+                          className={`group relative aspect-square h-[84px] w-[84px] shrink-0 overflow-hidden border bg-[#e7e2db] transition ${
+                            isActive
+                              ? "border-black"
+                              : "border-black/10 hover:border-black/40"
+                          }`}
+                          aria-label={`Select ${image.alt || productName} media`}
+                        >
+                          {isVideo ? (
+                            <>
+                              <video
+                                src={image.url}
+                                className="h-full w-full object-cover"
+                                muted
+                                playsInline
+                                preload="metadata"
+                              />
+                              <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
+                                  ▶
+                                </div>
                               </div>
-                            </div>
-                          </>
-                        ) : (
-                          <Image
-                            src={image.url}
-                            alt={image.alt || productName}
-                            fill
-                            className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                            sizes="25vw"
-                            quality={100}
-                          />
-                        )}
-                      </button>
-                    );
-                  })}
+                            </>
+                          ) : (
+                            <Image
+                              src={image.url}
+                              alt={image.alt || productName}
+                              fill
+                              className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                              sizes="84px"
+                              quality={100}
+                            />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
               )}
             </div>

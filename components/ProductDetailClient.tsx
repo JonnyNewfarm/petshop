@@ -56,18 +56,13 @@ type ProductDetailsClientProps = {
   };
   selectedVariantId: string | null;
   onVariantChange: (variantId: string | null) => void;
-  onColorChange: (colorValue: string | null) => void;
+  onOptionsChange: (selectedOptions: SelectedOptions) => void;
 };
 
 type SelectedOptions = Record<string, string>;
 
 function normalize(value: string) {
   return value.trim().toLowerCase();
-}
-
-function isColorOption(name: string) {
-  const normalized = normalize(name);
-  return normalized === "color" || normalized === "colour";
 }
 
 function variantMatchesOptions(
@@ -103,7 +98,7 @@ export default function ProductDetailsClient({
   product,
   selectedVariantId,
   onVariantChange,
-  onColorChange,
+  onOptionsChange,
 }: ProductDetailsClientProps) {
   const hasVariants = product.variants.length > 0;
   const optionsRef = useRef<HTMLDivElement | null>(null);
@@ -254,7 +249,8 @@ export default function ProductDetailsClient({
   }, [showReviewsModal, selectedReviewImage, stop, start]);
 
   useEffect(() => {
-    if (!hasVariants || groupedOptions.length === 0) return;
+    if (!hasVariants) return;
+    if (groupedOptions.length === 0) return;
     if (Object.keys(selectedOptions).length > 0) return;
 
     const firstAvailableVariant =
@@ -270,13 +266,8 @@ export default function ProductDetailsClient({
 
     setSelectedOptions(initialOptions);
     onVariantChange(firstAvailableVariant.id);
-  }, [
-    groupedOptions,
-    hasVariants,
-    onVariantChange,
-    product.variants,
-    selectedOptions,
-  ]);
+    onOptionsChange(initialOptions);
+  }, [hasVariants, groupedOptions, product.variants, selectedOptions]);
 
   const handleScrollToOptions = () => {
     if (!optionsRef.current) return;
@@ -426,10 +417,7 @@ export default function ProductDetailsClient({
 
                               setSelectedOptions(updatedOptions);
                               setHasAddedToCart(false);
-
-                              if (isColorOption(group.name)) {
-                                onColorChange(value);
-                              }
+                              onOptionsChange(updatedOptions);
 
                               const isComplete = groupedOptions.every(
                                 (optionGroup) =>
@@ -667,21 +655,21 @@ export default function ProductDetailsClient({
                               Verified
                             </p>
                           ) : null}
+
+                          {featuredReview.title ? (
+                            <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
+                              {featuredReview.title}
+                            </h3>
+                          ) : null}
+
+                          <p className="mt-3 line-clamp-4 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
+                            {featuredReview.content}
+                          </p>
+
+                          <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-black/45">
+                            Tap to view all reviews
+                          </p>
                         </div>
-
-                        {featuredReview.title ? (
-                          <h3 className="mt-3 text-sm uppercase tracking-[0.06em] text-black">
-                            {featuredReview.title}
-                          </h3>
-                        ) : null}
-
-                        <p className="mt-3 line-clamp-4 max-w-[62ch] text-[14px] leading-6 text-black/68 sm:text-[15px] sm:leading-7">
-                          {featuredReview.content}
-                        </p>
-
-                        <p className="mt-4 text-[10px] uppercase tracking-[0.16em] text-black/45">
-                          Tap to view all reviews
-                        </p>
                       </div>
 
                       {featuredReview.imageUrl ? (

@@ -31,6 +31,7 @@ type ProductVariant = {
   compareAtPrice: number | null;
   stock: number;
   options: ProductOption[];
+  images: ProductImage[];
 };
 
 type ProductWithRelations = {
@@ -81,6 +82,9 @@ export async function generateMetadata({
     include: {
       category: true,
       images: {
+        where: {
+          variantId: null,
+        },
         orderBy: {
           order: "asc",
         },
@@ -145,6 +149,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       category: true,
       tags: true,
       images: {
+        where: {
+          variantId: null,
+        },
         orderBy: {
           order: "asc",
         },
@@ -152,6 +159,11 @@ export default async function ProductPage({ params }: ProductPageProps) {
       variants: {
         include: {
           options: true,
+          images: {
+            orderBy: {
+              order: "asc",
+            },
+          },
         },
         orderBy: {
           createdAt: "asc",
@@ -218,6 +230,9 @@ export default async function ProductPage({ params }: ProductPageProps) {
       category: true,
       tags: true,
       images: {
+        where: {
+          variantId: null,
+        },
         orderBy: {
           order: "asc",
         },
@@ -489,6 +504,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     id: option.id,
                     name: option.name,
                     value: option.value,
+                  })),
+                  images: variant.images.map((image) => ({
+                    id: image.id,
+                    url: image.url,
+                    alt: image.alt,
+                    order: image.order,
                   })),
                 })),
                 reviews: product.reviews.map((review) => ({
