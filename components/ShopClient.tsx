@@ -478,48 +478,72 @@ export default function ShopClient() {
                 </div>
 
                 {pagination.totalPages > 1 && (
-                  <div className="mt-14 flex flex-col items-center gap-5 border-t border-black/10 pt-10">
-                    <div className="text-[11px] uppercase tracking-[0.22em] text-black/40">
-                      Page {pagination.page} of {pagination.totalPages}
-                    </div>
+                  <div className="mt-14 border-t border-black/10 pt-10">
+                    <div className="flex flex-col items-center gap-5">
+                      <div className="text-[11px] uppercase tracking-[0.22em] text-black/40">
+                        Page {pagination.page} of {pagination.totalPages}
+                      </div>
 
-                    <div className="flex flex-wrap items-center justify-center gap-2.5">
-                      <button
-                        onClick={() => handlePageChange(pagination.page - 1)}
-                        disabled={!pagination.hasPreviousPage}
-                        className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
-                      >
-                        Previous
-                      </button>
+                      <div className="flex w-full items-center justify-between gap-3 sm:hidden">
+                        <button
+                          onClick={() => handlePageChange(pagination.page - 1)}
+                          disabled={!pagination.hasPreviousPage}
+                          className="flex min-w-[88px] items-center justify-center border border-black/10 bg-[#f3efe8] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-black transition hover:border-black disabled:opacity-40"
+                        >
+                          ← Prev
+                        </button>
 
-                      {Array.from(
-                        { length: pagination.totalPages },
-                        (_, index) => index + 1,
-                      ).map((page) => {
-                        const active = page === pagination.page;
+                        <div className="text-[11px] uppercase tracking-[0.18em] text-black/55">
+                          {pagination.page} / {pagination.totalPages}
+                        </div>
 
-                        return (
-                          <button
-                            key={page}
-                            onClick={() => handlePageChange(page)}
-                            className={`min-w-[46px] px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
-                              active
-                                ? "bg-black text-[#f6f1e8]"
-                                : "border border-black/10 bg-[#f3efe8] text-black hover:border-black"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      })}
+                        <button
+                          onClick={() => handlePageChange(pagination.page + 1)}
+                          disabled={!pagination.hasNextPage}
+                          className="flex min-w-[88px] items-center justify-center border border-black/10 bg-[#f3efe8] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-black transition hover:border-black disabled:opacity-40"
+                        >
+                          Next →
+                        </button>
+                      </div>
 
-                      <button
-                        onClick={() => handlePageChange(pagination.page + 1)}
-                        disabled={!pagination.hasNextPage}
-                        className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
-                      >
-                        Next
-                      </button>
+                      <div className="hidden flex-wrap items-center justify-center gap-2.5 sm:flex">
+                        <button
+                          onClick={() => handlePageChange(pagination.page - 1)}
+                          disabled={!pagination.hasPreviousPage}
+                          className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
+                        >
+                          Previous
+                        </button>
+
+                        {Array.from(
+                          { length: pagination.totalPages },
+                          (_, index) => index + 1,
+                        ).map((page) => {
+                          const active = page === pagination.page;
+
+                          return (
+                            <button
+                              key={page}
+                              onClick={() => handlePageChange(page)}
+                              className={`min-w-[46px] px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
+                                active
+                                  ? "bg-black text-[#f6f1e8]"
+                                  : "border border-black/10 bg-[#f3efe8] text-black hover:border-black"
+                              }`}
+                            >
+                              {page}
+                            </button>
+                          );
+                        })}
+
+                        <button
+                          onClick={() => handlePageChange(pagination.page + 1)}
+                          disabled={!pagination.hasNextPage}
+                          className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
+                        >
+                          Next
+                        </button>
+                      </div>
                     </div>
                   </div>
                 )}
