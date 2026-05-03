@@ -5,6 +5,7 @@ import { formatPrice } from "@/lib/format";
 import AddToCartButton from "@/components/AddToCartButton";
 import { useSmoothScroller } from "@/components/SmoothScroll";
 import { AnimatePresence, motion } from "framer-motion";
+import { FaShippingFast } from "react-icons/fa";
 
 type VariantOption = {
   id: string;
@@ -35,6 +36,35 @@ type ProductReview = {
 };
 
 type SelectedOptions = Record<string, string>;
+
+const colorMap: Record<string, string> = {
+  black: "#111111",
+  white: "#f8f8f8",
+  grey: "#9ca3af",
+  gray: "#9ca3af",
+  beige: "#d8c3a5",
+  brown: "#7a4f2a",
+  navy: "#1e2a44",
+  blue: "#2563eb",
+  red: "#dc2626",
+  green: "#16a34a",
+  yellow: "#facc15",
+  pink: "#f9a8d4",
+  purple: "#9333ea",
+  orange: "#f97316",
+};
+
+function isColorOption(optionName: string) {
+  return ["color", "colour", "farge"].includes(optionName.toLowerCase());
+}
+
+function isSizeOption(optionName: string) {
+  return ["size", "størrelse", "storrelse"].includes(optionName.toLowerCase());
+}
+
+function getColorValue(value: string) {
+  return colorMap[value.toLowerCase()] ?? value;
+}
 
 type ProductDetailsClientProps = {
   product: {
@@ -172,6 +202,9 @@ export default function ProductDetailsClient({
   const displayCompareAtPrice =
     selectedVariant?.compareAtPrice ?? product.compareAtPrice;
 
+  const isOnSale =
+    !!displayCompareAtPrice && displayCompareAtPrice > displayPrice;
+
   const hasAnyVariantInStock = hasVariants
     ? product.variants.some((variant) => variant.stock > 0)
     : false;
@@ -303,44 +336,46 @@ export default function ProductDetailsClient({
     <>
       <div className="border border-black/10 bg-[#e6e2dc]">
         <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
-                {product.categoryName}
-              </p>
-
-              <h2
-                style={{ fontFamily: "Mango" }}
-                className="mt-3 text-[clamp(1.8rem,8vw,4.8rem)] uppercase leading-[0.92] tracking-[-0.03em] sm:mt-4 sm:tracking-[-0.02em]"
-              >
-                {product.name}
-              </h2>
-
-              {heroDescription ? (
-                <p className="mt-3 max-w-[52ch] text-[14px] leading-6 text-black/62 sm:text-[15px] sm:leading-7">
-                  {heroDescription}
+          <div>
+            <div className="flex items-start justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
+                  {product.categoryName}
                 </p>
-              ) : null}
 
-              {reviewCount > 0 && averageRating ? (
-                <div className="mt-4 flex flex-wrap items-center gap-3">
-                  <p className="text-sm tracking-[0.02em] text-black/80">
-                    <span className="mr-2">
-                      {renderStars(Math.round(Number(averageRating)))}
-                    </span>
-                    {averageRating} / 5
-                  </p>
-                  <p className="text-[11px] uppercase tracking-[0.16em] text-black/45">
-                    {reviewCount} review{reviewCount === 1 ? "" : "s"}
-                  </p>
-                </div>
+                <h2
+                  style={{ fontFamily: "Mango" }}
+                  className="mt-3 text-[clamp(2rem,8.2vw,5rem)] uppercase leading-[0.92] tracking-[-0.01em] sm:mt-4 sm:tracking-[-0.02em]"
+                >
+                  {product.name}
+                </h2>
+              </div>
+
+              {product.badge ? (
+                <p className="shrink-0 text-[10px] uppercase tracking-[0.18em] text-black/55">
+                  {product.badge}
+                </p>
               ) : null}
             </div>
 
-            {product.badge ? (
-              <p className="shrink-0 text-[10px] uppercase tracking-[0.18em] text-black/55">
-                {product.badge}
+            {heroDescription ? (
+              <p className="mt-3 w-full text-[17px] leading-6 text-black/62 sm:text-[15px] sm:leading-7">
+                {heroDescription}
               </p>
+            ) : null}
+
+            {reviewCount > 0 && averageRating ? (
+              <div className="mt-4 flex flex-wrap items-center gap-3">
+                <p className="text-sm tracking-[0.02em] text-black/80">
+                  <span className="mr-2">
+                    {renderStars(Math.round(Number(averageRating)))}
+                  </span>
+                  {averageRating} / 5
+                </p>
+                <p className="text-[11px] uppercase tracking-[0.16em] text-black/45">
+                  {reviewCount} review{reviewCount === 1 ? "" : "s"}
+                </p>
+              </div>
             ) : null}
           </div>
 
@@ -351,12 +386,15 @@ export default function ProductDetailsClient({
               </p>
 
               <div className="mt-2 flex flex-wrap items-end gap-3">
-                <p className="text-[1.55rem] leading-none tracking-[-0.05em] sm:text-[1.9rem]">
+                <p
+                  className={`text-[1.55rem] leading-none tracking-[-0.05em] sm:text-[1.9rem] ${
+                    isOnSale ? "text-red-700" : "text-black"
+                  }`}
+                >
                   {formatPrice(displayPrice)}
                 </p>
 
-                {displayCompareAtPrice &&
-                displayCompareAtPrice > displayPrice ? (
+                {isOnSale ? (
                   <p className="text-base leading-none text-black/35 line-through sm:text-lg">
                     {formatPrice(displayCompareAtPrice)}
                   </p>
@@ -404,6 +442,9 @@ export default function ProductDetailsClient({
                           ? matchingVariant.stock <= 0
                           : true;
 
+                        const isColor = isColorOption(group.name);
+                        const colorValue = getColorValue(value);
+
                         return (
                           <button
                             key={`${group.name}-${value}`}
@@ -447,22 +488,68 @@ export default function ProductDetailsClient({
                               onVariantChange(exactVariant?.id ?? null);
                             }}
                             disabled={!exists}
-                            className={`min-h-[44px] px-3 py-2.5 text-[10px] uppercase tracking-[0.18em] transition sm:px-4 sm:py-3 sm:text-[11px] ${
-                              isActive
-                                ? "bg-black text-[#f6f1e8]"
-                                : "bg-[#f3efe8] text-black hover:bg-black hover:text-[#f6f1e8]"
+                            aria-label={`${group.name}: ${value}`}
+                            title={value}
+                            className={`min-h-[44px] transition ${
+                              isColor
+                                ? `flex h-11 w-11 items-center justify-center border ${
+                                    isActive
+                                      ? "border-black bg-[#f3efe8]"
+                                      : "border-black/15 bg-[#f3efe8] hover:border-black/50"
+                                  }`
+                                : `min-w-[74px] border px-5 py-3.5 text-[11px] uppercase tracking-[0.18em] sm:min-w-[86px] sm:px-6 sm:py-4 sm:text-[12px] ${
+                                    isActive
+                                      ? "border-black bg-black font-semibold text-[#f6f1e8]"
+                                      : "border-black/60 bg-[#f8f6f2] font-semibold text-black hover:border-black hover:bg-black hover:text-[#f6f1e8]"
+                                  }`
                             } ${!exists ? "cursor-not-allowed opacity-30" : ""}`}
                           >
-                            {value}
-                            {exists && outOfStock ? (
-                              <span className="ml-2 text-[10px] opacity-70">
-                                • Out
-                              </span>
-                            ) : null}
+                            {isColor ? (
+                              <span
+                                className="block h-7 w-7 border border-black/10"
+                                style={{ backgroundColor: colorValue }}
+                              />
+                            ) : (
+                              <>
+                                {value}
+                                {exists && outOfStock ? (
+                                  <span className="ml-2 text-[10px] opacity-70">
+                                    • Out
+                                  </span>
+                                ) : null}
+                              </>
+                            )}
                           </button>
                         );
                       })}
                     </div>
+
+                    {isSizeOption(group.name) &&
+                    product.sizeGuideEnabled &&
+                    product.sizeGuideContent ? (
+                      <div className="mt-4 border border-black/10 bg-[#f3efe8]">
+                        <button
+                          type="button"
+                          onClick={() => setShowSizeGuide((prev) => !prev)}
+                          className="flex w-full items-center justify-between px-4 py-4 text-left"
+                        >
+                          <span className="text-[12px] uppercase tracking-[0.22em] text-black/80 sm:text-[11px]">
+                            {product.sizeGuideTitle || "Size guide"}
+                          </span>
+                          <span className="text-[12px] uppercase tracking-[0.18em] text-black/60">
+                            {showSizeGuide ? "Close" : "Open"}
+                          </span>
+                        </button>
+
+                        {showSizeGuide ? (
+                          <div className="border-t border-black/10 px-4 py-5">
+                            <div className="whitespace-pre-line text-[14px] leading-6 text-black/65 sm:text-[15px] sm:leading-7">
+                              {product.sizeGuideContent}
+                            </div>
+                          </div>
+                        ) : null}
+                      </div>
+                    ) : null}
                   </div>
                 ))}
               </div>
@@ -492,10 +579,22 @@ export default function ProductDetailsClient({
 
           <div className="mt-5 border-t border-black/10 pt-5 sm:mt-6 sm:pt-6">
             <div className="flex flex-col gap-3">
-              <div className="border border-black/20 bg-[#f3efe8] px-4 py-3">
-                <p className="text-[11px] uppercase tracking-[0.18em] text-black">
-                  Free shipping ends May 10th — don’t miss out{" "}
-                </p>
+              <div className="border-l-2 border-black bg-[#f0dcc5] px-4 py-3.5">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-[#e7c7a8]">
+                    <FaShippingFast size={17} color="rgba(0,0,0,0.72)" />
+                  </div>
+
+                  <div className="min-w-0">
+                    <p className="text-[11px] uppercase leading-4 tracking-[0.18em] text-black">
+                      Free shipping today
+                    </p>
+
+                    <p className="mt-1 text-[13px] leading-5 text-black/60">
+                      Every order ships with tracking.
+                    </p>
+                  </div>
+                </div>
               </div>
 
               <AddToCartButton
@@ -514,7 +613,7 @@ export default function ProductDetailsClient({
               />
 
               <p className="text-[10px] uppercase tracking-[0.18em] text-black/85">
-                30-day returns · Secure checkout
+                30-day returns · Secure checkout · Fast shipping
               </p>
 
               <a
@@ -533,10 +632,10 @@ export default function ProductDetailsClient({
             onClick={() => setShowDetails((prev) => !prev)}
             className="flex w-full items-center justify-between px-4 py-4 text-left sm:px-6 lg:px-8"
           >
-            <span className="text-[10px] uppercase tracking-[0.22em] text-black/50 sm:text-[11px]">
+            <span className="text-[12px] uppercase tracking-[0.22em] text-black/80 sm:text-[11px]">
               Description
             </span>
-            <span className="text-[10px] uppercase tracking-[0.18em] text-black/45">
+            <span className="text-[12px] uppercase tracking-[0.18em] text-black/80">
               {showDetails ? "Close" : "Open"}
             </span>
           </button>
@@ -575,37 +674,12 @@ export default function ProductDetailsClient({
           ) : null}
         </div>
 
-        {product.sizeGuideEnabled && product.sizeGuideContent ? (
-          <div className="border-t border-black/10">
-            <button
-              type="button"
-              onClick={() => setShowSizeGuide((prev) => !prev)}
-              className="flex w-full items-center justify-between px-4 py-4 text-left sm:px-6 lg:px-8"
-            >
-              <span className="text-[10px] uppercase tracking-[0.22em] text-black/50 sm:text-[11px]">
-                {product.sizeGuideTitle || "Size guide"}
-              </span>
-              <span className="text-[10px] uppercase tracking-[0.18em] text-black/45">
-                {showSizeGuide ? "Close" : "Open"}
-              </span>
-            </button>
-
-            {showSizeGuide ? (
-              <div className="border-t border-black/10 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
-                <div className="whitespace-pre-line text-[14px] leading-6 text-black/65 sm:text-[15px] sm:leading-7">
-                  {product.sizeGuideContent}
-                </div>
-              </div>
-            ) : null}
-          </div>
-        ) : null}
-
         {product.reviews.length > 0 ? (
           <div className="border-t border-black/10">
             <div className="px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
               <div className="flex flex-wrap items-end justify-between gap-4">
                 <div>
-                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/45 sm:text-[11px]">
+                  <p className="text-[12px] uppercase tracking-[0.22em] text-black/80 sm:text-[11px]">
                     Reviews
                   </p>
                   {averageRating ? (
@@ -703,10 +777,15 @@ export default function ProductDetailsClient({
               {product.name}
             </p>
             <div className="mt-1 flex items-center gap-2">
-              <p className="text-base tracking-[-0.04em] text-black">
+              <p
+                className={`text-base tracking-[-0.04em] ${
+                  isOnSale ? "text-red-700" : "text-black"
+                }`}
+              >
                 {formatPrice(displayPrice)}
               </p>
-              {displayCompareAtPrice && displayCompareAtPrice > displayPrice ? (
+
+              {isOnSale ? (
                 <p className="text-xs text-black/35 line-through">
                   {formatPrice(displayCompareAtPrice)}
                 </p>

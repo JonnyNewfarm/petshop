@@ -19,6 +19,7 @@ type ProductGalleryClientProps = {
 
 function isVideoUrl(url: string) {
   const cleanUrl = url.split("?")[0].toLowerCase();
+
   return (
     cleanUrl.endsWith(".mp4") ||
     cleanUrl.endsWith(".webm") ||
@@ -34,8 +35,12 @@ export default function ProductGalleryClient({
   onImageChange,
 }: ProductGalleryClientProps) {
   const [isFullscreenOpen, setIsFullscreenOpen] = useState(false);
+
   const desktopThumbRefs = useRef<Record<string, HTMLButtonElement | null>>({});
   const mobileThumbRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+
+  const desktopThumbScrollerRef = useRef<HTMLDivElement | null>(null);
+  const mobileThumbScrollerRef = useRef<HTMLDivElement | null>(null);
 
   const sortedImages = useMemo(() => {
     return [...images].sort((a, b) => a.order - b.order);
@@ -51,34 +56,51 @@ export default function ProductGalleryClient({
 
   function goToPrev() {
     if (!sortedImages.length) return;
+
     const prevIndex =
       (activeIndex - 1 + sortedImages.length) % sortedImages.length;
+
     onImageChange(sortedImages[prevIndex].id);
   }
 
   function goToNext() {
     if (!sortedImages.length) return;
+
     const nextIndex = (activeIndex + 1) % sortedImages.length;
+
     onImageChange(sortedImages[nextIndex].id);
   }
 
   useEffect(() => {
     if (!activeImageId) return;
 
+    const desktopScroller = desktopThumbScrollerRef.current;
+    const mobileScroller = mobileThumbScrollerRef.current;
+
     const desktopThumb = desktopThumbRefs.current[activeImageId];
     const mobileThumb = mobileThumbRefs.current[activeImageId];
 
-    desktopThumb?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "nearest",
-    });
+    if (desktopScroller && desktopThumb) {
+      const thumbTop = desktopThumb.offsetTop;
+      const thumbHeight = desktopThumb.offsetHeight;
+      const scrollerHeight = desktopScroller.clientHeight;
 
-    mobileThumb?.scrollIntoView({
-      behavior: "smooth",
-      block: "nearest",
-      inline: "center",
-    });
+      desktopScroller.scrollTo({
+        top: thumbTop - scrollerHeight / 2 + thumbHeight / 2,
+        behavior: "smooth",
+      });
+    }
+
+    if (mobileScroller && mobileThumb) {
+      const thumbLeft = mobileThumb.offsetLeft;
+      const thumbWidth = mobileThumb.offsetWidth;
+      const scrollerWidth = mobileScroller.clientWidth;
+
+      mobileScroller.scrollTo({
+        left: thumbLeft - scrollerWidth / 2 + thumbWidth / 2,
+        behavior: "smooth",
+      });
+    }
   }, [activeImageId]);
 
   useEffect(() => {
@@ -94,23 +116,29 @@ export default function ProductGalleryClient({
 
       if (event.key === "ArrowDown" || event.key === "ArrowRight") {
         event.preventDefault();
+
         const nextIndex = (activeIndex + 1) % sortedImages.length;
+
         onImageChange(sortedImages[nextIndex].id);
       }
 
       if (event.key === "ArrowUp" || event.key === "ArrowLeft") {
         event.preventDefault();
+
         const prevIndex =
           (activeIndex - 1 + sortedImages.length) % sortedImages.length;
+
         onImageChange(sortedImages[prevIndex].id);
       }
     }
+
+    const previousBodyOverflow = document.body.style.overflow;
 
     document.body.style.overflow = "hidden";
     window.addEventListener("keydown", handleKeyDown);
 
     return () => {
-      document.body.style.overflow = "";
+      document.body.style.overflow = previousBodyOverflow;
       window.removeEventListener("keydown", handleKeyDown);
     };
   }, [isFullscreenOpen, activeIndex, sortedImages, onImageChange]);
@@ -125,12 +153,13 @@ export default function ProductGalleryClient({
     <>
       <div className="min-w-0">
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-[78px_minmax(0,1fr)] lg:gap-6">
-          {sortedImages.length > 1 && (
+          {sortedImages.length > 1 ? (
             <div className="order-2 lg:order-1">
               <div className="hidden lg:block">
                 <div
+                  ref={desktopThumbScrollerRef}
                   style={{ scrollbarWidth: "none" }}
-                  className="max-h-[760px] overflow-y-auto  pr-2"
+                  className="max-h-[760px] overflow-y-auto pr-2"
                 >
                   <div className="flex flex-col gap-3">
                     {sortedImages.map((image) => {
@@ -161,6 +190,7 @@ export default function ProductGalleryClient({
                                 playsInline
                                 preload="metadata"
                               />
+
                               <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
                                   ▶
@@ -184,7 +214,7 @@ export default function ProductGalleryClient({
                 </div>
               </div>
             </div>
-          )}
+          ) : null}
 
           <div className="order-1 lg:order-2">
             <div className="mx-auto w-full max-w-[760px] lg:mx-0">
@@ -224,8 +254,9 @@ export default function ProductGalleryClient({
                 </div>
               </button>
 
-              {sortedImages.length > 1 && (
+              {sortedImages.length > 1 ? (
                 <div
+                  ref={mobileThumbScrollerRef}
                   style={{ scrollbarWidth: "none" }}
                   className="mt-4 overflow-x-auto"
                 >
@@ -258,6 +289,7 @@ export default function ProductGalleryClient({
                                 playsInline
                                 preload="metadata"
                               />
+
                               <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/10">
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-black/70 text-xs text-white">
                                   ▶
@@ -279,21 +311,21 @@ export default function ProductGalleryClient({
                     })}
                   </div>
                 </div>
-              )}
+              ) : null}
             </div>
           </div>
         </div>
       </div>
 
-      {isFullscreenOpen && (
+      {isFullscreenOpen ? (
         <div
           className="fixed inset-0 z-[999] bg-black/92 px-4 py-4 md:px-8 md:py-8"
           onClick={() => setIsFullscreenOpen(false)}
         >
           <button
             type="button"
-            onClick={(e) => {
-              e.stopPropagation();
+            onClick={(event) => {
+              event.stopPropagation();
               setIsFullscreenOpen(false);
             }}
             className="absolute right-4 top-4 z-20 cursor-pointer border border-white/15 bg-black/30 px-4 py-2 text-[11px] uppercase tracking-[0.18em] text-white transition hover:border-white/35"
@@ -302,12 +334,12 @@ export default function ProductGalleryClient({
             Close
           </button>
 
-          {sortedImages.length > 1 && (
+          {sortedImages.length > 1 ? (
             <>
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   goToPrev();
                 }}
                 className="absolute left-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center border border-white/15 bg-black/30 text-white transition hover:border-white/35"
@@ -318,8 +350,8 @@ export default function ProductGalleryClient({
 
               <button
                 type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
+                onClick={(event) => {
+                  event.stopPropagation();
                   goToNext();
                 }}
                 className="absolute right-4 top-1/2 z-20 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center border border-white/15 bg-black/30 text-white transition hover:border-white/35"
@@ -328,12 +360,12 @@ export default function ProductGalleryClient({
                 →
               </button>
             </>
-          )}
+          ) : null}
 
           <div className="flex h-full w-full items-center justify-center">
             <div
               className="relative h-full w-full max-w-[1300px]"
-              onClick={(e) => e.stopPropagation()}
+              onClick={(event) => event.stopPropagation()}
             >
               {activeIsVideo ? (
                 <video
@@ -360,7 +392,7 @@ export default function ProductGalleryClient({
             </div>
           </div>
         </div>
-      )}
+      ) : null}
     </>
   );
 }

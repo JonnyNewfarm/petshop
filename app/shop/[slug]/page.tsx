@@ -181,6 +181,22 @@ export default async function ProductPage({ params }: ProductPageProps) {
 
   const productBenefits = getProductBenefits(product.benefits);
 
+  const saleVariant = product.variants.find(
+    (variant) =>
+      variant.price !== null &&
+      variant.compareAtPrice !== null &&
+      variant.compareAtPrice > variant.price,
+  );
+
+  const displayHeaderPrice = saleVariant?.price ?? product.price;
+
+  const displayHeaderCompareAtPrice =
+    saleVariant?.compareAtPrice ?? product.compareAtPrice;
+
+  const isOnSale =
+    displayHeaderCompareAtPrice !== null &&
+    displayHeaderCompareAtPrice > displayHeaderPrice;
+
   const relatedCandidates = await prisma.product.findMany({
     where: {
       NOT: {
@@ -346,7 +362,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                 </h1>
 
                 {product.shortDescription ? (
-                  <p className="mt-4 max-w-[62ch] text-sm leading-6 text-black/65">
+                  <p className="mt-4 max-w-[62ch] text-[18px] leading-6 text-black/65">
                     {product.shortDescription}
                   </p>
                 ) : null}
@@ -357,14 +373,17 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
                     Price
                   </p>
-                  <p className="mt-1 text-base leading-none tracking-[-0.03em]">
-                    ${(product.price / 100).toFixed(2)}
+                  <p
+                    className={`mt-1 text-base leading-none tracking-[-0.03em] ${
+                      isOnSale ? "text-red-700" : "text-black"
+                    }`}
+                  >
+                    ${(displayHeaderPrice / 100).toFixed(2)}
                   </p>
 
-                  {product.compareAtPrice &&
-                  product.compareAtPrice > product.price ? (
+                  {isOnSale && displayHeaderCompareAtPrice !== null ? (
                     <p className="mt-2 text-xs leading-none text-black/35 line-through">
-                      ${(product.compareAtPrice / 100).toFixed(2)}
+                      ${(displayHeaderCompareAtPrice / 100).toFixed(2)}
                     </p>
                   ) : null}
                 </div>
