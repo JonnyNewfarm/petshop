@@ -374,7 +374,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                     Price
                   </p>
                   <p
-                    className={`mt-1 text-base leading-none tracking-[-0.03em] ${
+                    className={`mt-1 text-[20px] leading-none tracking-[-0.03em] ${
                       isOnSale ? "text-red-700" : "text-black"
                     }`}
                   >
@@ -382,7 +382,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   </p>
 
                   {isOnSale && displayHeaderCompareAtPrice !== null ? (
-                    <p className="mt-2 text-xs leading-none text-black/35 line-through">
+                    <p className="mt-2 text-[14px] leading-none text-black/45 line-through">
                       ${(displayHeaderCompareAtPrice / 100).toFixed(2)}
                     </p>
                   ) : null}
@@ -392,7 +392,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
                     Images
                   </p>
-                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                  <p className="mt-2 text-[20px] leading-none tracking-[-0.03em]">
                     {product.images.length}
                   </p>
                 </div>
@@ -401,7 +401,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
                   <p className="text-[10px] uppercase tracking-[0.18em] text-black/40">
                     Category
                   </p>
-                  <p className="mt-2 text-base leading-none tracking-[-0.03em]">
+                  <p className="mt-2 text-[20px] leading-none tracking-[-0.03em]">
                     {product.category.name}
                   </p>
                 </div>
