@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Montserrat, Geist } from "next/font/google";
-import Script from "next/script"; // ⭐ LEGG TIL
+import Script from "next/script";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={cn("font-sans", geist.variable)}>
       <head>
-        {/* 🔥 META PIXEL */}
+        {/* META PIXEL */}
         <Script id="meta-pixel" strategy="afterInteractive">
           {`
             !function(f,b,e,v,n,t,s)
@@ -42,7 +42,8 @@ export default function RootLayout({
             fbq('track', 'PageView');
           `}
         </Script>
-        {/* 🔥 GOOGLE ADS TAG */}
+
+        {/* GOOGLE ADS TAG */}
         <Script
           src="https://www.googletagmanager.com/gtag/js?id=AW-18099784617"
           strategy="afterInteractive"
@@ -50,12 +51,23 @@ export default function RootLayout({
 
         <Script id="google-ads-base" strategy="afterInteractive">
           {`
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    window.gtag = gtag;
-    gtag('js', new Date());
-    gtag('config', 'AW-18099784617');
-  `}
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            gtag('js', new Date());
+            gtag('config', 'AW-18099784617');
+          `}
+        </Script>
+
+        {/* MICROSOFT CLARITY */}
+        <Script id="microsoft-clarity" strategy="afterInteractive">
+          {`
+            (function(c,l,a,r,i,t,y){
+              c[a]=c[a]||function(){(c[a].q=c[a].q||[]).push(arguments)};
+              t=l.createElement(r);t.async=1;t.src="https://www.clarity.ms/tag/"+i;
+              y=l.getElementsByTagName(r)[0];y.parentNode.insertBefore(t,y);
+            })(window, document, "clarity", "script", "wlblrxvs8o");
+          `}
         </Script>
       </head>
 
