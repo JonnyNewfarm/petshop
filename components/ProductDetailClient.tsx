@@ -364,6 +364,17 @@ export default function ProductDetailsClient({
               </p>
             ) : null}
 
+            {product.benefits.length > 0 ? (
+              <div className="mt-5 grid gap-2 border-t border-black/10 pt-4 text-[14px] leading-5 text-black/72">
+                {product.benefits.slice(0, 3).map((benefit) => (
+                  <p key={benefit} className="flex gap-2">
+                    <span className="text-black/45">✓</span>
+                    <span>{benefit}</span>
+                  </p>
+                ))}
+              </div>
+            ) : null}
+
             {reviewCount > 0 && averageRating ? (
               <div className="mt-4 flex flex-wrap items-center gap-3">
                 <p className="text-sm tracking-[0.02em] text-black/80">
