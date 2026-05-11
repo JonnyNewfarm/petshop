@@ -41,20 +41,39 @@ export default function ShippingPage() {
           confirmation.
         </p>
         <p>
-          Processing times may be longer during high-demand periods, holidays,
-          or if additional order verification is required.
+          Orders are processed Monday–Saturday, excluding public holidays and
+          other days when carriers or fulfillment partners are unavailable.
         </p>
       </Section>
 
-      <Section title="Estimated delivery time">
+      <Section title="Order cutoff time">
         <p>
-          Estimated delivery time is typically 7–15 business days after your
-          order has been processed and shipped.
+          Our daily order cutoff time is 2:00 PM Pacific Standard Time. Orders
+          placed after the cutoff time may begin processing on the next business
+          day.
+        </p>
+      </Section>
+
+      <Section title="Estimated transit time">
+        <p>
+          Estimated transit time is typically 5–12 business days after your
+          order has been handed to the carrier.
         </p>
         <p>
-          Delivery times may vary depending on your location, carrier
-          performance, customs processing, demand, weather, and other external
-          factors outside our control.
+          Transit time may vary depending on your delivery location, carrier
+          performance, customs processing, weather, local delivery disruptions,
+          demand, and other external factors outside our control.
+        </p>
+      </Section>
+
+      <Section title="Total estimated delivery time">
+        <p>
+          The total estimated delivery time is typically 6–17 business days.
+          This includes both order processing time and carrier transit time.
+        </p>
+        <p>
+          Delivery estimates are not guaranteed and may vary during high-demand
+          periods, holidays, customs processing, or unexpected carrier delays.
         </p>
       </Section>
 
@@ -80,14 +99,25 @@ export default function ShippingPage() {
         </p>
       </Section>
 
-      <Section title="Fulfillment">
+      <Section title="Fulfillment and delivery">
         <p>
-          We work with trusted fulfillment partners and shipping providers to
-          process, pack, and deliver orders.
+          Petsaco works with trusted fulfillment and shipping partners to help
+          process, pack, and deliver customer orders.
         </p>
         <p>
-          Orders may be shipped from different fulfillment locations depending
-          on product availability and delivery destination.
+          We remain your point of contact for customer support, order questions,
+          shipping updates, returns, and refund requests.
+        </p>
+      </Section>
+
+      <Section title="Shipping destinations">
+        <p>
+          We currently ship to the United States, Canada, the United Kingdom,
+          Australia, and New Zealand.
+        </p>
+        <p>
+          Shipping availability may vary by product, destination, or checkout
+          availability.
         </p>
       </Section>
 
@@ -111,8 +141,8 @@ export default function ShippingPage() {
         </p>
         <p>
           Some delays may be caused by customs, carriers, weather, local
-          delivery disruptions, or other circumstances outside our reasonable
-          control.
+          delivery disruptions, public holidays, or other circumstances outside
+          our reasonable control.
         </p>
       </Section>
 
@@ -120,7 +150,7 @@ export default function ShippingPage() {
         <p>
           If you have questions about shipping, contact{" "}
           <a
-            href="mailto:support@petsaco.com"
+            href="mailto:sales@petsaco.com"
             className="underline underline-offset-4"
           >
             sales@petsaco.com
