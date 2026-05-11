@@ -99,10 +99,22 @@ export default function LegalPageLayout({
                     Refund Policy
                   </Link>
                   <Link
+                    href="/shipping"
+                    className="border-b border-black/10 py-3 text-[11px] uppercase tracking-[0.18em] text-black/70 transition hover:text-black"
+                  >
+                    shipping{" "}
+                  </Link>
+                  <Link
                     href="/contact"
                     className="py-3 text-[11px] uppercase tracking-[0.18em] text-black/70 transition hover:text-black"
                   >
                     Contact
+                  </Link>
+                  <Link
+                    href="/about"
+                    className="py-3 text-[11px] uppercase tracking-[0.18em] text-black/70 transition hover:text-black"
+                  >
+                    about
                   </Link>
                 </nav>
               </div>

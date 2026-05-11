@@ -64,12 +64,12 @@ export default function TermsPage() {
       <Section title="Shipping and fulfillment">
         <p>
           Orders are typically processed within 1–3 business days. Estimated
-          delivery times may vary depending on location, demand, carrier
-          performance, and other external factors.
+          delivery times, tracking information, shipping costs, and delay
+          information are explained in our Shipping Policy.
         </p>
         <p>
           We work with trusted fulfillment partners and shipping providers to
-          deliver your order.
+          process and deliver orders.
         </p>
       </Section>
 

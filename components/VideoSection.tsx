@@ -90,7 +90,7 @@ export default function VideoSection() {
             ref={l1}
             style={{ fontFamily: "Mango" }}
             className="text-[clamp(4rem,12vw,10rem)] uppercase leading-[0.8] tracking-[0.01em]"
-          >
+          >ø
             Better
           </div>
 

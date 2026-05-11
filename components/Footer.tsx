@@ -34,6 +34,16 @@ export default function Footer() {
           <Link href="/refunds" className="transition-opacity hover:opacity-60">
             refunds
           </Link>
+
+          <Link
+            href="/shipping"
+            className="transition-opacity hover:opacity-60"
+          >
+            shipping
+          </Link>
+          <Link href="/about" className="transition-opacity hover:opacity-60">
+            about
+          </Link>
         </nav>
 
         <div className="mt-10 h-px w-full bg-black/20" />

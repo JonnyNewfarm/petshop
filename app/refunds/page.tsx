@@ -43,6 +43,10 @@ export default function RefundsPage() {
         </p>
       </Section>
 
+      <Section title="Returns">
+        <p>Refund processing time: 7 days</p>
+      </Section>
+
       <Section title="Refund approval">
         <p>
           Once your returned item has been received and inspected, we will let
