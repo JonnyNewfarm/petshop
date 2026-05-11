@@ -53,7 +53,7 @@ export default function LegalPageLayout({
                       Support
                     </p>
                     <p className="mt-2 text-sm leading-none tracking-[-0.02em] sm:text-base">
-                      support@petsaco.com
+                      sales@petsaco.com
                     </p>
                   </div>
 
