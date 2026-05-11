@@ -95,7 +95,7 @@ export default function TermsPage() {
             href="mailto:support@petsaco.com"
             className="underline underline-offset-4"
           >
-            support@petsaco.com
+            sales@petsaco.com
           </a>
           .
         </p>
