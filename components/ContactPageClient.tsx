@@ -160,7 +160,7 @@ export default function ContactPageClient() {
               </h1>
 
               <p className="mt-6 max-w-[620px] text-[15px] leading-7 text-black/62 md:text-base">
-                Questions about products, orders, collaborations or general
+                Questions about products, orders, shipping, returns or general
                 enquiries — get in touch and we&apos;ll get back to you as soon
                 as possible.
               </p>
@@ -182,7 +182,7 @@ export default function ContactPageClient() {
                     Support
                   </p>
                   <p className="mt-2 text-2xl leading-none tracking-[-0.04em]">
-                    Global
+                    Email
                   </p>
                 </div>
 
@@ -218,7 +218,7 @@ export default function ContactPageClient() {
                     Email
                   </p>
                   <a
-                    href="mailto:hello@yourstore.com"
+                    href="mailto:sales@petsaco.com"
                     className="mt-2 block text-base tracking-[-0.02em] text-black transition hover:opacity-70"
                   >
                     sales@petsaco.com
@@ -227,12 +227,33 @@ export default function ContactPageClient() {
 
                 <div className="border-t border-black/10 pt-8">
                   <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
-                    Opening hours
+                    Support hours
                   </p>
                   <div className="mt-3 space-y-2 text-sm leading-6 text-black/65">
-                    <p>Mon — Fri / 09:00 — 17:00</p>
-                    <p>Sat — Sun / Closed</p>
+                    <p>Monday — Friday</p>
+                    <p>We typically reply within 24–48 hours.</p>
                   </div>
+                </div>
+
+                <div className="border-t border-black/10 pt-8">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
+                    Business location
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-black/65">
+                    Based in Norway, serving customers in selected international
+                    markets.
+                  </p>
+                </div>
+
+                <div className="border-t border-black/10 pt-8">
+                  <p className="text-[10px] uppercase tracking-[0.22em] text-black/40">
+                    Customer support
+                  </p>
+                  <p className="mt-3 text-sm leading-6 text-black/65">
+                    For order questions, shipping updates, returns, refunds,
+                    product questions, or general support, please contact us by
+                    email.
+                  </p>
                 </div>
               </div>
             </div>
