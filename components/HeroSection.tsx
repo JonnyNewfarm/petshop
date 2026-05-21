@@ -290,7 +290,7 @@ export default function HeroSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-12 items-center gap-y-22 mt-26 sm:mt-0 md:gap-y-20 lg:gap-y-24">
+          <div className="grid grid-cols-12 items-center gap-y-22 mt-26 sm:mt-5 md:gap-y-20 lg:gap-y-24">
             <div className="col-span-12 overflow-hidden md:col-span-8">
               <span
                 ref={topLineRef}
@@ -403,7 +403,7 @@ export default function HeroSection() {
           <div className="grid grid-cols-12 items-end">
             <a
               href="#products"
-              className="inline-flex absolute md:hidden left-6 bottom-20 items-center bg-stone-600 px-2 py-1 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
+              className="inline-flex absolute md:hidden left-6 bottom-20 items-center bg-stone-700 px-2 py-2 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
             >
               View curated objects →
             </a>
