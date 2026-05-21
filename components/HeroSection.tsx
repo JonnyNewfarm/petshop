@@ -3,7 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import Link from "next/link";
+import DogLineBg from "./DogLineBg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -11,43 +11,39 @@ export default function HeroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
   const heroRef = useRef<HTMLDivElement | null>(null);
 
-  const imageStageRef = useRef<HTMLDivElement | null>(null);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
 
-  const textWrapRef = useRef<HTMLDivElement | null>(null);
-  const line1Ref = useRef<HTMLSpanElement | null>(null);
-  const line2Ref = useRef<HTMLSpanElement | null>(null);
-  const line3Ref = useRef<HTMLSpanElement | null>(null);
-  const subRef = useRef<HTMLParagraphElement | null>(null);
+  const topLineRef = useRef<HTMLSpanElement | null>(null);
+  const hugeLineRef = useRef<HTMLSpanElement | null>(null);
+  const livingRef = useRef<HTMLSpanElement | null>(null);
+
+  const sideTextRef = useRef<HTMLParagraphElement | null>(null);
+  const bottomTextRef = useRef<HTMLParagraphElement | null>(null);
+  const indexRef = useRef<HTMLDivElement | null>(null);
+  const labelRef = useRef<HTMLParagraphElement | null>(null);
+
+  const dogArtRef = useRef<HTMLDivElement | null>(null);
 
   const petRef = useRef<HTMLSpanElement | null>(null);
   const dogRef = useRef<HTMLSpanElement | null>(null);
   const catRef = useRef<HTMLSpanElement | null>(null);
 
-  const shopWrapRef = useRef<HTMLDivElement | null>(null);
-  const shopRef = useRef<HTMLSpanElement | null>(null);
-  const nowRef = useRef<HTMLSpanElement | null>(null);
-
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      gsap.set(
-        [
-          line1Ref.current,
-          line2Ref.current,
-          line3Ref.current,
-          subRef.current,
-          petRef.current,
-          dogRef.current,
-          catRef.current,
-          shopRef.current,
-          nowRef.current,
-          textWrapRef.current,
-          shopWrapRef.current,
-        ],
-        {
-          force3D: true,
-        },
-      );
+      const revealItems = [
+        topLineRef.current,
+        hugeLineRef.current,
+        livingRef.current,
+        sideTextRef.current,
+        bottomTextRef.current,
+        indexRef.current,
+        labelRef.current,
+        dogArtRef.current,
+      ];
+
+      gsap.set(revealItems, {
+        force3D: true,
+      });
 
       gsap.set([petRef.current, dogRef.current, catRef.current], {
         transformPerspective: 1200,
@@ -57,45 +53,40 @@ export default function HeroSection() {
 
       const intro = gsap.timeline({
         defaults: {
+          ease: "power3.out",
           force3D: true,
         },
       });
 
       intro
-        .to(imageStageRef.current, {
-          scale: 1,
-          duration: 1.4,
-          ease: "power3.out",
+        .to([topLineRef.current, hugeLineRef.current, livingRef.current], {
+          y: 0,
+          opacity: 1,
+          duration: 0.85,
+          stagger: 0.08,
         })
         .to(
-          overlayRef.current,
-          {
-            opacity: 0.22,
-            duration: 0.8,
-            ease: "power2.out",
-          },
-          0.2,
-        )
-        .to(
-          [line1Ref.current, line2Ref.current, line3Ref.current],
+          [
+            sideTextRef.current,
+            bottomTextRef.current,
+            indexRef.current,
+            labelRef.current,
+          ],
           {
             y: 0,
             opacity: 1,
             duration: 0.75,
             stagger: 0.06,
-            ease: "power3.out",
           },
-          0.55,
+          0.14,
         )
         .to(
-          subRef.current,
+          dogArtRef.current,
           {
-            y: 0,
             opacity: 1,
-            duration: 0.7,
-            ease: "power3.out",
+            duration: 0.9,
           },
-          0.72,
+          0.18,
         );
 
       const tl = gsap.timeline({
@@ -111,43 +102,61 @@ export default function HeroSection() {
       });
 
       tl.to(
-        textWrapRef.current,
+        stageRef.current,
         {
-          yPercent: -10,
+          yPercent: -8,
           ease: "none",
           force3D: true,
         },
         0,
       )
         .to(
-          line1Ref.current,
+          topLineRef.current,
           {
-            xPercent: 8,
+            xPercent: 4,
             ease: "none",
             force3D: true,
           },
           0,
         )
         .to(
-          line2Ref.current,
+          hugeLineRef.current,
           {
-            xPercent: -8,
+            xPercent: -5,
             ease: "none",
             force3D: true,
           },
           0,
         )
         .to(
-          subRef.current,
+          livingRef.current,
           {
-            opacity: 0.6,
-            yPercent: -18,
+            xPercent: 3,
+            ease: "none",
+            force3D: true,
+          },
+          0,
+        )
+        .to(
+          dogArtRef.current,
+          {
+            yPercent: -4,
+            scale: 1.04,
+            ease: "none",
+            force3D: true,
+          },
+          0,
+        )
+        .to(
+          [sideTextRef.current, bottomTextRef.current, labelRef.current],
+          {
+            opacity: 0.62,
+            yPercent: -12,
             ease: "none",
             force3D: true,
           },
           0.08,
         )
-
         .to(
           petRef.current,
           {
@@ -172,7 +181,6 @@ export default function HeroSection() {
           },
           0.18,
         )
-
         .to(
           dogRef.current,
           {
@@ -183,7 +191,7 @@ export default function HeroSection() {
             ease: "none",
             force3D: true,
           },
-          0.38,
+          0.4,
         )
         .to(
           catRef.current,
@@ -195,71 +203,43 @@ export default function HeroSection() {
             ease: "none",
             force3D: true,
           },
-          0.38,
+          0.4,
         )
-
         .to(
-          shopRef.current,
+          topLineRef.current,
           {
-            x: 0,
-            y: 0,
-            opacity: 1,
-            rotate: 0,
-            duration: 0.22,
+            xPercent: 7,
             ease: "none",
             force3D: true,
           },
           0.5,
         )
         .to(
-          nowRef.current,
+          hugeLineRef.current,
           {
-            x: 0,
-            y: 0,
-            opacity: 1,
-            rotate: 0,
-            duration: 0.22,
+            xPercent: -8,
             ease: "none",
             force3D: true,
           },
-          0.56,
-        )
-
-        .to(
-          line1Ref.current,
-          {
-            xPercent: 14,
-            ease: "none",
-            force3D: true,
-          },
-          0.48,
+          0.5,
         )
         .to(
-          line2Ref.current,
+          livingRef.current,
           {
-            xPercent: -14,
+            xPercent: 5,
             ease: "none",
             force3D: true,
           },
-          0.48,
+          0.5,
         )
         .to(
-          textWrapRef.current,
+          stageRef.current,
           {
-            yPercent: -16,
+            yPercent: -13,
             ease: "none",
             force3D: true,
           },
-          0.48,
-        )
-        .to(
-          shopWrapRef.current,
-          {
-            yPercent: -18,
-            ease: "none",
-            force3D: true,
-          },
-          0.48,
+          0.5,
         );
     }, sectionRef);
 
@@ -270,74 +250,99 @@ export default function HeroSection() {
     <section ref={sectionRef} className="relative bg-[#dddad5]">
       <div
         ref={heroRef}
-        className="relative h-screen overflow-hidden bg-[#dddad5] sm:h-[120vh]"
+        className="relative h-screen overflow-hidden bg-[#dddad5] text-[#101010] sm:h-[120vh]"
       >
-        <div className="absolute left-1/2 top-1/2 h-[180vh] w-[130vw] -translate-x-1/2 -translate-y-1/2">
-          <div
-            ref={imageStageRef}
-            className="h-full w-full will-change-transform"
-            style={{
-              transform: "scale(0.28)",
-              transformOrigin: "50% 50%",
-            }}
-          >
-            <img
-              src="/dogs.jpg"
-              alt="Pets hero"
-              draggable={false}
-              className="h-full w-full object-cover"
-            />
-          </div>
+        <div
+          ref={dogArtRef}
+          style={{
+            opacity: 0,
+          }}
+          className="pointer-events-none absolute inset-0 z-0 will-change-[transform,opacity]"
+        >
+          <DogLineBg />
         </div>
 
         <div
-          ref={overlayRef}
-          className="absolute inset-0 bg-black will-change-[opacity]"
-          style={{ opacity: 0.08 }}
-        />
-
-        <div
-          ref={textWrapRef}
-          className="relative z-10 flex min-h-screen items-center px-6 py-16 md:px-10 md:py-14"
+          ref={stageRef}
+          className="relative z-10 flex min-h-screen flex-col justify-between px-6 pb-8 pt-10 md:px-12 md:pb-10 md:pt-12"
         >
-          <div className="w-full text-white">
-            <div className="w-full overflow-hidden">
+          <div className="grid grid-cols-12 items-start">
+            <div
+              ref={indexRef}
+              style={{
+                transform: "translate3d(0,28px,0)",
+                opacity: 0,
+              }}
+              className="col-span-5 hidden text-[11px] uppercase tracking-[0.24em] text-[#101010]/55 md:block"
+            >
+              01 / Petsaco
+            </div>
+
+            <p
+              ref={labelRef}
+              style={{
+                transform: "translate3d(0,28px,0)",
+                opacity: 0,
+              }}
+              className="col-span-7 ml-auto hidden max-w-[24rem] text-right text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/55 md:block"
+            >
+              Curated objects for animals and homes
+            </p>
+          </div>
+
+          <div className="grid grid-cols-12 items-center gap-y-22 mt-26 sm:mt-0 md:gap-y-20 lg:gap-y-24">
+            <div className="col-span-12 overflow-hidden md:col-span-8">
               <span
-                ref={line1Ref}
+                ref={topLineRef}
                 style={{
-                  fontFamily: "Mango",
-                  transform: "translate3d(0,110%,0)",
+                  transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)] will-change-[transform,opacity]"
+                className="block w-fit text-[clamp(2rem,8vw,8.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity]"
               >
                 Everything
               </span>
             </div>
 
-            <div className="w-full overflow-hidden">
+            <div className="col-span-12 overflow-hidden md:col-span-6 md:col-start-7">
               <span
-                ref={line2Ref}
+                ref={hugeLineRef}
                 style={{
-                  fontFamily: "Mango",
-                  transform: "translate3d(0,110%,0)",
+                  transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="ml-auto block w-fit text-right font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)] will-change-[transform,opacity]"
+                className="ml-auto block w-fit text-right text-[clamp(2.3rem,6.5vw,7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
               >
-                for modern
+                <span className="block">For</span>
+                <span className="block">modern</span>
               </span>
             </div>
 
-            <div className="w-full overflow-hidden">
+            <div className="relative col-span-12 overflow-visible md:col-span-7">
+              <div className="absolute bottom-full hidden md:block left-0 z-20 mb-5 max-w-[18rem] md:mb-7">
+                <p className="mb-5 hidden text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/55 md:block">
+                  Objects for pets,
+                  <br />
+                  chosen with the same care
+                  <br />
+                  as the rest of your home.
+                </p>
+
+                <a
+                  href="#products"
+                  className="inline-flex items-center  bg-stone-600 px-2 py-1 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
+                >
+                  View curated objects →
+                </a>
+              </div>
+
               <span
-                ref={line3Ref}
+                ref={livingRef}
                 style={{
-                  fontFamily: "Mango",
-                  transform: "translate3d(0,110%,0)",
+                  transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit font-semibold uppercase text-[clamp(3.75rem,11vw,10rem)] will-change-[transform,opacity]"
+                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity]"
               >
                 <span className="relative inline-grid [perspective:1200px]">
                   <span
@@ -349,7 +354,7 @@ export default function HeroSection() {
                     }}
                     className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
                   >
-                    pet
+                    Pet
                   </span>
 
                   <span
@@ -361,7 +366,7 @@ export default function HeroSection() {
                     }}
                     className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
                   >
-                    dog
+                    Dog
                   </span>
 
                   <span
@@ -373,55 +378,53 @@ export default function HeroSection() {
                     }}
                     className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
                   >
-                    cat
+                    Cat
                   </span>
                 </span>{" "}
-                living
+                Living
               </span>
             </div>
 
-            <div
-              ref={shopWrapRef}
-              className="mt-3 flex w-full justify-end pr-2 md:pr-10"
+            <p
+              ref={sideTextRef}
+              style={{
+                transform: "translate3d(0,38px,0)",
+                opacity: 0,
+              }}
+              className="invisible col-span-12 max-w-[23rem] text-[16px] font-semibold leading-relaxed text-[#101010]/70 md:visible md:col-span-3 md:col-start-10 md:self-end"
             >
-              <div className="flex flex-col items-end leading-none text-white">
-                <span
-                  ref={shopRef}
-                  style={{
-                    fontFamily: "Mango",
-                    opacity: 0,
-                    transform: "translate3d(28px,12px,0) rotate(2deg)",
-                  }}
-                  className="block text-[clamp(1.3rem,2.1vw,1.9rem)] uppercase tracking-[0.18em] will-change-[transform,opacity]"
-                >
-                  <Link href={"/shop"}>shop</Link>
-                </span>
+              <span>
+                A playful shop experience built around comfort, clean design and
+                useful products for modern pet owners.
+              </span>
+            </p>
+          </div>
 
-                <span
-                  ref={nowRef}
-                  style={{
-                    fontFamily: "Mango",
-                    opacity: 0,
-                    transform: "translate3d(48px,18px,0) rotate(4deg)",
-                  }}
-                  className="mt-1 block text-[clamp(2.8rem,4.6vw,4.6rem)] font-medium uppercase tracking-[0.08em] will-change-[transform,opacity]"
-                >
-                  <Link href={"/shop"}> now</Link>
-                </span>
+          <div className="grid grid-cols-12 items-end">
+            <a
+              href="#products"
+              className="inline-flex absolute md:hidden left-6 bottom-20 items-center bg-stone-600 px-2 py-1 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
+            >
+              View curated objects →
+            </a>
+            <p
+              ref={bottomTextRef}
+              style={{
+                transform: "translate3d(0,34px,0)",
+                opacity: 0,
+              }}
+              className="col-span-12 max-w-[32rem] text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/90 md:col-span-5 md:text-[12px]"
+            >
+              Thoughtfully selected essentials for dogs, cats and everyday life
+              with pets.
+            </p>
+
+            <div className="col-span-12 mt-6 hidden justify-end md:col-span-4 md:col-start-9 md:flex">
+              <div className="flex gap-8 text-[11px] uppercase tracking-[0.2em] text-[#101010]/50">
+                <span>Comfort</span>
+                <span>Utility</span>
+                <span>Personality</span>
               </div>
-            </div>
-
-            <div className="mt-8 w-full">
-              <p
-                ref={subRef}
-                style={{
-                  transform: "translate3d(0,110%,0)",
-                  opacity: 0,
-                }}
-                className="ml-auto w-fit max-w-[34rem] text-right text-[11px] uppercase tracking-[0.2em] text-white/90 md:text-[12px]"
-              >
-                Curated essentials for dogs, cats and everyday life with pets
-              </p>
             </div>
           </div>
         </div>

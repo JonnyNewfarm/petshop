@@ -78,7 +78,7 @@ export default function AnimalsPage() {
           <div className="mt-14 md:mt-0">
             <Link
               href="/shop"
-              className="inline-block text-[13px] uppercase tracking-[0.18em] text-color/55 transition hover:text-color"
+              className="inline-block text-[13px] uppercase tracking-[0.18em] text-color/55 transition text-red-900 font-semibold"
             >
               View — Shop
             </Link>

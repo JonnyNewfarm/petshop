@@ -135,7 +135,7 @@ export default function EditorialShopSection() {
           </ul>
         </div>
 
-        <div ref={textRef} className="max-w-[520px]">
+        <div ref={textRef} className="max-w-[520px] text-red-900">
           <p className="text-sm leading-relaxed uppercase">
             Toys, treats, walk gear, bowls, soft beds and everyday favorites for
             pets with big personalities.
@@ -149,7 +149,7 @@ export default function EditorialShopSection() {
           <a
             ref={btnRef}
             href="/shop"
-            className="inline-block mt-14 border border-black px-10 py-4 text-sm uppercase hover:bg-black hover:text-white transition-colors"
+            className="inline-block mt-14 border-2 font-semibold border-red-900 text-red-900 px-10 py-4 text-sm uppercase hover:bg-red-900 hover:text-white transition-colors"
           >
             shop now
           </a>
