@@ -290,18 +290,25 @@ export default function HeroSection() {
             </p>
           </div>
 
-          <div className="grid grid-cols-12 items-center gap-y-22 mt-26 sm:mt-5 md:gap-y-20 lg:gap-y-24">
-            <div className="col-span-12 overflow-hidden md:col-span-8">
+          <div className="grid grid-cols-12 items-center gap-y-26 mt-20 sm:mt-5 md:gap-y-20 lg:gap-y-24">
+            <div className="col-span-14 overflow-hidden md:col-span-8">
               <span
                 ref={topLineRef}
                 style={{
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit text-[clamp(2rem,8vw,8.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity]"
+                className="block w-fit text-[clamp(2rem,8vw,8.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
               >
                 Everything
               </span>
+              <p className="text-[9px] absolute md:hidden uppercase leading-relaxed tracking-[0.22em] text-[#101010] ">
+                Objects for pets,
+                <br />
+                chosen with the same care
+                <br />
+                as the rest of your home.
+              </p>
             </div>
 
             <div className="col-span-12 overflow-hidden md:col-span-6 md:col-start-7">
@@ -311,7 +318,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="ml-auto block w-fit text-right text-[clamp(2.3rem,6.5vw,7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
+                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
               >
                 <span className="block">For</span>
                 <span className="block">modern</span>
@@ -342,7 +349,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900 will-change-[transform,opacity]"
+                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
               >
                 <span className="relative inline-grid [perspective:1200px]">
                   <span

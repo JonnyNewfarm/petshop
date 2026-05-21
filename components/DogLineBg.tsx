@@ -2,6 +2,13 @@
 
 import { useEffect, useRef } from "react";
 
+type AnimalVideo = {
+  src: string;
+  xOffset: number;
+  yOffset: number;
+  scale: number;
+};
+
 export default function DogLineBg() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const rafRef = useRef<number | null>(null);
@@ -16,19 +23,47 @@ export default function DogLineBg() {
 
     if (!ctx) return;
 
-    const video = document.createElement("video");
-    video.src = "/dog-10.mp4";
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    video.autoplay = true;
-
     const buffer = document.createElement("canvas");
     const bctx = buffer.getContext("2d", {
       willReadFrequently: true,
     });
 
     if (!bctx) return;
+
+    const createVideo = (src: string) => {
+      const video = document.createElement("video");
+
+      video.src = src;
+      video.muted = true;
+      video.loop = true;
+      video.playsInline = true;
+      video.autoplay = true;
+
+      return video;
+    };
+
+    const dogVideo = createVideo("/dog-10.mp4");
+    const catVideo = createVideo("/cat-10.mp4");
+
+    const animals: AnimalVideo[] = [
+      {
+        src: "/cat-10.mp4",
+        xOffset: -155,
+        yOffset: 20,
+        scale: 0.3,
+      },
+      {
+        src: "/dog-10.mp4",
+        xOffset: 40,
+        yOffset: 30,
+        scale: 0.78,
+      },
+    ];
+
+    const videos = {
+      "/dog-10.mp4": dogVideo,
+      "/cat-10.mp4": catVideo,
+    };
 
     let time = 0;
 
@@ -50,52 +85,41 @@ export default function DogLineBg() {
       ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
-    const isDogPixel = (r: number, g: number, b: number) => {
+    const isAnimalPixel = (r: number, g: number, b: number) => {
       const brightness = (r + g + b) / 3;
 
-      // Golden / brown dog
-      const brownDog =
+      const brownFur =
         r > 45 &&
         g > 28 &&
-        b < 150 &&
-        r > b * 1.1 &&
-        g > b * 0.8 &&
-        brightness < 210;
+        b < 155 &&
+        r > b * 1.08 &&
+        g > b * 0.75 &&
+        brightness < 220;
 
-      // Dark fur details
-      const darkFur = brightness < 85;
+      const darkFur = brightness < 92;
 
-      return brownDog || darkFur;
+      return brownFur || darkFur;
     };
 
-    const draw = () => {
+    const drawAnimal = (video: HTMLVideoElement, animal: AnimalVideo) => {
       const width = window.innerWidth;
       const height = window.innerHeight;
 
-      time += 0.012;
-
-      ctx.clearRect(0, 0, width, height);
-
-      // WHITE PAGE BACKGROUND
-      ctx.fillStyle = "#dddad5";
-      ctx.fillRect(0, 0, width, height);
-
       if (video.readyState < 2 || !video.videoWidth || !video.videoHeight) {
-        rafRef.current = requestAnimationFrame(draw);
         return;
       }
 
-      // White buffer, so empty pixels are white, not black
       bctx.fillStyle = "#ffffff";
       bctx.fillRect(0, 0, width, height);
 
       const videoRatio = video.videoWidth / video.videoHeight;
 
-      const drawHeight = Math.min(height * 0.78, 760);
+      const baseHeight = Math.min(height * animal.scale, 760);
+      const drawHeight = baseHeight;
       const drawWidth = drawHeight * videoRatio;
 
-      const videoX = width / 2 - drawWidth / 2;
-      const videoY = height / 2 - drawHeight / 2 + 30;
+      const videoX = width / 2 - drawWidth / 2 + animal.xOffset;
+      const videoY = height / 2 - drawHeight / 2 + animal.yOffset;
 
       const videoLeft = videoX;
       const videoRight = videoX + drawWidth;
@@ -110,14 +134,12 @@ export default function DogLineBg() {
       const lineWidth = 2;
       const sampleStep = 2;
 
-      // BLACK DOG LINES
       ctx.fillStyle = "#000000";
-      ctx.globalAlpha = 1;
+      ctx.globalAlpha = 0.5;
 
       for (let x = 0; x < width; x += lineGap) {
         let startY: number | null = null;
 
-        // tiny movement so the lines feel alive
         const wobble = Math.sin(time * 1.5 + x * 0.025) * 0.8;
 
         for (let y = 0; y < height; y += sampleStep) {
@@ -154,13 +176,13 @@ export default function DogLineBg() {
           const g = pixels[index + 1];
           const b = pixels[index + 2];
 
-          const dog = isDogPixel(r, g, b);
+          const animalPixel = isAnimalPixel(r, g, b);
 
-          if (dog && startY === null) {
+          if (animalPixel && startY === null) {
             startY = y;
           }
 
-          if ((!dog || y >= height - sampleStep) && startY !== null) {
+          if ((!animalPixel || y >= height - sampleStep) && startY !== null) {
             const segmentHeight = y - startY;
 
             if (segmentHeight > 4) {
@@ -173,6 +195,23 @@ export default function DogLineBg() {
       }
 
       ctx.globalAlpha = 1;
+    };
+
+    const draw = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+
+      time += 0.012;
+
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.fillStyle = "#dddad5";
+      ctx.fillRect(0, 0, width, height);
+
+      animals.forEach((animal) => {
+        const video = videos[animal.src as keyof typeof videos];
+        drawAnimal(video, animal);
+      });
 
       rafRef.current = requestAnimationFrame(draw);
     };
@@ -180,25 +219,34 @@ export default function DogLineBg() {
     resize();
 
     const start = () => {
-      video.play().catch(() => {});
+      dogVideo.play().catch(() => {});
+      catVideo.play().catch(() => {});
       draw();
     };
 
-    video.addEventListener("loadeddata", start);
-    video.load();
+    dogVideo.addEventListener("loadeddata", start);
+    catVideo.addEventListener("loadeddata", start);
+
+    dogVideo.load();
+    catVideo.load();
 
     window.addEventListener("resize", resize);
 
     return () => {
       window.removeEventListener("resize", resize);
-      video.removeEventListener("loadeddata", start);
+
+      dogVideo.removeEventListener("loadeddata", start);
+      catVideo.removeEventListener("loadeddata", start);
 
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
 
-      video.pause();
-      video.src = "";
+      dogVideo.pause();
+      catVideo.pause();
+
+      dogVideo.src = "";
+      catVideo.src = "";
     };
   }, []);
 
