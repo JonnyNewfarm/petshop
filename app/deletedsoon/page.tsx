@@ -3,7 +3,7 @@ import React from "react";
 
 const page = () => {
   return (
-    <div className="h-screen z-[99999999]">
+    <div className="h-screen  w-full">
       <DogLineBg />
     </div>
   );
