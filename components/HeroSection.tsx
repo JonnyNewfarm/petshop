@@ -4,7 +4,6 @@ import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import DogLineBg from "./DogLineBg";
-import PetVideoBg from "./PetVideoBg";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -260,7 +259,7 @@ export default function HeroSection() {
           }}
           className="pointer-events-none absolute inset-0 z-0 will-change-[transform,opacity]"
         >
-          <PetVideoBg />
+          <DogLineBg />
         </div>
 
         <div
