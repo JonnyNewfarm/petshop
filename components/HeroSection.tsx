@@ -3,7 +3,6 @@
 import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import DogLineBg from "./DogLineBg";
 import PetVideoBg from "./PetVideoBg";
 
 gsap.registerPlugin(ScrollTrigger);
