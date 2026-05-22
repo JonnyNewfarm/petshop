@@ -48,7 +48,7 @@ export default function DogLineBg() {
     const animals: AnimalVideo[] = [
       {
         src: "/cat-10.mp4",
-        xOffset: -155,
+        xOffset: -130,
         yOffset: 20,
         scale: 0.3,
       },

@@ -298,7 +298,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit text-[clamp(2rem,8vw,8.5rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
+                className="block w-fit text-[clamp(1rem,5.7vw,6.2rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
               >
                 Everything
               </span>
