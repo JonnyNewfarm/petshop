@@ -298,7 +298,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit text-[clamp(1rem,5.7vw,6.2rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
+                className="block w-fit text-[clamp(1rem,5.7vw,6.2rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
               >
                 Everything
               </span>
@@ -318,7 +318,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
+                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
               >
                 <span className="block">For</span>
                 <span className="block">modern</span>
@@ -349,7 +349,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-red-900/80 will-change-[transform,opacity]"
+                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
               >
                 <span className="relative inline-grid [perspective:1200px]">
                   <span

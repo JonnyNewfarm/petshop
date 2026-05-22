@@ -105,7 +105,10 @@ export default function EditorialShopSection() {
             little lives
           </div>
 
-          <ul ref={listRef} className="mt-16 space-y-3 text-sm uppercase">
+          <ul
+            ref={listRef}
+            className="mt-16 space-y-3 text-sm uppercase text-red-900"
+          >
             <li>
               <Link className="underline" href="/shop?category=dogs">
                 life with dogs
@@ -135,7 +138,7 @@ export default function EditorialShopSection() {
           </ul>
         </div>
 
-        <div ref={textRef} className="max-w-[520px] text-red-900">
+        <div ref={textRef} className="max-w-[520px] md:text-red-900">
           <p className="text-sm leading-relaxed uppercase">
             Toys, treats, walk gear, bowls, soft beds and everyday favorites for
             pets with big personalities.
