@@ -143,3 +143,21 @@ body::-webkit-scrollbar {
     @apply font-sans;
   }
 }
+
+
+.bg-video-no-controls::-webkit-media-controls {
+  display: none !important;
+}
+
+.bg-video-no-controls::-webkit-media-controls-panel {
+  display: none !important;
+}
+
+.bg-video-no-controls::-webkit-media-controls-play-button {
+  display: none !important;
+}
+
+.bg-video-no-controls::-webkit-media-controls-start-playback-button {
+  display: none !important;
+  -webkit-appearance: none;
+}
