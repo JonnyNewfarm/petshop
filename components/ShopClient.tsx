@@ -492,7 +492,7 @@ export default function ShopClient() {
                       </div>
 
                       {/* Mobile pagination */}
-                      <div className="grid grid-cols-2 border-y border-black sm:hidden">
+                      <div className="grid grid-cols-2 border-y border-black/20 sm:hidden">
                         <button
                           type="button"
                           onClick={() => handlePageChange(pagination.page - 1)}
@@ -506,7 +506,7 @@ export default function ShopClient() {
                           </span>
 
                           <span className="relative z-10 mt-2 block text-2xl uppercase leading-none tracking-[-0.06em] transition-colors group-hover:text-[#f6f1e8]">
-                            ← Prev
+                            Prev
                           </span>
                         </button>
 
@@ -523,34 +523,31 @@ export default function ShopClient() {
                           </span>
 
                           <span className="relative z-10 mt-2 block text-2xl uppercase leading-none tracking-[-0.06em] transition-colors group-hover:text-[#f6f1e8]">
-                            Next →
+                            Next
                           </span>
                         </button>
                       </div>
 
                       {/* Desktop pagination */}
-                      <div className="hidden border-y border-black sm:grid sm:grid-cols-[1fr_auto_1fr]">
+                      <div className="hidden  sm:grid sm:grid-cols-[1fr_auto_1fr]">
                         <button
                           type="button"
                           onClick={() => handlePageChange(pagination.page - 1)}
                           disabled={!pagination.hasPreviousPage}
                           className="group relative overflow-hidden px-8 py-7 text-left disabled:pointer-events-none disabled:opacity-25"
                         >
-                          <span className="absolute inset-0 -translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
+                          <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
 
                           <span className="relative z-10 block text-[11px] uppercase tracking-[0.24em] text-black/40 transition-colors group-hover:text-white/50">
                             Previous page
                           </span>
 
-                          <span className="relative z-10 mt-3 flex items-center gap-4 text-[clamp(2rem,4vw,4rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
-                            <span className="transition-transform duration-500 group-hover:-translate-x-2">
-                              ←
-                            </span>
+                          <span className="relative z-10 mt-3 flex items-center gap-4 text-[clamp(1rem,3vw,3rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
                             Previous
                           </span>
                         </button>
 
-                        <div className="flex items-center border-x border-black px-8 text-center">
+                        <div className="flex items-center  px-8 text-center">
                           <div>
                             <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">
                               Page
@@ -578,11 +575,8 @@ export default function ShopClient() {
                             Next page
                           </span>
 
-                          <span className="relative z-10 mt-3 flex items-center justify-end gap-4 text-[clamp(2rem,4vw,4rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
+                          <span className="relative z-10 mt-3 flex items-center justify-end gap-4 text-[clamp(1rem,3vw,3rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
                             Next
-                            <span className="transition-transform duration-500 group-hover:translate-x-2">
-                              →
-                            </span>
                           </span>
                         </button>
                       </div>
