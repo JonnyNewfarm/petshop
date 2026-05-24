@@ -117,6 +117,7 @@ export default function ShopClient() {
         }
 
         const data = await response.json();
+
         setProducts(data.products);
         setPagination(data.pagination);
       } catch (error) {
@@ -325,13 +326,13 @@ export default function ShopClient() {
                           value={searchInput}
                           onChange={(e) => setSearchInput(e.target.value)}
                           placeholder="Search products..."
-                          className="w-full border border-black/10 bg-[#f3efe8] px-4 py-4 text-sm outline-none placeholder:text-black/35 focus:border-black"
+                          className="w-full border-0 border-b border-black/80 px-4 py-4 text-sm outline-none placeholder:text-black/35 focus:border-black"
                         />
 
                         <div className="flex gap-3">
                           <button
                             type="submit"
-                            className="flex-1 border border-black bg-black px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-[#f6f1e8] transition hover:bg-transparent hover:text-black"
+                            className="flex-1 border border-black px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:bg-black/80 hover:text-white"
                           >
                             Search
                           </button>
@@ -478,43 +479,116 @@ export default function ShopClient() {
                 </div>
 
                 {pagination.totalPages > 1 && (
-                  <div className="mt-14 border-t border-black/10 pt-10">
-                    <div className="flex flex-col items-center gap-5">
-                      <div className="text-[11px] uppercase tracking-[0.22em] text-black/40">
-                        Page {pagination.page} of {pagination.totalPages}
+                  <div className="mt-16 border-t border-black/10 pt-10">
+                    <div className="flex flex-col gap-6">
+                      <div className="flex items-center justify-between gap-4">
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/40">
+                          Navigation
+                        </p>
+
+                        <p className="text-[11px] uppercase tracking-[0.22em] text-black/40">
+                          Page {pagination.page} of {pagination.totalPages}
+                        </p>
                       </div>
 
-                      <div className="flex w-full items-center justify-between gap-3 sm:hidden">
+                      {/* Mobile pagination */}
+                      <div className="grid grid-cols-2 border-y border-black sm:hidden">
                         <button
+                          type="button"
                           onClick={() => handlePageChange(pagination.page - 1)}
                           disabled={!pagination.hasPreviousPage}
-                          className="flex min-w-[88px] items-center justify-center border border-black/10 bg-[#f3efe8] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-black transition hover:border-black disabled:opacity-40"
+                          className="group relative overflow-hidden border-r border-black px-5 py-5 text-left disabled:pointer-events-none disabled:opacity-30"
                         >
-                          ← Prev
+                          <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
+
+                          <span className="relative z-10 block text-[10px] uppercase tracking-[0.22em] text-black/45 transition-colors group-hover:text-white/55">
+                            Previous
+                          </span>
+
+                          <span className="relative z-10 mt-2 block text-2xl uppercase leading-none tracking-[-0.06em] transition-colors group-hover:text-[#f6f1e8]">
+                            ← Prev
+                          </span>
                         </button>
 
-                        <div className="text-[11px] uppercase tracking-[0.18em] text-black/55">
-                          {pagination.page} / {pagination.totalPages}
+                        <button
+                          type="button"
+                          onClick={() => handlePageChange(pagination.page + 1)}
+                          disabled={!pagination.hasNextPage}
+                          className="group relative overflow-hidden px-5 py-5 text-right disabled:pointer-events-none disabled:opacity-30"
+                        >
+                          <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
+
+                          <span className="relative z-10 block text-[10px] uppercase tracking-[0.22em] text-black/45 transition-colors group-hover:text-white/55">
+                            Next
+                          </span>
+
+                          <span className="relative z-10 mt-2 block text-2xl uppercase leading-none tracking-[-0.06em] transition-colors group-hover:text-[#f6f1e8]">
+                            Next →
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* Desktop pagination */}
+                      <div className="hidden border-y border-black sm:grid sm:grid-cols-[1fr_auto_1fr]">
+                        <button
+                          type="button"
+                          onClick={() => handlePageChange(pagination.page - 1)}
+                          disabled={!pagination.hasPreviousPage}
+                          className="group relative overflow-hidden px-8 py-7 text-left disabled:pointer-events-none disabled:opacity-25"
+                        >
+                          <span className="absolute inset-0 -translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
+
+                          <span className="relative z-10 block text-[11px] uppercase tracking-[0.24em] text-black/40 transition-colors group-hover:text-white/50">
+                            Previous page
+                          </span>
+
+                          <span className="relative z-10 mt-3 flex items-center gap-4 text-[clamp(2rem,4vw,4rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
+                            <span className="transition-transform duration-500 group-hover:-translate-x-2">
+                              ←
+                            </span>
+                            Previous
+                          </span>
+                        </button>
+
+                        <div className="flex items-center border-x border-black px-8 text-center">
+                          <div>
+                            <p className="text-[10px] uppercase tracking-[0.24em] text-black/40">
+                              Page
+                            </p>
+
+                            <p className="mt-2 text-5xl leading-none tracking-[-0.08em]">
+                              {String(pagination.page).padStart(2, "0")}
+                            </p>
+
+                            <p className="mt-2 text-[10px] uppercase tracking-[0.2em] text-black/40">
+                              / {String(pagination.totalPages).padStart(2, "0")}
+                            </p>
+                          </div>
                         </div>
 
                         <button
+                          type="button"
                           onClick={() => handlePageChange(pagination.page + 1)}
                           disabled={!pagination.hasNextPage}
-                          className="flex min-w-[88px] items-center justify-center border border-black/10 bg-[#f3efe8] px-4 py-3 text-[10px] uppercase tracking-[0.16em] text-black transition hover:border-black disabled:opacity-40"
+                          className="group relative overflow-hidden px-8 py-7 text-right disabled:pointer-events-none disabled:opacity-25"
                         >
-                          Next →
+                          <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
+
+                          <span className="relative z-10 block text-[11px] uppercase tracking-[0.24em] text-black/40 transition-colors group-hover:text-white/50">
+                            Next page
+                          </span>
+
+                          <span className="relative z-10 mt-3 flex items-center justify-end gap-4 text-[clamp(2rem,4vw,4rem)] uppercase leading-none tracking-[-0.08em] transition-colors group-hover:text-[#f6f1e8]">
+                            Next
+                            <span className="transition-transform duration-500 group-hover:translate-x-2">
+                              →
+                            </span>
+                          </span>
                         </button>
                       </div>
 
-                      <div className="hidden flex-wrap items-center justify-center gap-2.5 sm:flex">
-                        <button
-                          onClick={() => handlePageChange(pagination.page - 1)}
-                          disabled={!pagination.hasPreviousPage}
-                          className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
-                        >
-                          Previous
-                        </button>
-
+                      {/* Page numbers */}
+                      <div className="flex flex-wrap items-center justify-center gap-2">
                         {Array.from(
                           { length: pagination.totalPages },
                           (_, index) => index + 1,
@@ -524,25 +598,18 @@ export default function ShopClient() {
                           return (
                             <button
                               key={page}
+                              type="button"
                               onClick={() => handlePageChange(page)}
-                              className={`min-w-[46px] px-4 py-3 text-[11px] uppercase tracking-[0.18em] transition ${
+                              className={`relative h-10 min-w-10 overflow-hidden border px-4 text-[11px] uppercase tracking-[0.18em] transition ${
                                 active
-                                  ? "bg-black text-[#f6f1e8]"
-                                  : "border border-black/10 bg-[#f3efe8] text-black hover:border-black"
+                                  ? "border-black bg-black text-[#f6f1e8]"
+                                  : "border-black/15 text-black hover:border-black"
                               }`}
                             >
                               {page}
                             </button>
                           );
                         })}
-
-                        <button
-                          onClick={() => handlePageChange(pagination.page + 1)}
-                          disabled={!pagination.hasNextPage}
-                          className="min-w-[110px] border border-black/10 bg-[#f3efe8] px-5 py-3 text-[11px] uppercase tracking-[0.18em] text-black transition hover:border-black disabled:opacity-40"
-                        >
-                          Next
-                        </button>
                       </div>
                     </div>
                   </div>
