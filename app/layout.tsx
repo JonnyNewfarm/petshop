@@ -72,7 +72,6 @@ export default function RootLayout({
       </head>
 
       <body className={`${mont.variable} antialiased`}>
-        <Navbar />
         <PawCursor />
         {children}
         <Footer />
