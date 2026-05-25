@@ -284,9 +284,13 @@ export default function HeroSection() {
                 transform: "translate3d(0,28px,0)",
                 opacity: 0,
               }}
-              className="col-span-7 ml-auto hidden max-w-[24rem] text-right text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/55 md:block"
+              className="col-span-7 ml-auto hidden max-w-[24rem] text-right text-[9px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/90 md:block"
             >
               Curated objects for animals and homes
+              <br />
+              From food and toys to beds, care essentials
+              <br />
+              and everyday comfort for dogs and cats.
             </p>
           </div>
 
@@ -298,7 +302,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="block w-fit text-[clamp(1rem,5.7vw,6.2rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
+                className="block w-fit text-[clamp(1rem,5vw,5.4rem)] sm:text-[clamp(0.1rem,4vw,4.4rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
               >
                 Everything
               </span>
@@ -318,7 +322,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity] sm:text-[clamp(2.8rem,7vw,7.5rem)]"
+                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity] sm:text-[clamp(2.3rem,6.5vw,7rem)]"
               >
                 <span className="block">For</span>
                 <span className="block">modern</span>
@@ -327,7 +331,7 @@ export default function HeroSection() {
 
             <div className="relative col-span-12 overflow-visible md:col-span-7">
               <div className="absolute bottom-full hidden md:block left-0 z-20 mb-5 max-w-[18rem] md:mb-7">
-                <p className="mb-5 hidden text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/55 md:block">
+                <p className="mb-5 hidden text-[12px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/80 md:block">
                   Objects for pets,
                   <br />
                   chosen with the same care
@@ -349,7 +353,7 @@ export default function HeroSection() {
                   transform: "translate3d(0,115%,0)",
                   opacity: 0,
                 }}
-                className="relative z-10 block w-fit text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
+                className="relative z-10 block w-fit text-[clamp(2.7rem,7.9vw,8.4rem)] sm:text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
               >
                 <span className="relative inline-grid [perspective:1200px]">
                   <span
@@ -390,6 +394,10 @@ export default function HeroSection() {
                 </span>{" "}
                 Living
               </span>
+              <span className="font-semibold md:hidden">
+                A playful shop experience built around comfort, clean design and
+                useful products for modern pet owners.
+              </span>
             </div>
 
             <p
@@ -398,7 +406,7 @@ export default function HeroSection() {
                 transform: "translate3d(0,38px,0)",
                 opacity: 0,
               }}
-              className="invisible col-span-12 max-w-[23rem] text-[16px] font-semibold leading-relaxed text-[#101010]/70 md:visible md:col-span-3 md:col-start-10 md:self-end"
+              className="invisible col-span-12 max-w-[23rem] text-[3px] md:text-[18px] font-semibold leading-relaxed text-[#101010] md:visible md:col-span-3 md:col-start-10 md:self-end"
             >
               <span>
                 A playful shop experience built around comfort, clean design and

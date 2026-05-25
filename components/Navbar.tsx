@@ -25,35 +25,45 @@ const panelVariants = {
   closed: {
     height: 0,
     opacity: 0,
+    y: -8,
     transition: {
       height: {
-        duration: 0.4,
+        duration: 0.45,
         ease: [0.76, 0, 0.24, 1] as const,
       },
       opacity: {
         duration: 0.25,
         ease: "linear" as const,
       },
+      y: {
+        duration: 0.35,
+        ease: [0.76, 0, 0.24, 1] as const,
+      },
       when: "afterChildren",
-      staggerChildren: 0.04,
+      staggerChildren: 0.035,
       staggerDirection: -1,
     },
   },
   open: {
     height: "auto",
     opacity: 1,
+    y: 0,
     transition: {
       height: {
-        duration: 0.5,
+        duration: 0.6,
         ease: [0.22, 1, 0.36, 1] as const,
       },
       opacity: {
-        duration: 0.3,
+        duration: 0.25,
         ease: "linear" as const,
       },
+      y: {
+        duration: 0.5,
+        ease: [0.22, 1, 0.36, 1] as const,
+      },
       when: "beforeChildren",
-      staggerChildren: 0.07,
-      delayChildren: 0.06,
+      staggerChildren: 0.075,
+      delayChildren: 0.08,
     },
   },
 };
@@ -61,7 +71,8 @@ const panelVariants = {
 const itemVariants = {
   closed: {
     opacity: 0,
-    y: 20,
+    y: 18,
+    filter: "blur(6px)",
     transition: {
       duration: 0.35,
       ease: [0.76, 0, 0.24, 1] as const,
@@ -70,6 +81,7 @@ const itemVariants = {
   open: {
     opacity: 1,
     y: 0,
+    filter: "blur(0px)",
     transition: {
       duration: 0.55,
       ease: [0.22, 1, 0.36, 1] as const,
@@ -87,6 +99,7 @@ export default function Navbar() {
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!wrapperRef.current) return;
+
       if (!wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
@@ -109,57 +122,94 @@ export default function Navbar() {
 
   return (
     <motion.header
-      initial={{ opacity: 0, y: -24 }}
+      initial={{ opacity: 0, y: -22 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
       className="fixed left-0 top-0 z-50 w-full"
     >
-      <div className="relative mx-auto flex w-full max-w-[1700px] items-start justify-center px-4 py-6 sm:px-6 lg:px-10">
-        <div className="pointer-events-none absolute left-1/2 top-6 -translate-x-1/2">
+      <div className="relative mx-auto flex w-full max-w-[1760px] items-start justify-center px-4 py-5 sm:px-6 md:py-7 lg:px-10">
+        <div className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 md:top-7">
           <div ref={wrapperRef} className="pointer-events-auto relative">
             <motion.div
               layout
               transition={{
                 layout: {
-                  duration: 0.7,
+                  duration: 0.65,
                   ease: [0.22, 1, 0.36, 1],
                 },
               }}
-              className="min-w-[230px] overflow-hidden border border-black/10 bg-white/70 text-black backdrop-blur-md sm:min-w-[270px]"
+              className="
+                w-[310px] overflow-hidden
+                border border-black/10
+                bg-[#f7f4ee]/72
+                text-[#101010]
+                backdrop-blur-xl
+                md:w-[350px]
+              "
             >
-              <div className="flex items-center justify-between gap-2 px-5 py-2 sm:px-7">
+              <div className="grid h-[58px] grid-cols-[1fr_auto_1fr] items-center px-5 md:px-6">
                 <Link
                   href="/"
-                  className="shrink-0 text-lg font-semibold tracking-[-0.04em] text-black"
+                  onClick={() => setIsOpen(false)}
+                  className="
+                    justify-self-start
+                    text-[20px] font-semibold
+                    tracking-[-0.055em]
+                    text-[#101010]
+                  "
                 >
                   Petsaco
                 </Link>
 
-                <div className="flex-1 text-center">
-                  <span className="text-sm font-medium text-black">
-                    {currentPage}
-                  </span>
-                </div>
+                <Link
+                  href={pathname === "/" ? "#top" : "/"}
+                  onClick={() => setIsOpen(false)}
+                  className="
+                    justify-self-center
+                    text-[13px] font-medium
+                    tracking-[-0.02em]
+                    text-[#101010]/80
+                    transition-colors duration-300
+                    hover:text-[#101010]
+                  "
+                >
+                  {currentPage}
+                </Link>
 
                 <button
                   type="button"
                   aria-label={isOpen ? "Close menu" : "Open menu"}
                   aria-expanded={isOpen}
                   onClick={() => setIsOpen((prev) => !prev)}
-                  className="relative inline-flex h-8 w-8 shrink-0 items-center justify-center"
+                  className="
+                    group relative
+                    inline-flex h-9 w-9
+                    justify-self-end
+                    items-center justify-center
+                  "
                 >
-                  <span className="relative block h-4 w-5 overflow-hidden">
+                  <span className="relative block h-4 w-6 overflow-hidden">
                     <motion.span
                       animate={
                         isOpen
-                          ? { top: "50%", y: "-50%", width: "20px", x: 0 }
-                          : { top: "3px", y: "0%", width: "20px", x: 0 }
+                          ? {
+                              top: "50%",
+                              y: "-50%",
+                              rotate: 0,
+                              width: "24px",
+                            }
+                          : {
+                              top: "4px",
+                              y: "0%",
+                              rotate: 0,
+                              width: "24px",
+                            }
                       }
                       transition={{
                         duration: 0.55,
                         ease: [0.22, 1, 0.36, 1],
                       }}
-                      className="absolute left-0 h-[1.5px] bg-black"
+                      className="absolute left-0 h-px bg-[#101010]"
                     />
 
                     <motion.span
@@ -168,23 +218,23 @@ export default function Navbar() {
                           ? {
                               top: "50%",
                               y: "-50%",
-                              width: "12px",
-                              x: 4,
                               opacity: 0,
+                              x: 8,
+                              width: "14px",
                             }
                           : {
-                              top: "11px",
+                              top: "12px",
                               y: "0%",
-                              width: "20px",
-                              x: 0,
                               opacity: 1,
+                              x: 0,
+                              width: "24px",
                             }
                       }
                       transition={{
                         duration: 0.55,
                         ease: [0.22, 1, 0.36, 1],
                       }}
-                      className="absolute left-0 h-[1.5px] bg-black"
+                      className="absolute left-0 h-px bg-[#101010]"
                     />
                   </span>
                 </button>
@@ -205,9 +255,7 @@ export default function Navbar() {
                         const isActive =
                           item.href === "/"
                             ? pathname === "/"
-                            : item.href.startsWith("#")
-                              ? false
-                              : pathname.startsWith(item.href);
+                            : pathname.startsWith(item.href);
 
                         return (
                           <motion.div
@@ -218,30 +266,37 @@ export default function Navbar() {
                             <Link
                               href={item.href}
                               onClick={() => setIsOpen(false)}
-                              className="group relative flex items-center justify-between border-b border-black/10 px-5 py-4 last:border-b-0"
+                              className="
+                                group relative grid grid-cols-[auto_1fr_auto]
+                                items-center gap-5
+                                border-b border-black/10
+                                px-5 py-5
+                                last:border-b-0
+                                md:px-6
+                              "
                             >
+                              <span className="text-[10px] uppercase tracking-[0.24em] text-[#101010]/35">
+                                0{index + 1}
+                              </span>
+
                               <span
-                                className={`text-lg font-semibold tracking-[-0.03em] transition-colors duration-300 ${
+                                className={`text-[30px] font-semibold leading-none tracking-[-0.065em] transition-colors duration-300 ${
                                   isActive
-                                    ? "text-black"
-                                    : "text-black/65 group-hover:text-black"
+                                    ? "text-[#963d3a]"
+                                    : "text-[#101010]/75 group-hover:text-[#101010]"
                                 }`}
                               >
                                 {item.label}
                               </span>
 
-                              <span className="text-xs text-black/35">
-                                0{index + 1}
-                              </span>
-
-                              <motion.span
-                                initial={{ scaleX: 0 }}
-                                whileHover={{ scaleX: 1 }}
-                                transition={{
-                                  duration: 0.45,
-                                  ease: [0.22, 1, 0.36, 1],
-                                }}
-                                className="absolute bottom-0 left-0 h-px w-full origin-left bg-black"
+                              <span
+                                className="
+                                  absolute bottom-0 left-0 h-px w-full
+                                  origin-left scale-x-0
+                                  bg-[#963d3a]
+                                  transition-transform duration-500
+                                  group-hover:scale-x-100
+                                "
                               />
                             </Link>
                           </motion.div>
@@ -250,8 +305,18 @@ export default function Navbar() {
 
                       <motion.div
                         variants={itemVariants}
-                        className="border-t border-black/10 px-5 py-4"
+                        className="border-t border-black/10 px-5 py-5 md:px-6"
                       >
+                        <div className="mb-4 flex items-center justify-between">
+                          <span className="text-[10px] uppercase tracking-[0.24em] text-[#101010]/35">
+                            Cart
+                          </span>
+
+                          <span className="text-[10px] uppercase tracking-[0.24em] text-[#101010]/35">
+                            Petsaco
+                          </span>
+                        </div>
+
                         <CartButton />
                       </motion.div>
                     </motion.nav>

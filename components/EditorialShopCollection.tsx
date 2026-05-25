@@ -128,7 +128,6 @@ export default function EditorialShopSection() {
               <Link className="underline" href="/shop?category=small-pets">
                 small companions
               </Link>
-              s
             </li>
             <li>
               <Link className="underline" href="/shop?category=fish">
