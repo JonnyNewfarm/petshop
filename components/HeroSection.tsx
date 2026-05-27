@@ -24,8 +24,8 @@ type Slide = {
 const slides: Slide[] = [
   {
     label: "Dogs",
-    leftImage: "/dog-11.jpg",
-    rightImage: "/dog-22.jpg",
+    leftImage: "/processed_dog-11.jpeg",
+    rightImage: "/processed_dog-22.jpeg",
     title: "Dogs",
     text: "Walk, rest and play essentials for everyday dog life.",
     cta: "Shop dogs",
@@ -35,8 +35,8 @@ const slides: Slide[] = [
   },
   {
     label: "Cats",
-    leftImage: "/cat-11.jpg",
-    rightImage: "/cat-22.jpg",
+    leftImage: "/processed_cat-11.jpeg",
+    rightImage: "/processed_cat-22.jpeg",
     title: "Cats",
     text: "Soft, useful objects for sleep, scratch and sunlit corners.",
     cta: "Shop cats",
