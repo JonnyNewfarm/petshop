@@ -69,9 +69,6 @@ export default function HomePage() {
   return (
     <ScrollSection>
       <HeroSection />
-      <TrainCardsSection />
-      <VideoSection />
-      <EditorialShopSection />
     </ScrollSection>
   );
 }

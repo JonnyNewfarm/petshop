@@ -1,87 +1,103 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export default function Footer() {
-  return (
-    <footer className="overflow-hidden bg-[#dddad5] px-6 pb-8 pt-16 text-black md:px-10">
-      <div className="mx-auto max-w-[1600px]">
-        <nav className="flex flex-wrap gap-x-10 gap-y-4 text-sm uppercase">
-          <Link href="/" className="transition-opacity hover:opacity-60">
-            home
-          </Link>
+  const path = usePathname();
 
-          <Link href="/shop" className="transition-opacity hover:opacity-60">
-            shop
-          </Link>
+  if (path === "/") {
+    return null;
+  } else {
+    return (
+      <footer className="overflow-hidden bg-[#dddad5] px-6 pb-8 pt-16 text-black md:px-10">
+        <div className="mx-auto max-w-[1600px]">
+          <nav className="flex flex-wrap gap-x-10 gap-y-4 text-sm uppercase">
+            <Link href="/" className="transition-opacity hover:opacity-60">
+              home
+            </Link>
 
-          <Link href="/cart" className="transition-opacity hover:opacity-60">
-            cart
-          </Link>
+            <Link href="/shop" className="transition-opacity hover:opacity-60">
+              shop
+            </Link>
 
-          <Link href="/contact" className="transition-opacity hover:opacity-60">
-            contact
-          </Link>
+            <Link href="/cart" className="transition-opacity hover:opacity-60">
+              cart
+            </Link>
 
-          <Link href="/privacy" className="transition-opacity hover:opacity-60">
-            privacy
-          </Link>
+            <Link
+              href="/contact"
+              className="transition-opacity hover:opacity-60"
+            >
+              contact
+            </Link>
 
-          <Link href="/terms" className="transition-opacity hover:opacity-60">
-            terms
-          </Link>
+            <Link
+              href="/privacy"
+              className="transition-opacity hover:opacity-60"
+            >
+              privacy
+            </Link>
 
-          <Link href="/refunds" className="transition-opacity hover:opacity-60">
-            refunds
-          </Link>
+            <Link href="/terms" className="transition-opacity hover:opacity-60">
+              terms
+            </Link>
 
-          <Link
-            href="/shipping"
-            className="transition-opacity hover:opacity-60"
-          >
-            shipping
-          </Link>
-          <Link href="/about" className="transition-opacity hover:opacity-60">
-            about
-          </Link>
-        </nav>
+            <Link
+              href="/refunds"
+              className="transition-opacity hover:opacity-60"
+            >
+              refunds
+            </Link>
 
-        <div className="mt-10 h-px w-full bg-black/20" />
-      </div>
+            <Link
+              href="/shipping"
+              className="transition-opacity hover:opacity-60"
+            >
+              shipping
+            </Link>
+            <Link href="/about" className="transition-opacity hover:opacity-60">
+              about
+            </Link>
+          </nav>
 
-      <div className="mt-10">
-        <div className="footer-marquee flex w-max items-center">
-          <span
-            style={{ fontFamily: "Mango" }}
-            className="block whitespace-nowrap pr-10 text-[clamp(4.5rem,14vw,14rem)] uppercase leading-[0.8]"
-          >
-            petsaco — petsaco — petsaco — petsaco —
-          </span>
-
-          <span
-            style={{ fontFamily: "Mango" }}
-            className="block whitespace-nowrap pr-10 text-[clamp(4.5rem,14vw,14rem)] uppercase leading-[0.8]"
-            aria-hidden="true"
-          >
-            petsaco — petsaco — petsaco — petsaco —
-          </span>
+          <div className="mt-10 h-px w-full bg-black/20" />
         </div>
-      </div>
 
-      <style jsx>{`
-        .footer-marquee {
-          animation: marqueeMove 18s linear infinite;
-        }
+        <div className="mt-10">
+          <div className="footer-marquee flex w-max items-center">
+            <span
+              style={{ fontFamily: "Mango" }}
+              className="block whitespace-nowrap pr-10 text-[clamp(4.5rem,14vw,14rem)] uppercase leading-[0.8]"
+            >
+              petsaco — petsaco — petsaco — petsaco —
+            </span>
 
-        @keyframes marqueeMove {
-          from {
-            transform: translate3d(0, 0, 0);
+            <span
+              style={{ fontFamily: "Mango" }}
+              className="block whitespace-nowrap pr-10 text-[clamp(4.5rem,14vw,14rem)] uppercase leading-[0.8]"
+              aria-hidden="true"
+            >
+              petsaco — petsaco — petsaco — petsaco —
+            </span>
+          </div>
+        </div>
+
+        <style jsx>{`
+          .footer-marquee {
+            animation: marqueeMove 18s linear infinite;
           }
-          to {
-            transform: translate3d(-50%, 0, 0);
+
+          @keyframes marqueeMove {
+            from {
+              transform: translate3d(0, 0, 0);
+            }
+            to {
+              transform: translate3d(-50%, 0, 0);
+            }
           }
-        }
-      `}</style>
-    </footer>
-  );
+        `}</style>
+      </footer>
+    );
+  }
 }

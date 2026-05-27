@@ -1,449 +1,766 @@
 "use client";
 
-import { useLayoutEffect, useRef } from "react";
+import { forwardRef, useLayoutEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
+import Image from "next/image";
 import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import PetVideoBg from "./PetVideoBg";
+import { Observer } from "gsap/Observer";
+import Link from "next/link";
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(Observer);
+
+type Slide = {
+  label: "Dogs" | "Cats";
+  leftImage: string;
+  rightImage: string;
+  title: string;
+  text: string;
+  cta: string;
+  meta: string;
+  bg: string;
+  textColor: string;
+};
+
+const slides: Slide[] = [
+  {
+    label: "Dogs",
+    leftImage: "/dog-11.jpg",
+    rightImage: "/dog-22.jpg",
+    title: "Dogs",
+    text: "Walk, rest and play essentials for everyday dog life.",
+    cta: "Shop dogs",
+    meta: "Canine goods",
+    bg: "#8f3a32",
+    textColor: "#f1e9dc",
+  },
+  {
+    label: "Cats",
+    leftImage: "/cat-11.jpg",
+    rightImage: "/cat-22.jpg",
+    title: "Cats",
+    text: "Soft, useful objects for sleep, scratch and sunlit corners.",
+    cta: "Shop cats",
+    meta: "Feline goods",
+    bg: "#ded8cc",
+    textColor: "#111111",
+  },
+];
+
+const grainSvg = `
+<svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
+  <filter id="noise">
+    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
+    <feColorMatrix type="saturate" values="0"/>
+    <feComponentTransfer>
+      <feFuncA type="table" tableValues="0 0.85"/>
+    </feComponentTransfer>
+  </filter>
+  <rect width="220" height="220" filter="url(#noise)" opacity="1"/>
+</svg>
+`;
+
+const grainDataUrl = `url("data:image/svg+xml,${encodeURIComponent(grainSvg)}")`;
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
-  const heroRef = useRef<HTMLDivElement | null>(null);
 
-  const stageRef = useRef<HTMLDivElement | null>(null);
+  const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
+  const introRightBlankRef = useRef<HTMLDivElement | null>(null);
 
-  const topLineRef = useRef<HTMLSpanElement | null>(null);
-  const hugeLineRef = useRef<HTMLSpanElement | null>(null);
-  const livingRef = useRef<HTMLSpanElement | null>(null);
+  const leftCurrentRef = useRef<HTMLDivElement | null>(null);
+  const leftNextRef = useRef<HTMLDivElement | null>(null);
 
-  const sideTextRef = useRef<HTMLParagraphElement | null>(null);
-  const bottomTextRef = useRef<HTMLParagraphElement | null>(null);
-  const indexRef = useRef<HTMLDivElement | null>(null);
-  const labelRef = useRef<HTMLParagraphElement | null>(null);
+  const rightCurrentRef = useRef<HTMLDivElement | null>(null);
+  const rightNextRef = useRef<HTMLDivElement | null>(null);
 
-  const dogArtRef = useRef<HTMLDivElement | null>(null);
+  const cardCurrentRef = useRef<HTMLDivElement | null>(null);
+  const cardNextRef = useRef<HTMLDivElement | null>(null);
 
-  const petRef = useRef<HTMLSpanElement | null>(null);
-  const dogRef = useRef<HTMLSpanElement | null>(null);
-  const catRef = useRef<HTMLSpanElement | null>(null);
+  const titleCurrentRef = useRef<HTMLHeadingElement | null>(null);
+  const titleNextRef = useRef<HTMLHeadingElement | null>(null);
+
+  const currentIndexRef = useRef(0);
+  const isAnimatingRef = useRef(false);
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [nextIndex, setNextIndex] = useState(1);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const revealItems = [
-        topLineRef.current,
-        hugeLineRef.current,
-        livingRef.current,
-        sideTextRef.current,
-        bottomTextRef.current,
-        indexRef.current,
-        labelRef.current,
-        dogArtRef.current,
-      ];
+      const isMobile = () => window.innerWidth < 768;
 
-      gsap.set(revealItems, {
-        force3D: true,
+      const setBaseStyles = () => {
+        gsap.set(
+          [
+            introLeftBlankRef.current,
+            introRightBlankRef.current,
+            leftCurrentRef.current,
+            leftNextRef.current,
+            rightCurrentRef.current,
+            rightNextRef.current,
+            cardCurrentRef.current,
+            cardNextRef.current,
+            titleCurrentRef.current,
+            titleNextRef.current,
+          ],
+          {
+            force3D: true,
+            backfaceVisibility: "hidden",
+            transformStyle: "preserve-3d",
+          },
+        );
+      };
+
+      const resetPanels = () => {
+        const mobile = isMobile();
+
+        gsap.set(leftCurrentRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
+        });
+
+        gsap.set(rightCurrentRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
+        });
+
+        if (mobile) {
+          gsap.set(leftNextRef.current, {
+            xPercent: 100,
+            yPercent: 0,
+            zIndex: 3,
+            autoAlpha: 1,
+            scale: 1,
+          });
+
+          gsap.set(rightNextRef.current, {
+            xPercent: -100,
+            yPercent: 0,
+            zIndex: 3,
+            autoAlpha: 1,
+            scale: 1,
+          });
+        } else {
+          gsap.set(leftNextRef.current, {
+            xPercent: 0,
+            yPercent: 100,
+            zIndex: 3,
+            autoAlpha: 1,
+            scale: 1,
+          });
+
+          gsap.set(rightNextRef.current, {
+            xPercent: 0,
+            yPercent: -100,
+            zIndex: 3,
+            autoAlpha: 1,
+            scale: 1,
+          });
+        }
+
+        gsap.set(cardCurrentRef.current, {
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+
+        gsap.set(cardNextRef.current, {
+          yPercent: 100,
+          zIndex: 3,
+          autoAlpha: 1,
+        });
+
+        gsap.set(titleCurrentRef.current, {
+          yPercent: 0,
+          opacity: 1,
+        });
+
+        gsap.set(titleNextRef.current, {
+          yPercent: 100,
+          opacity: 1,
+        });
+      };
+
+      setBaseStyles();
+      resetPanels();
+
+      gsap.set([titleCurrentRef.current, cardCurrentRef.current], {
+        y: 40,
+        opacity: 0,
       });
 
-      gsap.set([petRef.current, dogRef.current, catRef.current], {
-        transformPerspective: 1200,
-        transformOrigin: "50% 50%",
-        backfaceVisibility: "hidden",
+      gsap.set([leftCurrentRef.current, rightCurrentRef.current], {
+        scale: 1.08,
       });
 
-      const intro = gsap.timeline({
+      gsap.set(introLeftBlankRef.current, {
+        xPercent: 0,
+        yPercent: 0,
+        autoAlpha: 1,
+      });
+
+      gsap.set(introRightBlankRef.current, {
+        xPercent: 0,
+        yPercent: 0,
+        autoAlpha: 1,
+      });
+
+      const introTl = gsap.timeline({
         defaults: {
-          ease: "power3.out",
+          ease: "power4.inOut",
           force3D: true,
         },
       });
 
-      intro
-        .to([topLineRef.current, hugeLineRef.current, livingRef.current], {
-          y: 0,
-          opacity: 1,
-          duration: 0.85,
-          stagger: 0.08,
-        })
+      introTl
         .to(
-          [
-            sideTextRef.current,
-            bottomTextRef.current,
-            indexRef.current,
-            labelRef.current,
-          ],
+          introLeftBlankRef.current,
+          {
+            yPercent: -100,
+            duration: 1.15,
+          },
+          0.15,
+        )
+        .to(
+          introRightBlankRef.current,
+          {
+            yPercent: 100,
+            duration: 1.15,
+          },
+          0.15,
+        )
+        .to(
+          [leftCurrentRef.current, rightCurrentRef.current],
+          {
+            scale: 1,
+            duration: 1.35,
+          },
+          0.15,
+        )
+        .to(
+          titleCurrentRef.current,
           {
             y: 0,
             opacity: 1,
-            duration: 0.75,
-            stagger: 0.06,
+            duration: 0.85,
+            ease: "power3.out",
           },
-          0.14,
+          0.72,
         )
         .to(
-          dogArtRef.current,
+          cardCurrentRef.current,
           {
+            y: 0,
             opacity: 1,
-            duration: 0.9,
+            duration: 0.85,
+            ease: "power3.out",
           },
-          0.18,
-        );
+          0.82,
+        )
+        .set([introLeftBlankRef.current, introRightBlankRef.current], {
+          autoAlpha: 0,
+        });
 
-      const tl = gsap.timeline({
-        scrollTrigger: {
-          trigger: sectionRef.current,
-          start: "top top",
-          end: "+=1200",
-          scrub: 1.1,
-          pin: heroRef.current,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
+      const goToSlide = (direction: 1 | -1) => {
+        if (isAnimatingRef.current) return;
+
+        isAnimatingRef.current = true;
+
+        const mobile = isMobile();
+
+        const current = currentIndexRef.current;
+        const next =
+          direction === 1
+            ? (current + 1) % slides.length
+            : (current - 1 + slides.length) % slides.length;
+
+        flushSync(() => {
+          setNextIndex(next);
+        });
+
+        gsap.set(leftCurrentRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+
+        gsap.set(rightCurrentRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+
+        if (mobile) {
+          gsap.set(leftNextRef.current, {
+            xPercent: direction === 1 ? 100 : -100,
+            yPercent: 0,
+            zIndex: 3,
+            autoAlpha: 1,
+          });
+
+          gsap.set(rightNextRef.current, {
+            xPercent: direction === 1 ? -100 : 100,
+            yPercent: 0,
+            zIndex: 3,
+            autoAlpha: 1,
+          });
+        } else {
+          gsap.set(leftNextRef.current, {
+            xPercent: 0,
+            yPercent: direction === 1 ? 100 : -100,
+            zIndex: 3,
+            autoAlpha: 1,
+          });
+
+          gsap.set(rightNextRef.current, {
+            xPercent: 0,
+            yPercent: direction === 1 ? -100 : 100,
+            zIndex: 3,
+            autoAlpha: 1,
+          });
+        }
+
+        gsap.set(cardCurrentRef.current, {
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+
+        gsap.set(cardNextRef.current, {
+          yPercent: direction === 1 ? 100 : -100,
+          zIndex: 3,
+          autoAlpha: 1,
+        });
+
+        gsap.set(titleCurrentRef.current, {
+          yPercent: 0,
+          opacity: 1,
+        });
+
+        gsap.set(titleNextRef.current, {
+          yPercent: direction === 1 ? 100 : -100,
+          opacity: 1,
+        });
+
+        const tl = gsap.timeline({
+          defaults: {
+            duration: 1.1,
+            ease: "power4.inOut",
+            force3D: true,
+          },
+          onComplete: () => {
+            currentIndexRef.current = next;
+
+            flushSync(() => {
+              setCurrentIndex(next);
+              setNextIndex((next + 1) % slides.length);
+            });
+
+            resetPanels();
+
+            isAnimatingRef.current = false;
+          },
+        });
+
+        if (mobile) {
+          tl.to(
+            leftCurrentRef.current,
+            {
+              xPercent: direction === 1 ? -100 : 100,
+              yPercent: 0,
+            },
+            0,
+          )
+            .to(
+              leftNextRef.current,
+              {
+                xPercent: 0,
+                yPercent: 0,
+              },
+              0,
+            )
+            .to(
+              rightCurrentRef.current,
+              {
+                xPercent: direction === 1 ? 100 : -100,
+                yPercent: 0,
+              },
+              0,
+            )
+            .to(
+              rightNextRef.current,
+              {
+                xPercent: 0,
+                yPercent: 0,
+              },
+              0,
+            );
+        } else {
+          tl.to(
+            leftCurrentRef.current,
+            {
+              xPercent: 0,
+              yPercent: direction === 1 ? -100 : 100,
+            },
+            0,
+          )
+            .to(
+              leftNextRef.current,
+              {
+                xPercent: 0,
+                yPercent: 0,
+              },
+              0,
+            )
+            .to(
+              rightCurrentRef.current,
+              {
+                xPercent: 0,
+                yPercent: direction === 1 ? 100 : -100,
+              },
+              0,
+            )
+            .to(
+              rightNextRef.current,
+              {
+                xPercent: 0,
+                yPercent: 0,
+              },
+              0,
+            );
+        }
+
+        tl.to(
+          cardCurrentRef.current,
+          {
+            yPercent: direction === 1 ? -100 : 100,
+          },
+          0,
+        )
+          .to(
+            cardNextRef.current,
+            {
+              yPercent: 0,
+            },
+            0,
+          )
+          .to(
+            titleCurrentRef.current,
+            {
+              yPercent: direction === 1 ? -100 : 100,
+              opacity: 0,
+            },
+            0,
+          )
+          .to(
+            titleNextRef.current,
+            {
+              yPercent: 0,
+              opacity: 1,
+            },
+            0,
+          );
+      };
+
+      const observer = Observer.create({
+        target: sectionRef.current,
+        type: "wheel,touch,pointer",
+        tolerance: 18,
+        preventDefault: true,
+        onDown: () => goToSlide(1),
+        onUp: () => goToSlide(-1),
       });
 
-      tl.to(
-        stageRef.current,
-        {
-          yPercent: -8,
-          ease: "none",
-          force3D: true,
-        },
-        0,
-      )
-        .to(
-          topLineRef.current,
-          {
-            xPercent: 4,
-            ease: "none",
-            force3D: true,
-          },
-          0,
-        )
-        .to(
-          hugeLineRef.current,
-          {
-            xPercent: -5,
-            ease: "none",
-            force3D: true,
-          },
-          0,
-        )
-        .to(
-          livingRef.current,
-          {
-            xPercent: 3,
-            ease: "none",
-            force3D: true,
-          },
-          0,
-        )
-        .to(
-          dogArtRef.current,
-          {
-            yPercent: -4,
-            scale: 1.04,
-            ease: "none",
-            force3D: true,
-          },
-          0,
-        )
-        .to(
-          [sideTextRef.current, bottomTextRef.current, labelRef.current],
-          {
-            opacity: 0.62,
-            yPercent: -12,
-            ease: "none",
-            force3D: true,
-          },
-          0.08,
-        )
-        .to(
-          petRef.current,
-          {
-            rotateX: 90,
-            yPercent: -24,
-            opacity: 0,
-            duration: 0.22,
-            ease: "none",
-            force3D: true,
-          },
-          0.18,
-        )
-        .to(
-          dogRef.current,
-          {
-            rotateX: 0,
-            yPercent: 0,
-            opacity: 1,
-            duration: 0.22,
-            ease: "none",
-            force3D: true,
-          },
-          0.18,
-        )
-        .to(
-          dogRef.current,
-          {
-            rotateX: 90,
-            yPercent: -24,
-            opacity: 0,
-            duration: 0.22,
-            ease: "none",
-            force3D: true,
-          },
-          0.4,
-        )
-        .to(
-          catRef.current,
-          {
-            rotateX: 0,
-            yPercent: 0,
-            opacity: 1,
-            duration: 0.22,
-            ease: "none",
-            force3D: true,
-          },
-          0.4,
-        )
-        .to(
-          topLineRef.current,
-          {
-            xPercent: 7,
-            ease: "none",
-            force3D: true,
-          },
-          0.5,
-        )
-        .to(
-          hugeLineRef.current,
-          {
-            xPercent: -8,
-            ease: "none",
-            force3D: true,
-          },
-          0.5,
-        )
-        .to(
-          livingRef.current,
-          {
-            xPercent: 5,
-            ease: "none",
-            force3D: true,
-          },
-          0.5,
-        )
-        .to(
-          stageRef.current,
-          {
-            yPercent: -13,
-            ease: "none",
-            force3D: true,
-          },
-          0.5,
-        );
+      const handleResize = () => {
+        if (isAnimatingRef.current) return;
+        resetPanels();
+      };
+
+      window.addEventListener("resize", handleResize);
+
+      return () => {
+        observer.kill();
+        window.removeEventListener("resize", handleResize);
+      };
     }, sectionRef);
 
     return () => ctx.revert();
   }, []);
 
+  const current = slides[currentIndex];
+  const next = slides[nextIndex];
+
   return (
-    <section ref={sectionRef} className="relative bg-[#dddad5]">
-      <div
-        ref={heroRef}
-        className="relative h-screen overflow-hidden bg-[#dddad5] text-[#101010] sm:h-[120vh]"
-      >
-        <div
-          ref={dogArtRef}
-          style={{
-            opacity: 0,
-          }}
-          className="pointer-events-none absolute inset-0 z-0 will-change-[transform,opacity]"
-        >
-          <PetVideoBg />
+    <section
+      ref={sectionRef}
+      className="relative h-screen overflow-hidden bg-black text-white"
+    >
+      <div className="grid h-full grid-rows-2 md:grid-cols-2 md:grid-rows-none">
+        <div className="relative h-full overflow-hidden  md:h-screen ">
+          <div
+            ref={leftCurrentRef}
+            className="absolute inset-0 will-change-transform"
+          >
+            <Image
+              src={current.leftImage}
+              alt={`${current.label} top`}
+              fill
+              priority
+              draggable={false}
+              sizes="(max-width: 767px) 100vw, 50vw"
+              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+            />
+            <div className="absolute inset-0 bg-black/15" />
+            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
+          </div>
+
+          <div
+            ref={leftNextRef}
+            className="absolute inset-0 will-change-transform"
+          >
+            <Image
+              src={next.leftImage}
+              alt={`${next.label} top`}
+              fill
+              priority
+              draggable={false}
+              sizes="(max-width: 767px) 100vw, 50vw"
+              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+            />
+            <div className="absolute inset-0 bg-black/15" />
+            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
+          </div>
+
+          <div
+            ref={introLeftBlankRef}
+            className="pointer-events-none absolute inset-0 z-20 will-change-transform"
+            style={{
+              backgroundColor: "#ded8cc",
+            }}
+          >
+            <div
+              className="absolute inset-0 opacity-[0.26] mix-blend-multiply"
+              style={{
+                backgroundImage: grainDataUrl,
+                backgroundSize: "120px 120px",
+              }}
+            />
+          </div>
         </div>
 
-        <div
-          ref={stageRef}
-          className="relative z-10 flex min-h-screen flex-col justify-between px-6 pb-8 pt-10 md:px-12 md:pb-10 md:pt-12"
-        >
-          <div className="grid grid-cols-12 items-start">
+        <div className="relative h-full overflow-hidden md:h-screen">
+          <div
+            ref={rightCurrentRef}
+            className="absolute inset-0 will-change-transform"
+          >
+            <Image
+              src={current.rightImage}
+              alt={`${current.label} bottom`}
+              fill
+              priority
+              draggable={false}
+              sizes="(max-width: 767px) 100vw, 50vw"
+              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+            />
+            <div className="absolute inset-0 bg-black/15" />
+            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
+          </div>
+
+          <div
+            ref={rightNextRef}
+            className="absolute inset-0 will-change-transform"
+          >
+            <Image
+              src={next.rightImage}
+              alt={`${next.label} bottom`}
+              fill
+              priority
+              draggable={false}
+              sizes="(max-width: 767px) 100vw, 50vw"
+              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+            />
+            <div className="absolute inset-0 bg-black/15" />
+            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
+          </div>
+
+          <div
+            ref={introRightBlankRef}
+            className="pointer-events-none absolute inset-0 z-20 will-change-transform"
+            style={{
+              backgroundColor: "#ded8cc",
+            }}
+          >
             <div
-              ref={indexRef}
+              className="absolute inset-0 opacity-[0.26] mix-blend-multiply"
               style={{
-                transform: "translate3d(0,28px,0)",
-                opacity: 0,
+                backgroundImage: grainDataUrl,
+                backgroundSize: "120px 120px",
               }}
-              className="col-span-5 hidden text-[11px] uppercase tracking-[0.24em] text-[#101010]/55 md:block"
-            >
-              01 / Petsaco
-            </div>
-
-            <p
-              ref={labelRef}
-              style={{
-                transform: "translate3d(0,28px,0)",
-                opacity: 0,
-              }}
-              className="col-span-7 ml-auto hidden max-w-[24rem] text-right text-[9px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/90 md:block"
-            >
-              Curated objects for animals and homes
-              <br />
-              From food and toys to beds, care essentials
-              <br />
-              and everyday comfort for dogs and cats.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-12 items-center gap-y-26 mt-20 sm:mt-5 md:gap-y-20 lg:gap-y-24">
-            <div className="col-span-14 overflow-hidden md:col-span-8">
-              <span
-                ref={topLineRef}
-                style={{
-                  transform: "translate3d(0,115%,0)",
-                  opacity: 0,
-                }}
-                className="block w-fit text-[clamp(1rem,5vw,5.4rem)] sm:text-[clamp(0.1rem,4vw,4.4rem)]   font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
-              >
-                Everything
-              </span>
-              <p className="text-[9px] absolute md:hidden uppercase leading-relaxed tracking-[0.22em] text-[#101010] ">
-                Objects for pets,
-                <br />
-                chosen with the same care
-                <br />
-                as the rest of your home.
-              </p>
-            </div>
-
-            <div className="col-span-12 overflow-hidden md:col-span-6 md:col-start-7">
-              <span
-                ref={hugeLineRef}
-                style={{
-                  transform: "translate3d(0,115%,0)",
-                  opacity: 0,
-                }}
-                className="ml-auto block w-fit text-right text-[clamp(2rem,6.2vw,6.7rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity] sm:text-[clamp(2.3rem,6.5vw,7rem)]"
-              >
-                <span className="block">For</span>
-                <span className="block">modern</span>
-              </span>
-            </div>
-
-            <div className="relative col-span-12 overflow-visible md:col-span-7">
-              <div className="absolute bottom-full hidden md:block left-0 z-20 mb-5 max-w-[18rem] md:mb-7">
-                <p className="mb-5 hidden text-[12px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/80 md:block">
-                  Objects for pets,
-                  <br />
-                  chosen with the same care
-                  <br />
-                  as the rest of your home.
-                </p>
-
-                <a
-                  href="#products"
-                  className="inline-flex items-center  bg-stone-600 px-2 py-1 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
-                >
-                  View curated objects →
-                </a>
-              </div>
-
-              <span
-                ref={livingRef}
-                style={{
-                  transform: "translate3d(0,115%,0)",
-                  opacity: 0,
-                }}
-                className="relative z-10 block w-fit text-[clamp(2.7rem,7.9vw,8.4rem)] sm:text-[clamp(2.5rem,7.7vw,8.2rem)] font-semibold uppercase leading-[0.82] tracking-[-0.035em] text-[#963d3a] will-change-[transform,opacity]"
-              >
-                <span className="relative inline-grid [perspective:1200px]">
-                  <span
-                    ref={petRef}
-                    style={{
-                      opacity: 1,
-                      transform: "rotateX(0deg) translate3d(0,0,0)",
-                      backfaceVisibility: "hidden",
-                    }}
-                    className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
-                  >
-                    Pet
-                  </span>
-
-                  <span
-                    ref={dogRef}
-                    style={{
-                      opacity: 0,
-                      transform: "rotateX(-90deg) translate3d(0,30%,0)",
-                      backfaceVisibility: "hidden",
-                    }}
-                    className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
-                  >
-                    Dog
-                  </span>
-
-                  <span
-                    ref={catRef}
-                    style={{
-                      opacity: 0,
-                      transform: "rotateX(-90deg) translate3d(0,30%,0)",
-                      backfaceVisibility: "hidden",
-                    }}
-                    className="col-start-1 row-start-1 inline-block will-change-[transform,opacity]"
-                  >
-                    Cat
-                  </span>
-                </span>{" "}
-                Living
-              </span>
-              <span className="font-semibold md:hidden">
-                A playful shop experience built around comfort, clean design and
-                useful products for modern pet owners.
-              </span>
-            </div>
-
-            <p
-              ref={sideTextRef}
-              style={{
-                transform: "translate3d(0,38px,0)",
-                opacity: 0,
-              }}
-              className="invisible col-span-12 max-w-[23rem] text-[3px] md:text-[18px] font-semibold leading-relaxed text-[#101010] md:visible md:col-span-3 md:col-start-10 md:self-end"
-            >
-              <span>
-                A playful shop experience built around comfort, clean design and
-                useful products for modern pet owners.
-              </span>
-            </p>
-          </div>
-
-          <div className="grid grid-cols-12 items-end">
-            <a
-              href="#products"
-              className="inline-flex absolute md:hidden left-6 bottom-20 items-center bg-stone-700 px-2 py-2 text-[14px] font-semibold uppercase tracking-[0.18em] text-white transition-opacity hover:opacity-60 md:bg-transparent md:p-0 md:text-red-900"
-            >
-              View curated objects →
-            </a>
-            <p
-              ref={bottomTextRef}
-              style={{
-                transform: "translate3d(0,34px,0)",
-                opacity: 0,
-              }}
-              className="col-span-12 max-w-[32rem] text-[11px] uppercase leading-relaxed tracking-[0.22em] text-[#101010]/90 md:col-span-5 md:text-[12px]"
-            >
-              Thoughtfully selected essentials for dogs, cats and everyday life
-              with pets.
-            </p>
-
-            <div className="col-span-12 mt-6 hidden justify-end md:col-span-4 md:col-start-9 md:flex">
-              <div className="flex gap-8 text-[11px] uppercase tracking-[0.2em] text-[#101010]/50">
-                <span>Comfort</span>
-                <span>Utility</span>
-                <span>Personality</span>
-              </div>
-            </div>
+            />
           </div>
         </div>
       </div>
+
+      <div
+        className="pointer-events-none absolute inset-[-20%] z-30 opacity-[0.42] mix-blend-overlay"
+        style={{
+          backgroundImage: grainDataUrl,
+          backgroundSize: "180px 180px",
+          animation: "petsaco-grain 0.45s steps(2) infinite",
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0 z-30 opacity-[0.18] mix-blend-multiply"
+        style={{
+          backgroundImage: grainDataUrl,
+          backgroundSize: "90px 90px",
+        }}
+      />
+
+      <div className="pointer-events-none absolute inset-0 z-30 bg-[#c79a6b]/10 mix-blend-soft-light" />
+
+      <div className="pointer-events-none absolute bottom-[9rem] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)]">
+        <h1
+          ref={titleCurrentRef}
+          className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
+        >
+          {current.label}
+        </h1>
+
+        <h1
+          ref={titleNextRef}
+          className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
+        >
+          {next.label}
+        </h1>
+      </div>
+
+      <div className="absolute bottom-4 right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px]">
+        <InfoCard ref={cardCurrentRef} slide={current} />
+        <InfoCard ref={cardNextRef} slide={next} />
+      </div>
+
+      <div className="pointer-events-none absolute left-0 top-1/2 z-40 h-px w-full -translate-y-1/2 bg-white/20 md:left-1/2 md:top-0 md:h-full md:w-px md:-translate-x-1/2 md:translate-y-0" />
+
+      <style jsx global>{`
+        @keyframes petsaco-grain {
+          0% {
+            transform: translate3d(0, 0, 0);
+          }
+
+          10% {
+            transform: translate3d(-5%, -8%, 0);
+          }
+
+          20% {
+            transform: translate3d(-12%, 6%, 0);
+          }
+
+          30% {
+            transform: translate3d(8%, -10%, 0);
+          }
+
+          40% {
+            transform: translate3d(-6%, 12%, 0);
+          }
+
+          50% {
+            transform: translate3d(10%, 4%, 0);
+          }
+
+          60% {
+            transform: translate3d(-14%, -4%, 0);
+          }
+
+          70% {
+            transform: translate3d(6%, 10%, 0);
+          }
+
+          80% {
+            transform: translate3d(12%, -6%, 0);
+          }
+
+          90% {
+            transform: translate3d(-8%, 8%, 0);
+          }
+
+          100% {
+            transform: translate3d(0, 0, 0);
+          }
+        }
+      `}</style>
     </section>
   );
 }
+
+const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
+  { slide },
+  ref,
+) {
+  return (
+    <div
+      ref={ref}
+      style={{
+        backgroundColor: slide.bg,
+        color: slide.textColor,
+      }}
+      className="absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 backdrop-blur-[2px] will-change-transform md:px-5 md:py-4"
+    >
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply"
+        style={{
+          backgroundImage: grainDataUrl,
+          backgroundSize: "110px 110px",
+        }}
+      />
+
+      <Link
+        href={
+          slide.label === "Dogs"
+            ? "/shop?category=dogs&page=1"
+            : "/shop?category=cats&page=1"
+        }
+        className="relative z-10 flex h-full flex-col justify-between"
+      >
+        <div className="flex items-start justify-between gap-3 md:gap-6">
+          <div>
+            <p className="mb-1 text-[7px] font-semibold uppercase tracking-[0.18em] opacity-55 md:mb-2 md:text-[9px] md:tracking-[0.22em]">
+              Petsaco / {slide.meta}
+            </p>
+
+            <h2 className="text-2xl font-semibold uppercase leading-[0.85] tracking-[-0.07em] md:text-3xl">
+              {slide.title}
+            </h2>
+          </div>
+
+          <span className="text-sm leading-none opacity-65 md:text-lg">↗</span>
+        </div>
+
+        <div>
+          <p className="mb-2 max-w-[13rem] text-[10px] font-medium leading-snug opacity-70 md:mb-3 md:max-w-[15rem] md:text-xs">
+            {slide.text}
+          </p>
+
+          <div className="flex items-center justify-between border-t border-current/20 pt-2 md:pt-3">
+            <p className="text-[7px] font-semibold uppercase tracking-[0.18em] opacity-80 transition hover:opacity-50 md:text-[9px] md:tracking-[0.22em]">
+              {slide.cta}
+            </p>
+
+            <span className="text-[7px] uppercase tracking-[0.18em] opacity-45 md:text-[9px] md:tracking-[0.22em]">
+              {slide.label}
+            </span>
+          </div>
+        </div>
+      </Link>
+    </div>
+  );
+});

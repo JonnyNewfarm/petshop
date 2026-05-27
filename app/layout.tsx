@@ -71,7 +71,7 @@ export default function RootLayout({
         </Script>
       </head>
 
-      <body className={`${mont.variable} antialiased`}>
+      <body className={`${mont.variable} `}>
         <Navbar />
         <PawCursor />
         {children}
