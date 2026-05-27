@@ -534,7 +534,7 @@ export default function ShopClient() {
                           type="button"
                           onClick={() => handlePageChange(pagination.page - 1)}
                           disabled={!pagination.hasPreviousPage}
-                          className="group relative overflow-hidden px-8 py-7 text-left disabled:pointer-events-none disabled:opacity-25"
+                          className="group relative overflow-hidden cursor-pointer px-8 py-7 text-left disabled:pointer-events-none disabled:opacity-25"
                         >
                           <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
 
@@ -567,7 +567,7 @@ export default function ShopClient() {
                           type="button"
                           onClick={() => handlePageChange(pagination.page + 1)}
                           disabled={!pagination.hasNextPage}
-                          className="group relative overflow-hidden px-8 py-7 text-right disabled:pointer-events-none disabled:opacity-25"
+                          className="group relative cursor-pointer overflow-hidden px-8 py-7 text-right disabled:pointer-events-none disabled:opacity-25"
                         >
                           <span className="absolute inset-0 translate-y-full bg-black transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:translate-y-0" />
 
@@ -582,7 +582,7 @@ export default function ShopClient() {
                       </div>
 
                       {/* Page numbers */}
-                      <div className="flex flex-wrap items-center justify-center gap-2">
+                      <div className="flex flex-wrap items-center justify-start gap-2">
                         {Array.from(
                           { length: pagination.totalPages },
                           (_, index) => index + 1,
@@ -594,10 +594,10 @@ export default function ShopClient() {
                               key={page}
                               type="button"
                               onClick={() => handlePageChange(page)}
-                              className={`relative h-10 min-w-10 overflow-hidden border px-4 text-[11px] uppercase tracking-[0.18em] transition ${
+                              className={`relative h-10 min-w-10 overflow-hidden px-4 text-[15px] uppercase tracking-[0.18em] transition ${
                                 active
-                                  ? "border-black bg-black text-[#f6f1e8]"
-                                  : "border-black/15 text-black hover:border-black"
+                                  ? " scale-130 mb-[2px] font-bold text-black"
+                                  : " text-black"
                               }`}
                             >
                               {page}
