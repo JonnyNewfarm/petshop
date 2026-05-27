@@ -1,7 +1,6 @@
 "use client";
 
-import { forwardRef, useLayoutEffect, useRef, useState } from "react";
-import { flushSync } from "react-dom";
+import { forwardRef, useLayoutEffect, useRef } from "react";
 import Image from "next/image";
 import gsap from "gsap";
 import { Observer } from "gsap/Observer";
@@ -67,135 +66,116 @@ export default function HeroSection() {
   const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
   const introRightBlankRef = useRef<HTMLDivElement | null>(null);
 
-  const leftCurrentRef = useRef<HTMLDivElement | null>(null);
-  const leftNextRef = useRef<HTMLDivElement | null>(null);
-
-  const rightCurrentRef = useRef<HTMLDivElement | null>(null);
-  const rightNextRef = useRef<HTMLDivElement | null>(null);
-
-  const cardCurrentRef = useRef<HTMLDivElement | null>(null);
-  const cardNextRef = useRef<HTMLDivElement | null>(null);
-
-  const titleCurrentRef = useRef<HTMLHeadingElement | null>(null);
-  const titleNextRef = useRef<HTMLHeadingElement | null>(null);
+  const leftRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const titleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
 
   const currentIndexRef = useRef(0);
   const isAnimatingRef = useRef(false);
-
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
       const isMobile = () => window.innerWidth < 768;
 
-      const setBaseStyles = () => {
-        gsap.set(
-          [
-            introLeftBlankRef.current,
-            introRightBlankRef.current,
-            leftCurrentRef.current,
-            leftNextRef.current,
-            rightCurrentRef.current,
-            rightNextRef.current,
-            cardCurrentRef.current,
-            cardNextRef.current,
-            titleCurrentRef.current,
-            titleNextRef.current,
-          ],
-          {
-            force3D: true,
-            backfaceVisibility: "hidden",
-            transformStyle: "preserve-3d",
-          },
-        );
-      };
+      const allPanels = [
+        ...leftRefs.current,
+        ...rightRefs.current,
+        ...cardRefs.current,
+        ...titleRefs.current,
+        introLeftBlankRef.current,
+        introRightBlankRef.current,
+      ].filter(Boolean);
 
-      const resetPanels = () => {
+      gsap.set(allPanels, {
+        force3D: true,
+        backfaceVisibility: "hidden",
+        transformStyle: "preserve-3d",
+      });
+
+      const placeInactive = (index: number) => {
         const mobile = isMobile();
 
-        gsap.set(leftCurrentRef.current, {
-          xPercent: 0,
-          yPercent: 0,
-          zIndex: 2,
-          autoAlpha: 1,
+        gsap.set(leftRefs.current[index], {
+          xPercent: mobile ? 100 : 0,
+          yPercent: mobile ? 0 : 100,
+          zIndex: 1,
+          autoAlpha: 0,
           scale: 1,
         });
 
-        gsap.set(rightCurrentRef.current, {
-          xPercent: 0,
-          yPercent: 0,
-          zIndex: 2,
-          autoAlpha: 1,
+        gsap.set(rightRefs.current[index], {
+          xPercent: mobile ? -100 : 0,
+          yPercent: mobile ? 0 : -100,
+          zIndex: 1,
+          autoAlpha: 0,
           scale: 1,
         });
 
-        if (mobile) {
-          gsap.set(leftNextRef.current, {
-            xPercent: 100,
-            yPercent: 0,
-            zIndex: 3,
-            autoAlpha: 1,
-            scale: 1,
-          });
-
-          gsap.set(rightNextRef.current, {
-            xPercent: -100,
-            yPercent: 0,
-            zIndex: 3,
-            autoAlpha: 1,
-            scale: 1,
-          });
-        } else {
-          gsap.set(leftNextRef.current, {
-            xPercent: 0,
-            yPercent: 100,
-            zIndex: 3,
-            autoAlpha: 1,
-            scale: 1,
-          });
-
-          gsap.set(rightNextRef.current, {
-            xPercent: 0,
-            yPercent: -100,
-            zIndex: 3,
-            autoAlpha: 1,
-            scale: 1,
-          });
-        }
-
-        gsap.set(cardCurrentRef.current, {
-          yPercent: 0,
-          zIndex: 2,
-          autoAlpha: 1,
-        });
-
-        gsap.set(cardNextRef.current, {
+        gsap.set(cardRefs.current[index], {
           yPercent: 100,
-          zIndex: 3,
-          autoAlpha: 1,
+          zIndex: 1,
+          autoAlpha: 0,
         });
 
-        gsap.set(titleCurrentRef.current, {
-          yPercent: 0,
-          opacity: 1,
-        });
-
-        gsap.set(titleNextRef.current, {
+        gsap.set(titleRefs.current[index], {
           yPercent: 100,
-          opacity: 1,
+          opacity: 0,
+          zIndex: 1,
+          autoAlpha: 0,
         });
       };
 
-      setBaseStyles();
-      resetPanels();
+      const placeActive = (index: number) => {
+        gsap.set(leftRefs.current[index], {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
+        });
 
-      gsap.set([titleCurrentRef.current, cardCurrentRef.current], {
+        gsap.set(rightRefs.current[index], {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
+        });
+
+        gsap.set(cardRefs.current[index], {
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+
+        gsap.set(titleRefs.current[index], {
+          yPercent: 0,
+          opacity: 1,
+          zIndex: 2,
+          autoAlpha: 1,
+        });
+      };
+
+      slides.forEach((_, index) => {
+        if (index === currentIndexRef.current) {
+          placeActive(index);
+        } else {
+          placeInactive(index);
+        }
+      });
+
+      gsap.set(titleRefs.current[0], {
         y: 40,
         opacity: 0,
       });
 
-      gsap.set([leftCurrentRef.current, rightCurrentRef.current], {
+      gsap.set(cardRefs.current[0], {
+        y: 40,
+        opacity: 0,
+      });
+
+      gsap.set([leftRefs.current[0], rightRefs.current[0]], {
         scale: 1.08,
       });
 
@@ -236,7 +216,7 @@ export default function HeroSection() {
           0.15,
         )
         .to(
-          [leftCurrentRef.current, rightCurrentRef.current],
+          [leftRefs.current[0], rightRefs.current[0]],
           {
             scale: 1,
             duration: 1.35,
@@ -244,7 +224,7 @@ export default function HeroSection() {
           0.15,
         )
         .to(
-          titleCurrentRef.current,
+          titleRefs.current[0],
           {
             y: 0,
             opacity: 1,
@@ -254,7 +234,7 @@ export default function HeroSection() {
           0.72,
         )
         .to(
-          cardCurrentRef.current,
+          cardRefs.current[0],
           {
             y: 0,
             opacity: 1,
@@ -273,81 +253,108 @@ export default function HeroSection() {
         isAnimatingRef.current = true;
 
         const mobile = isMobile();
-
         const current = currentIndexRef.current;
+
         const next =
           direction === 1
             ? (current + 1) % slides.length
             : (current - 1 + slides.length) % slides.length;
 
-        flushSync(() => {
-          setNextIndex(next);
+        const currentLeft = leftRefs.current[current];
+        const currentRight = rightRefs.current[current];
+        const currentCard = cardRefs.current[current];
+        const currentTitle = titleRefs.current[current];
+
+        const nextLeft = leftRefs.current[next];
+        const nextRight = rightRefs.current[next];
+        const nextCard = cardRefs.current[next];
+        const nextTitle = titleRefs.current[next];
+
+        gsap.killTweensOf([
+          currentLeft,
+          currentRight,
+          currentCard,
+          currentTitle,
+          nextLeft,
+          nextRight,
+          nextCard,
+          nextTitle,
+        ]);
+
+        gsap.set(currentLeft, {
+          xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
         });
 
-        gsap.set(leftCurrentRef.current, {
+        gsap.set(currentRight, {
           xPercent: 0,
+          yPercent: 0,
+          zIndex: 2,
+          autoAlpha: 1,
+          scale: 1,
+        });
+
+        gsap.set(currentCard, {
           yPercent: 0,
           zIndex: 2,
           autoAlpha: 1,
         });
 
-        gsap.set(rightCurrentRef.current, {
-          xPercent: 0,
+        gsap.set(currentTitle, {
           yPercent: 0,
+          opacity: 1,
           zIndex: 2,
           autoAlpha: 1,
         });
 
         if (mobile) {
-          gsap.set(leftNextRef.current, {
+          gsap.set(nextLeft, {
             xPercent: direction === 1 ? 100 : -100,
             yPercent: 0,
             zIndex: 3,
             autoAlpha: 1,
+            scale: 1,
           });
 
-          gsap.set(rightNextRef.current, {
+          gsap.set(nextRight, {
             xPercent: direction === 1 ? -100 : 100,
             yPercent: 0,
             zIndex: 3,
             autoAlpha: 1,
+            scale: 1,
           });
         } else {
-          gsap.set(leftNextRef.current, {
+          gsap.set(nextLeft, {
             xPercent: 0,
             yPercent: direction === 1 ? 100 : -100,
             zIndex: 3,
             autoAlpha: 1,
+            scale: 1,
           });
 
-          gsap.set(rightNextRef.current, {
+          gsap.set(nextRight, {
             xPercent: 0,
             yPercent: direction === 1 ? -100 : 100,
             zIndex: 3,
             autoAlpha: 1,
+            scale: 1,
           });
         }
 
-        gsap.set(cardCurrentRef.current, {
-          yPercent: 0,
-          zIndex: 2,
-          autoAlpha: 1,
-        });
-
-        gsap.set(cardNextRef.current, {
+        gsap.set(nextCard, {
           yPercent: direction === 1 ? 100 : -100,
           zIndex: 3,
           autoAlpha: 1,
         });
 
-        gsap.set(titleCurrentRef.current, {
-          yPercent: 0,
-          opacity: 1,
-        });
-
-        gsap.set(titleNextRef.current, {
+        gsap.set(nextTitle, {
           yPercent: direction === 1 ? 100 : -100,
           opacity: 1,
+          zIndex: 3,
+          autoAlpha: 1,
         });
 
         const tl = gsap.timeline({
@@ -359,12 +366,55 @@ export default function HeroSection() {
           onComplete: () => {
             currentIndexRef.current = next;
 
-            flushSync(() => {
-              setCurrentIndex(next);
-              setNextIndex((next + 1) % slides.length);
+            gsap.set(currentLeft, {
+              autoAlpha: 0,
+              zIndex: 1,
             });
 
-            resetPanels();
+            gsap.set(currentRight, {
+              autoAlpha: 0,
+              zIndex: 1,
+            });
+
+            gsap.set(currentCard, {
+              autoAlpha: 0,
+              zIndex: 1,
+            });
+
+            gsap.set(currentTitle, {
+              autoAlpha: 0,
+              opacity: 0,
+              zIndex: 1,
+            });
+
+            gsap.set(nextLeft, {
+              xPercent: 0,
+              yPercent: 0,
+              zIndex: 2,
+              autoAlpha: 1,
+              scale: 1,
+            });
+
+            gsap.set(nextRight, {
+              xPercent: 0,
+              yPercent: 0,
+              zIndex: 2,
+              autoAlpha: 1,
+              scale: 1,
+            });
+
+            gsap.set(nextCard, {
+              yPercent: 0,
+              zIndex: 2,
+              autoAlpha: 1,
+            });
+
+            gsap.set(nextTitle, {
+              yPercent: 0,
+              opacity: 1,
+              zIndex: 2,
+              autoAlpha: 1,
+            });
 
             isAnimatingRef.current = false;
           },
@@ -372,7 +422,7 @@ export default function HeroSection() {
 
         if (mobile) {
           tl.to(
-            leftCurrentRef.current,
+            currentLeft,
             {
               xPercent: direction === 1 ? -100 : 100,
               yPercent: 0,
@@ -380,7 +430,7 @@ export default function HeroSection() {
             0,
           )
             .to(
-              leftNextRef.current,
+              nextLeft,
               {
                 xPercent: 0,
                 yPercent: 0,
@@ -388,7 +438,7 @@ export default function HeroSection() {
               0,
             )
             .to(
-              rightCurrentRef.current,
+              currentRight,
               {
                 xPercent: direction === 1 ? 100 : -100,
                 yPercent: 0,
@@ -396,7 +446,7 @@ export default function HeroSection() {
               0,
             )
             .to(
-              rightNextRef.current,
+              nextRight,
               {
                 xPercent: 0,
                 yPercent: 0,
@@ -405,7 +455,7 @@ export default function HeroSection() {
             );
         } else {
           tl.to(
-            leftCurrentRef.current,
+            currentLeft,
             {
               xPercent: 0,
               yPercent: direction === 1 ? -100 : 100,
@@ -413,7 +463,7 @@ export default function HeroSection() {
             0,
           )
             .to(
-              leftNextRef.current,
+              nextLeft,
               {
                 xPercent: 0,
                 yPercent: 0,
@@ -421,7 +471,7 @@ export default function HeroSection() {
               0,
             )
             .to(
-              rightCurrentRef.current,
+              currentRight,
               {
                 xPercent: 0,
                 yPercent: direction === 1 ? 100 : -100,
@@ -429,7 +479,7 @@ export default function HeroSection() {
               0,
             )
             .to(
-              rightNextRef.current,
+              nextRight,
               {
                 xPercent: 0,
                 yPercent: 0,
@@ -439,21 +489,21 @@ export default function HeroSection() {
         }
 
         tl.to(
-          cardCurrentRef.current,
+          currentCard,
           {
             yPercent: direction === 1 ? -100 : 100,
           },
           0,
         )
           .to(
-            cardNextRef.current,
+            nextCard,
             {
               yPercent: 0,
             },
             0,
           )
           .to(
-            titleCurrentRef.current,
+            currentTitle,
             {
               yPercent: direction === 1 ? -100 : 100,
               opacity: 0,
@@ -461,7 +511,7 @@ export default function HeroSection() {
             0,
           )
           .to(
-            titleNextRef.current,
+            nextTitle,
             {
               yPercent: 0,
               opacity: 1,
@@ -481,7 +531,16 @@ export default function HeroSection() {
 
       const handleResize = () => {
         if (isAnimatingRef.current) return;
-        resetPanels();
+
+        const current = currentIndexRef.current;
+
+        slides.forEach((_, index) => {
+          if (index === current) {
+            placeActive(index);
+          } else {
+            placeInactive(index);
+          }
+        });
       };
 
       window.addEventListener("resize", handleResize);
@@ -495,49 +554,34 @@ export default function HeroSection() {
     return () => ctx.revert();
   }, []);
 
-  const current = slides[currentIndex];
-  const next = slides[nextIndex];
-
   return (
     <section
       ref={sectionRef}
-      className="relative h-screen overflow-hidden bg-black text-white"
+      className="relative h-[100svh] overflow-hidden bg-black text-white md:h-screen"
     >
       <div className="grid h-full grid-rows-2 md:grid-cols-2 md:grid-rows-none">
-        <div className="relative h-full overflow-hidden  md:h-screen ">
-          <div
-            ref={leftCurrentRef}
-            className="absolute inset-0 will-change-transform"
-          >
-            <Image
-              src={current.leftImage}
-              alt={`${current.label} top`}
-              fill
-              priority
-              draggable={false}
-              sizes="(max-width: 767px) 100vw, 50vw"
-              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-            />
-            <div className="absolute inset-0 bg-black/15" />
-            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
-          </div>
-
-          <div
-            ref={leftNextRef}
-            className="absolute inset-0 will-change-transform"
-          >
-            <Image
-              src={next.leftImage}
-              alt={`${next.label} top`}
-              fill
-              priority
-              draggable={false}
-              sizes="(max-width: 767px) 100vw, 50vw"
-              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-            />
-            <div className="absolute inset-0 bg-black/15" />
-            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
-          </div>
+        <div className="relative h-full overflow-hidden md:h-screen">
+          {slides.map((slide, index) => (
+            <div
+              key={`left-${slide.label}`}
+              ref={(el) => {
+                leftRefs.current[index] = el;
+              }}
+              className="absolute inset-0 will-change-transform"
+            >
+              <Image
+                src={slide.leftImage}
+                alt={`${slide.label} top`}
+                fill
+                priority
+                draggable={false}
+                sizes="(max-width: 767px) 100vw, 50vw"
+                className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+              />
+              <div className="absolute inset-0 bg-black/15" />
+              <div className="absolute inset-0 hidden bg-[#b88a5f]/15 mix-blend-soft-light md:block" />
+            </div>
+          ))}
 
           <div
             ref={introLeftBlankRef}
@@ -547,7 +591,7 @@ export default function HeroSection() {
             }}
           >
             <div
-              className="absolute inset-0 opacity-[0.26] mix-blend-multiply"
+              className="absolute inset-0 hidden opacity-[0.26] mix-blend-multiply md:block"
               style={{
                 backgroundImage: grainDataUrl,
                 backgroundSize: "120px 120px",
@@ -557,39 +601,27 @@ export default function HeroSection() {
         </div>
 
         <div className="relative h-full overflow-hidden md:h-screen">
-          <div
-            ref={rightCurrentRef}
-            className="absolute inset-0 will-change-transform"
-          >
-            <Image
-              src={current.rightImage}
-              alt={`${current.label} bottom`}
-              fill
-              priority
-              draggable={false}
-              sizes="(max-width: 767px) 100vw, 50vw"
-              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-            />
-            <div className="absolute inset-0 bg-black/15" />
-            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
-          </div>
-
-          <div
-            ref={rightNextRef}
-            className="absolute inset-0 will-change-transform"
-          >
-            <Image
-              src={next.rightImage}
-              alt={`${next.label} bottom`}
-              fill
-              priority
-              draggable={false}
-              sizes="(max-width: 767px) 100vw, 50vw"
-              className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-            />
-            <div className="absolute inset-0 bg-black/15" />
-            <div className="absolute inset-0 bg-[#b88a5f]/15 mix-blend-soft-light" />
-          </div>
+          {slides.map((slide, index) => (
+            <div
+              key={`right-${slide.label}`}
+              ref={(el) => {
+                rightRefs.current[index] = el;
+              }}
+              className="absolute inset-0 will-change-transform"
+            >
+              <Image
+                src={slide.rightImage}
+                alt={`${slide.label} bottom`}
+                fill
+                priority
+                draggable={false}
+                sizes="(max-width: 767px) 100vw, 50vw"
+                className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+              />
+              <div className="absolute inset-0 bg-black/15" />
+              <div className="absolute inset-0 hidden bg-[#b88a5f]/15 mix-blend-soft-light md:block" />
+            </div>
+          ))}
 
           <div
             ref={introRightBlankRef}
@@ -599,7 +631,7 @@ export default function HeroSection() {
             }}
           >
             <div
-              className="absolute inset-0 opacity-[0.26] mix-blend-multiply"
+              className="absolute inset-0 hidden opacity-[0.26] mix-blend-multiply md:block"
               style={{
                 backgroundImage: grainDataUrl,
                 backgroundSize: "120px 120px",
@@ -610,7 +642,7 @@ export default function HeroSection() {
       </div>
 
       <div
-        className="pointer-events-none absolute inset-[-20%] z-30 opacity-[0.42] mix-blend-overlay"
+        className="pointer-events-none absolute inset-[-20%] z-30 hidden opacity-[0.42] mix-blend-overlay md:block"
         style={{
           backgroundImage: grainDataUrl,
           backgroundSize: "180px 180px",
@@ -619,34 +651,39 @@ export default function HeroSection() {
       />
 
       <div
-        className="pointer-events-none absolute inset-0 z-30 opacity-[0.18] mix-blend-multiply"
+        className="pointer-events-none absolute inset-0 z-30 hidden opacity-[0.18] mix-blend-multiply md:block"
         style={{
           backgroundImage: grainDataUrl,
           backgroundSize: "90px 90px",
         }}
       />
 
-      <div className="pointer-events-none absolute inset-0 z-30 bg-[#c79a6b]/10 mix-blend-soft-light" />
+      <div className="pointer-events-none absolute inset-0 z-30 hidden bg-[#c79a6b]/10 mix-blend-soft-light md:block" />
 
-      <div className="pointer-events-none absolute bottom-[9rem] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)]">
-        <h1
-          ref={titleCurrentRef}
-          className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
-        >
-          {current.label}
-        </h1>
-
-        <h1
-          ref={titleNextRef}
-          className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
-        >
-          {next.label}
-        </h1>
+      <div className="pointer-events-none absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)]">
+        {slides.map((slide, index) => (
+          <h1
+            key={`title-${slide.label}`}
+            ref={(el) => {
+              titleRefs.current[index] = el;
+            }}
+            className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
+          >
+            {slide.label}
+          </h1>
+        ))}
       </div>
 
-      <div className="absolute bottom-4 right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px]">
-        <InfoCard ref={cardCurrentRef} slide={current} />
-        <InfoCard ref={cardNextRef} slide={next} />
+      <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px]">
+        {slides.map((slide, index) => (
+          <InfoCard
+            key={`card-${slide.label}`}
+            ref={(el) => {
+              cardRefs.current[index] = el;
+            }}
+            slide={slide}
+          />
+        ))}
       </div>
 
       <div className="pointer-events-none absolute left-0 top-1/2 z-40 h-px w-full -translate-y-1/2 bg-white/20 md:left-1/2 md:top-0 md:h-full md:w-px md:-translate-x-1/2 md:translate-y-0" />
@@ -716,7 +753,7 @@ const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
       className="absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 backdrop-blur-[2px] will-change-transform md:px-5 md:py-4"
     >
       <div
-        className="pointer-events-none absolute inset-0 opacity-[0.22] mix-blend-multiply"
+        className="pointer-events-none absolute inset-0 hidden opacity-[0.22] mix-blend-multiply md:block"
         style={{
           backgroundImage: grainDataUrl,
           backgroundSize: "110px 110px",
