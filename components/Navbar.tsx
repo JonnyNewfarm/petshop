@@ -156,7 +156,7 @@ export default function Navbar() {
       initial={{ opacity: 0, y: -22 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-      className="fixed left-0 top-0 z-50 w-full"
+      className="fixed left-0 top-0 z-[999999] w-full"
     >
       <div className="relative mx-auto flex w-full max-w-[1760px] items-start justify-center px-4 py-5 sm:px-6 md:py-7 lg:px-10">
         <div className="pointer-events-none absolute left-1/2 top-5 -translate-x-1/2 md:top-7">

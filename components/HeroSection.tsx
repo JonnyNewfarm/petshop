@@ -684,7 +684,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="absolute bottom-[calc(3.3rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
+      <div className="absolute bottom-[calc(2.8rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
         {slides.map((slide, index) => (
           <InfoCard
             key={`card-${slide.label}`}
