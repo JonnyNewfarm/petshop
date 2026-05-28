@@ -76,7 +76,11 @@ export default function HeroSection() {
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
-      const isMobile = () => window.innerWidth < 768;
+      const isMobileLandscape = () =>
+        window.matchMedia("(orientation: landscape)").matches &&
+        window.innerHeight <= 500;
+
+      const isMobile = () => window.innerWidth < 768 || isMobileLandscape();
 
       const allPanels = [
         ...leftRefs.current,
@@ -544,10 +548,12 @@ export default function HeroSection() {
       };
 
       window.addEventListener("resize", handleResize);
+      window.addEventListener("orientationchange", handleResize);
 
       return () => {
         observer.kill();
         window.removeEventListener("resize", handleResize);
+        window.removeEventListener("orientationchange", handleResize);
       };
     }, sectionRef);
 
@@ -557,10 +563,10 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative h-[100svh] overflow-hidden bg-black text-white md:h-screen"
+      className="relative h-[100svh] overflow-hidden bg-black text-white"
     >
-      <div className="grid h-full grid-rows-2 md:grid-cols-2 md:grid-rows-none">
-        <div className="relative h-full overflow-hidden md:h-screen">
+      <div className="grid h-full grid-rows-2 md:grid-cols-2 md:grid-rows-none [@media_(orientation:landscape)_and_(max-height:500px)]:grid-cols-2 [@media_(orientation:landscape)_and_(max-height:500px)]:grid-rows-none">
+        <div className="relative h-full overflow-hidden">
           {slides.map((slide, index) => (
             <div
               key={`left-${slide.label}`}
@@ -578,7 +584,9 @@ export default function HeroSection() {
                 sizes="(max-width: 767px) 100vw, 50vw"
                 className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
               />
+
               <div className="absolute inset-0 bg-black/15" />
+
               <div className="absolute inset-0 hidden bg-[#b88a5f]/15 mix-blend-soft-light md:block" />
             </div>
           ))}
@@ -600,7 +608,7 @@ export default function HeroSection() {
           </div>
         </div>
 
-        <div className="relative h-full overflow-hidden md:h-screen">
+        <div className="relative h-full overflow-hidden">
           {slides.map((slide, index) => (
             <div
               key={`right-${slide.label}`}
@@ -618,7 +626,9 @@ export default function HeroSection() {
                 sizes="(max-width: 767px) 100vw, 50vw"
                 className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
               />
+
               <div className="absolute inset-0 bg-black/15" />
+
               <div className="absolute inset-0 hidden bg-[#b88a5f]/15 mix-blend-soft-light md:block" />
             </div>
           ))}
@@ -660,21 +670,21 @@ export default function HeroSection() {
 
       <div className="pointer-events-none absolute inset-0 z-30 hidden bg-[#c79a6b]/10 mix-blend-soft-light md:block" />
 
-      <div className="pointer-events-none absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)]">
+      <div className="pointer-events-none absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:left-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[3.5rem]">
         {slides.map((slide, index) => (
           <h1
             key={`title-${slide.label}`}
             ref={(el) => {
               titleRefs.current[index] = el;
             }}
-            className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)]"
+            className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[3.5rem]"
           >
             {slide.label}
           </h1>
         ))}
       </div>
 
-      <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px]">
+      <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
         {slides.map((slide, index) => (
           <InfoCard
             key={`card-${slide.label}`}
@@ -686,7 +696,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="pointer-events-none absolute left-0 top-1/2 z-40 h-px w-full -translate-y-1/2 bg-white/20 md:left-1/2 md:top-0 md:h-full md:w-px md:-translate-x-1/2 md:translate-y-0" />
+      <div className="pointer-events-none absolute left-0 top-1/2 z-40 h-px w-full -translate-y-1/2 bg-white/20 md:left-1/2 md:top-0 md:h-full md:w-px md:-translate-x-1/2 md:translate-y-0 [@media_(orientation:landscape)_and_(max-height:500px)]:left-1/2 [@media_(orientation:landscape)_and_(max-height:500px)]:top-0 [@media_(orientation:landscape)_and_(max-height:500px)]:h-full [@media_(orientation:landscape)_and_(max-height:500px)]:w-px [@media_(orientation:landscape)_and_(max-height:500px)]:-translate-x-1/2 [@media_(orientation:landscape)_and_(max-height:500px)]:translate-y-0" />
 
       <style jsx global>{`
         @keyframes petsaco-grain {
@@ -750,7 +760,7 @@ const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
         backgroundColor: slide.bg,
         color: slide.textColor,
       }}
-      className="absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 backdrop-blur-[2px] will-change-transform md:px-5 md:py-4"
+      className="absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 backdrop-blur-[2px] will-change-transform md:px-5 md:py-4 [@media_(orientation:landscape)_and_(max-height:500px)]:px-3 [@media_(orientation:landscape)_and_(max-height:500px)]:py-2"
     >
       <div
         className="pointer-events-none absolute inset-0 hidden opacity-[0.22] mix-blend-multiply md:block"
@@ -768,31 +778,33 @@ const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
         }
         className="relative z-10 flex h-full flex-col justify-between"
       >
-        <div className="flex items-start justify-between gap-3 md:gap-6">
+        <div className="flex items-start justify-between gap-3 md:gap-6 [@media_(orientation:landscape)_and_(max-height:500px)]:gap-3">
           <div>
-            <p className="mb-1 text-[7px] font-semibold uppercase tracking-[0.18em] opacity-55 md:mb-2 md:text-[9px] md:tracking-[0.22em]">
+            <p className="mb-1 text-[7px] font-semibold uppercase tracking-[0.18em] opacity-55 md:mb-2 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:mb-1 [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
               Petsaco / {slide.meta}
             </p>
 
-            <h2 className="text-2xl font-semibold uppercase leading-[0.85] tracking-[-0.07em] md:text-3xl">
+            <h2 className="text-2xl font-semibold uppercase leading-[0.85] tracking-[-0.07em] md:text-3xl [@media_(orientation:landscape)_and_(max-height:500px)]:text-xl">
               {slide.title}
             </h2>
           </div>
 
-          <span className="text-sm leading-none opacity-65 md:text-lg">↗</span>
+          <span className="hidden text-sm leading-none opacity-65 sm:block md:text-lg [@media_(orientation:landscape)_and_(max-height:500px)]:text-sm">
+            ↗
+          </span>
         </div>
 
         <div>
-          <p className="mb-2 max-w-[13rem] text-[10px] font-medium leading-snug opacity-70 md:mb-3 md:max-w-[15rem] md:text-xs">
+          <p className="mb-2 max-w-[13rem] text-[10px] font-medium leading-snug opacity-70 md:mb-3 md:max-w-[15rem] md:text-xs [@media_(orientation:landscape)_and_(max-height:500px)]:mb-1 [@media_(orientation:landscape)_and_(max-height:500px)]:max-w-[12rem] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[9px]">
             {slide.text}
           </p>
 
-          <div className="flex items-center justify-between border-t border-current/20 pt-2 md:pt-3">
-            <p className="text-[7px] font-semibold uppercase tracking-[0.18em] opacity-80 transition hover:opacity-50 md:text-[9px] md:tracking-[0.22em]">
+          <div className="flex items-center justify-between border-t border-current/20 pt-2 md:pt-3 [@media_(orientation:landscape)_and_(max-height:500px)]:pt-1.5">
+            <p className="text-[7px] font-semibold uppercase tracking-[0.18em] opacity-80 transition hover:opacity-50 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
               {slide.cta}
             </p>
 
-            <span className="text-[7px] uppercase tracking-[0.18em] opacity-45 md:text-[9px] md:tracking-[0.22em]">
+            <span className="text-[7px] uppercase tracking-[0.18em] opacity-45 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
               {slide.label}
             </span>
           </div>
