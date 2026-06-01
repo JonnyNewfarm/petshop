@@ -526,13 +526,9 @@ export default function HeroSection() {
 
       const observer = Observer.create({
         target: sectionRef.current,
-        type: "wheel,touch",
+        type: "wheel,touch,pointer",
         tolerance: 18,
-
-        // Viktig på mobil:
-        // false gjør at Safari/Chrome fortsatt kan skjule/justere browser-baren nederst.
-        preventDefault: false,
-
+        preventDefault: true,
         onDown: () => goToSlide(1),
         onUp: () => goToSlide(-1),
       });
@@ -567,9 +563,9 @@ export default function HeroSection() {
   return (
     <section
       ref={sectionRef}
-      className="relative min-h-[100dvh] overflow-hidden bg-black text-white"
+      className="relative h-[100svh] overflow-hidden bg-black text-white"
     >
-      <div className="grid min-h-[100dvh] grid-rows-2 md:grid-cols-2 md:grid-rows-none [@media_(orientation:landscape)_and_(max-height:500px)]:grid-cols-2 [@media_(orientation:landscape)_and_(max-height:500px)]:grid-rows-none">
+      <div className="grid h-full grid-rows-2 md:grid-cols-2 md:grid-rows-none [@media_(orientation:landscape)_and_(max-height:500px)]:grid-cols-2 [@media_(orientation:landscape)_and_(max-height:500px)]:grid-rows-none">
         <div className="relative h-full overflow-hidden">
           {slides.map((slide, index) => (
             <div
@@ -674,7 +670,7 @@ export default function HeroSection() {
 
       <div className="pointer-events-none absolute inset-0 z-30 hidden bg-[#c79a6b]/10 mix-blend-soft-light md:block" />
 
-      <div className="pointer-events-none absolute bottom-[calc(15rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:left-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[3.5rem]">
+      <div className="pointer-events-none absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:left-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[3.5rem]">
         {slides.map((slide, index) => (
           <h1
             key={`title-${slide.label}`}
@@ -688,7 +684,7 @@ export default function HeroSection() {
         ))}
       </div>
 
-      <div className="absolute bottom-[calc(4.5rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
+      <div className="absolute bottom-[calc(2.8rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
         {slides.map((slide, index) => (
           <InfoCard
             key={`card-${slide.label}`}
