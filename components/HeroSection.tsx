@@ -20,6 +20,8 @@ type Slide = {
   textColor: string;
 };
 
+const PRELOADER_STORAGE_KEY = "petsaco-hero-preloader-played";
+
 const slides: Slide[] = [
   {
     label: "Dogs",
@@ -45,13 +47,64 @@ const slides: Slide[] = [
   },
 ];
 
+const introImages = [
+  {
+    src: slides[0].leftImage,
+    alt: "Dogs intro 1",
+    rotation: -7,
+    exitRotation: -13,
+    x: -54,
+    y: -24,
+    exitX: -88,
+    exitY: -150,
+  },
+  {
+    src: slides[0].rightImage,
+    alt: "Dogs intro 2",
+    rotation: 5,
+    exitRotation: 11,
+    x: 46,
+    y: 18,
+    exitX: 82,
+    exitY: -142,
+  },
+  {
+    src: slides[1].leftImage,
+    alt: "Cats intro 1",
+    rotation: -4,
+    exitRotation: -10,
+    x: -24,
+    y: 46,
+    exitX: -52,
+    exitY: -132,
+  },
+  {
+    src: slides[1].rightImage,
+    alt: "Cats intro 2",
+    rotation: 8,
+    exitRotation: 15,
+    x: 58,
+    y: -38,
+    exitX: 96,
+    exitY: -162,
+  },
+];
+
 const grainSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
   <filter id="noise">
-    <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="4" stitchTiles="stitch"/>
-    <feColorMatrix type="saturate" values="0"/>
+    <feTurbulence
+      type="fractalNoise"
+      baseFrequency="1.15"
+      numOctaves="5"
+      stitchTiles="stitch"
+    />
+    <feColorMatrix type="saturate" values="0" />
     <feComponentTransfer>
-      <feFuncA type="table" tableValues="0 0.85"/>
+      <feFuncR type="linear" slope="1" />
+      <feFuncG type="linear" slope="1" />
+      <feFuncB type="linear" slope="1" />
+      <feFuncA type="table" tableValues="0 0.9" />
     </feComponentTransfer>
   </filter>
   <rect width="220" height="220" filter="url(#noise)" opacity="1"/>
@@ -62,6 +115,11 @@ const grainDataUrl = `url("data:image/svg+xml,${encodeURIComponent(grainSvg)}")`
 
 export default function HeroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
+
+  const preloaderRef = useRef<HTMLDivElement | null>(null);
+  const introStackRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const introTinyLineRef = useRef<HTMLDivElement | null>(null);
+  const introPanelTextRef = useRef<HTMLDivElement | null>(null);
 
   const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
   const introRightBlankRef = useRef<HTMLDivElement | null>(null);
@@ -82,13 +140,33 @@ export default function HeroSection() {
 
       const isMobile = () => window.innerWidth < 768 || isMobileLandscape();
 
+      const shouldPlayPreloader = (() => {
+        try {
+          return sessionStorage.getItem(PRELOADER_STORAGE_KEY) !== "true";
+        } catch {
+          return true;
+        }
+      })();
+
+      const markPreloaderAsPlayed = () => {
+        try {
+          sessionStorage.setItem(PRELOADER_STORAGE_KEY, "true");
+        } catch {
+          // Ignore storage errors.
+        }
+      };
+
       const allPanels = [
         ...leftRefs.current,
         ...rightRefs.current,
         ...cardRefs.current,
         ...titleRefs.current,
+        ...introStackRefs.current,
+        introPanelTextRef.current,
+        introTinyLineRef.current,
         introLeftBlankRef.current,
         introRightBlankRef.current,
+        preloaderRef.current,
       ].filter(Boolean);
 
       gsap.set(allPanels, {
@@ -106,6 +184,7 @@ export default function HeroSection() {
           zIndex: 1,
           autoAlpha: 0,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(rightRefs.current[index], {
@@ -114,16 +193,20 @@ export default function HeroSection() {
           zIndex: 1,
           autoAlpha: 0,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(cardRefs.current[index], {
           yPercent: 100,
+          y: 0,
+          opacity: 0,
           zIndex: 1,
           autoAlpha: 0,
         });
 
         gsap.set(titleRefs.current[index], {
           yPercent: 100,
+          y: 0,
           opacity: 0,
           zIndex: 1,
           autoAlpha: 0,
@@ -137,6 +220,7 @@ export default function HeroSection() {
           zIndex: 2,
           autoAlpha: 1,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(rightRefs.current[index], {
@@ -145,16 +229,20 @@ export default function HeroSection() {
           zIndex: 2,
           autoAlpha: 1,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(cardRefs.current[index], {
           yPercent: 0,
+          y: 0,
+          opacity: 1,
           zIndex: 2,
           autoAlpha: 1,
         });
 
         gsap.set(titleRefs.current[index], {
           yPercent: 0,
+          y: 0,
           opacity: 1,
           zIndex: 2,
           autoAlpha: 1,
@@ -169,87 +257,237 @@ export default function HeroSection() {
         }
       });
 
-      gsap.set(titleRefs.current[0], {
-        y: 40,
-        opacity: 0,
-      });
+      if (shouldPlayPreloader) {
+        markPreloaderAsPlayed();
 
-      gsap.set(cardRefs.current[0], {
-        y: 40,
-        opacity: 0,
-      });
-
-      gsap.set([leftRefs.current[0], rightRefs.current[0]], {
-        scale: 1.08,
-      });
-
-      gsap.set(introLeftBlankRef.current, {
-        xPercent: 0,
-        yPercent: 0,
-        autoAlpha: 1,
-      });
-
-      gsap.set(introRightBlankRef.current, {
-        xPercent: 0,
-        yPercent: 0,
-        autoAlpha: 1,
-      });
-
-      const introTl = gsap.timeline({
-        defaults: {
-          ease: "power4.inOut",
-          force3D: true,
-        },
-      });
-
-      introTl
-        .to(
-          introLeftBlankRef.current,
-          {
-            yPercent: -100,
-            duration: 1.15,
-          },
-          0.15,
-        )
-        .to(
-          introRightBlankRef.current,
-          {
-            yPercent: 100,
-            duration: 1.15,
-          },
-          0.15,
-        )
-        .to(
-          [leftRefs.current[0], rightRefs.current[0]],
-          {
-            scale: 1,
-            duration: 1.35,
-          },
-          0.15,
-        )
-        .to(
-          titleRefs.current[0],
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.85,
-            ease: "power3.out",
-          },
-          0.72,
-        )
-        .to(
-          cardRefs.current[0],
-          {
-            y: 0,
-            opacity: 1,
-            duration: 0.85,
-            ease: "power3.out",
-          },
-          0.82,
-        )
-        .set([introLeftBlankRef.current, introRightBlankRef.current], {
+        gsap.set(titleRefs.current[0], {
+          y: 40,
+          opacity: 0,
           autoAlpha: 0,
         });
+
+        gsap.set(cardRefs.current[0], {
+          y: 40,
+          opacity: 0,
+          autoAlpha: 0,
+        });
+
+        gsap.set([leftRefs.current[0], rightRefs.current[0]], {
+          scale: 1.12,
+          filter: "blur(8px)",
+        });
+
+        gsap.set(introLeftBlankRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          autoAlpha: 1,
+          display: "block",
+        });
+
+        gsap.set(introRightBlankRef.current, {
+          xPercent: 0,
+          yPercent: 0,
+          autoAlpha: 1,
+          display: "block",
+        });
+
+        gsap.set(preloaderRef.current, {
+          autoAlpha: 1,
+          display: "block",
+        });
+
+        gsap.set(introStackRefs.current, {
+          xPercent: -50,
+          yPercent: -50,
+          x: 0,
+          y: 0,
+          rotate: 0,
+          scale: 0.88,
+          autoAlpha: 0,
+          zIndex: 1,
+        });
+
+        gsap.set(introPanelTextRef.current, {
+          y: 18,
+          autoAlpha: 0,
+        });
+
+        gsap.set(introTinyLineRef.current, {
+          scaleX: 0,
+          transformOrigin: "left center",
+        });
+
+        const introTl = gsap.timeline({
+          defaults: {
+            ease: "power4.inOut",
+            force3D: true,
+          },
+        });
+
+        introTl
+          .to(introPanelTextRef.current, {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.75,
+            ease: "power3.out",
+          })
+          .to(
+            introTinyLineRef.current,
+            {
+              scaleX: 1,
+              duration: 0.95,
+              ease: "expo.inOut",
+            },
+            "-=0.55",
+          );
+
+        introImages.forEach((image, index) => {
+          introTl.to(
+            introStackRefs.current[index],
+            {
+              autoAlpha: 1,
+              x: image.x,
+              y: image.y,
+              rotate: image.rotation,
+              scale: 1,
+              zIndex: 10 + index,
+              duration: 0.62,
+              ease: "expo.out",
+            },
+            index === 0 ? "-=0.2" : "-=0.34",
+          );
+        });
+
+        introTl.to(
+          introStackRefs.current,
+          {
+            duration: 0.42,
+          },
+          "+=0.1",
+        );
+
+        [...introImages].reverse().forEach((image, reverseIndex) => {
+          const originalIndex = introImages.length - 1 - reverseIndex;
+
+          introTl.to(
+            introStackRefs.current[originalIndex],
+            {
+              autoAlpha: 0,
+              x: image.exitX,
+              y: image.exitY,
+              rotate: image.exitRotation,
+              scale: 0.9,
+              duration: 0.48,
+              ease: "power4.inOut",
+            },
+            reverseIndex === 0 ? undefined : "-=0.25",
+          );
+        });
+
+        introTl
+          .to(
+            introTinyLineRef.current,
+            {
+              scaleX: 0,
+              transformOrigin: "right center",
+              duration: 0.55,
+              ease: "power4.inOut",
+            },
+            "-=0.12",
+          )
+          .to(
+            preloaderRef.current,
+            {
+              autoAlpha: 0,
+              duration: 0.25,
+              ease: "power2.out",
+            },
+            "-=0.08",
+          )
+          .to(
+            introLeftBlankRef.current,
+            {
+              yPercent: -100,
+              duration: 1.35,
+              ease: "expo.inOut",
+            },
+            "-=0.02",
+          )
+          .to(
+            introRightBlankRef.current,
+            {
+              yPercent: 100,
+              duration: 1.35,
+              ease: "expo.inOut",
+            },
+            "<",
+          )
+          .to(
+            [leftRefs.current[0], rightRefs.current[0]],
+            {
+              scale: 1,
+              filter: "blur(0px)",
+              duration: 1.65,
+              ease: "expo.out",
+            },
+            "<",
+          )
+          .to(
+            titleRefs.current[0],
+            {
+              y: 0,
+              opacity: 1,
+              autoAlpha: 1,
+              duration: 0.95,
+              ease: "power4.out",
+            },
+            "-=0.5",
+          )
+          .to(
+            cardRefs.current[0],
+            {
+              y: 0,
+              opacity: 1,
+              autoAlpha: 1,
+              duration: 0.95,
+              ease: "power4.out",
+            },
+            "-=0.78",
+          )
+          .set([introLeftBlankRef.current, introRightBlankRef.current], {
+            autoAlpha: 0,
+            display: "none",
+          })
+          .set(preloaderRef.current, {
+            autoAlpha: 0,
+            display: "none",
+          });
+      } else {
+        gsap.set(preloaderRef.current, {
+          autoAlpha: 0,
+          display: "none",
+        });
+
+        gsap.set([introLeftBlankRef.current, introRightBlankRef.current], {
+          autoAlpha: 0,
+          display: "none",
+        });
+
+        gsap.set(introStackRefs.current, {
+          autoAlpha: 0,
+        });
+
+        gsap.set(introPanelTextRef.current, {
+          y: 0,
+          autoAlpha: 0,
+        });
+
+        gsap.set(introTinyLineRef.current, {
+          scaleX: 0,
+        });
+
+        placeActive(currentIndexRef.current);
+      }
 
       const goToSlide = (direction: 1 | -1) => {
         if (isAnimatingRef.current) return;
@@ -291,6 +529,7 @@ export default function HeroSection() {
           zIndex: 2,
           autoAlpha: 1,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(currentRight, {
@@ -299,6 +538,7 @@ export default function HeroSection() {
           zIndex: 2,
           autoAlpha: 1,
           scale: 1,
+          filter: "blur(0px)",
         });
 
         gsap.set(currentCard, {
@@ -321,6 +561,7 @@ export default function HeroSection() {
             zIndex: 3,
             autoAlpha: 1,
             scale: 1,
+            filter: "blur(0px)",
           });
 
           gsap.set(nextRight, {
@@ -329,6 +570,7 @@ export default function HeroSection() {
             zIndex: 3,
             autoAlpha: 1,
             scale: 1,
+            filter: "blur(0px)",
           });
         } else {
           gsap.set(nextLeft, {
@@ -337,6 +579,7 @@ export default function HeroSection() {
             zIndex: 3,
             autoAlpha: 1,
             scale: 1,
+            filter: "blur(0px)",
           });
 
           gsap.set(nextRight, {
@@ -345,6 +588,7 @@ export default function HeroSection() {
             zIndex: 3,
             autoAlpha: 1,
             scale: 1,
+            filter: "blur(0px)",
           });
         }
 
@@ -397,6 +641,7 @@ export default function HeroSection() {
               zIndex: 2,
               autoAlpha: 1,
               scale: 1,
+              filter: "blur(0px)",
             });
 
             gsap.set(nextRight, {
@@ -405,6 +650,7 @@ export default function HeroSection() {
               zIndex: 2,
               autoAlpha: 1,
               scale: 1,
+              filter: "blur(0px)",
             });
 
             gsap.set(nextCard, {
@@ -593,18 +839,51 @@ export default function HeroSection() {
 
           <div
             ref={introLeftBlankRef}
-            className="pointer-events-none absolute inset-0 z-20 will-change-transform"
+            className="pointer-events-none absolute inset-0 z-20 overflow-hidden will-change-transform"
             style={{
               backgroundColor: "#ded8cc",
             }}
           >
             <div
-              className="absolute inset-0 hidden opacity-[0.26] mix-blend-multiply md:block"
+              className="absolute inset-[-30%] opacity-[0.52] mix-blend-multiply"
               style={{
                 backgroundImage: grainDataUrl,
-                backgroundSize: "120px 120px",
+                backgroundSize: "82px 82px",
+                animation: "petsaco-grain 0.38s steps(2) infinite",
               }}
             />
+
+            <div
+              className="absolute inset-[-20%] opacity-[0.34] mix-blend-overlay"
+              style={{
+                backgroundImage: grainDataUrl,
+                backgroundSize: "38px 38px",
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-[0.14] mix-blend-soft-light"
+              style={{
+                backgroundImage: grainDataUrl,
+                backgroundSize: "18px 18px",
+              }}
+            />
+
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
+
+            <div className="absolute left-4 top-4 z-20 overflow-hidden md:left-8 md:top-7">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-black/60 md:text-xs">
+                Petsaco Goods
+              </p>
+            </div>
+
+            <div
+              ref={introPanelTextRef}
+              className="invisible absolute bottom-4 left-4 z-20 max-w-[18rem] translate-y-[18px] text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.18em] text-[#963d3a] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[30rem] md:text-[18px] md:tracking-[0.22em]"
+            >
+              Selected essentials for soft routines, slow mornings and quiet
+              companions.
+            </div>
           </div>
         </div>
 
@@ -635,19 +914,91 @@ export default function HeroSection() {
 
           <div
             ref={introRightBlankRef}
-            className="pointer-events-none absolute inset-0 z-20 will-change-transform"
+            className="pointer-events-none absolute inset-0 z-20 overflow-hidden will-change-transform"
             style={{
               backgroundColor: "#ded8cc",
             }}
           >
             <div
-              className="absolute inset-0 hidden opacity-[0.26] mix-blend-multiply md:block"
+              className="absolute inset-[-30%] opacity-[0.52] mix-blend-multiply"
               style={{
                 backgroundImage: grainDataUrl,
-                backgroundSize: "120px 120px",
+                backgroundSize: "82px 82px",
+                animation: "petsaco-grain 0.38s steps(2) infinite",
               }}
             />
+
+            <div
+              className="absolute inset-[-20%] opacity-[0.34] mix-blend-overlay"
+              style={{
+                backgroundImage: grainDataUrl,
+                backgroundSize: "38px 38px",
+              }}
+            />
+
+            <div
+              className="absolute inset-0 opacity-[0.14] mix-blend-soft-light"
+              style={{
+                backgroundImage: grainDataUrl,
+                backgroundSize: "18px 18px",
+              }}
+            />
+
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
+
+            <div className="absolute right-4 top-4 z-20 text-right md:right-8 md:top-7">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-black/45 md:text-xs">
+                Dogs / Cats
+              </p>
+            </div>
           </div>
+        </div>
+      </div>
+
+      <div
+        ref={preloaderRef}
+        className="pointer-events-none absolute inset-0 z-[80] overflow-hidden text-black"
+      >
+        <div className="absolute left-1/2 top-1/2 z-10 h-[48vh] w-[36vh] min-w-[230px] max-w-[360px] -translate-x-1/2 -translate-y-1/2">
+          {introImages.map((image, index) => (
+            <div
+              key={`${image.src}-${index}`}
+              ref={(el) => {
+                introStackRefs.current[index] = el;
+              }}
+              className="absolute left-1/2 top-1/2 aspect-[3/4] w-full overflow-hidden opacity-0 will-change-transform"
+            >
+              <Image
+                src={image.src}
+                alt={image.alt}
+                fill
+                priority
+                draggable={false}
+                sizes="360px"
+                className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+              />
+
+              <div className="absolute inset-0 bg-black/8" />
+
+              <div
+                className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
+                style={{
+                  backgroundImage: grainDataUrl,
+                  backgroundSize: "80px 80px",
+                }}
+              />
+            </div>
+          ))}
+        </div>
+
+        <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-3 text-right md:bottom-8 md:right-8">
+          <div className="h-px w-28 overflow-hidden bg-black/15">
+            <div ref={introTinyLineRef} className="h-full w-full bg-black/60" />
+          </div>
+
+          <p className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-35 md:text-[10px]">
+            01 / 04
+          </p>
         </div>
       </div>
 
@@ -677,7 +1028,7 @@ export default function HeroSection() {
             ref={(el) => {
               titleRefs.current[index] = el;
             }}
-            className="absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] will-change-transform md:text-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[3.5rem]"
+            className="invisible absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] opacity-0 will-change-transform md:text-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[3.5rem]"
           >
             {slide.label}
           </h1>
@@ -760,13 +1111,39 @@ const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
         backgroundColor: slide.bg,
         color: slide.textColor,
       }}
-      className="absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 backdrop-blur-[2px] will-change-transform md:px-5 md:py-4 [@media_(orientation:landscape)_and_(max-height:500px)]:px-3 [@media_(orientation:landscape)_and_(max-height:500px)]:py-2"
+      className="invisible absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 opacity-0 will-change-transform md:px-5 md:py-4 [@media_(orientation:landscape)_and_(max-height:500px)]:px-3 [@media_(orientation:landscape)_and_(max-height:500px)]:py-2"
     >
+      <div className="pointer-events-none absolute inset-0 bg-[#b88a5f]/8 mix-blend-soft-light" />
+
       <div
-        className="pointer-events-none absolute inset-0 hidden opacity-[0.22] mix-blend-multiply md:block"
+        className="pointer-events-none absolute inset-0 opacity-[0.34] mix-blend-multiply"
         style={{
           backgroundImage: grainDataUrl,
-          backgroundSize: "110px 110px",
+          backgroundSize: "70px 70px",
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
+        style={{
+          backgroundImage: grainDataUrl,
+          backgroundSize: "32px 32px",
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-soft-light"
+        style={{
+          backgroundImage: grainDataUrl,
+          backgroundSize: "18px 18px",
+        }}
+      />
+
+      <div
+        className="pointer-events-none absolute inset-0"
+        style={{
+          background:
+            "radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.10) 100%)",
         }}
       />
 
