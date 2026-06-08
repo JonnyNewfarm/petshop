@@ -47,6 +47,32 @@ const slides: Slide[] = [
   },
 ];
 
+const preloaderLeftImages = [
+  {
+    src: slides[0].leftImage,
+    alt: "Dog preloader image",
+    className: "right-[14%] top-[18%] h-[96px] w-[74px]",
+  },
+  {
+    src: slides[1].leftImage,
+    alt: "Cat preloader image",
+    className: "right-[34%] top-[50%] h-[162px] w-[132px]",
+  },
+];
+
+const preloaderRightImages = [
+  {
+    src: slides[0].rightImage,
+    alt: "Dog preloader image",
+    className: "left-[13%] top-[22%] h-[142px] w-[126px]",
+  },
+  {
+    src: slides[1].rightImage,
+    alt: "Cat preloader image",
+    className: "right-[13%] top-[40%] h-[92px] w-[72px]",
+  },
+];
+
 const grainSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
   <filter id="noise">
@@ -86,6 +112,9 @@ export default function HeroSection() {
   const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
   const introRightBlankRef = useRef<HTMLDivElement | null>(null);
 
+  const preloaderLeftImageRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const preloaderRightImageRefs = useRef<(HTMLDivElement | null)[]>([]);
+
   const leftRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -118,11 +147,17 @@ export default function HeroSection() {
         }
       };
 
+      const allPreloaderImages = [
+        ...preloaderLeftImageRefs.current,
+        ...preloaderRightImageRefs.current,
+      ].filter(Boolean);
+
       const allPanels = [
         ...leftRefs.current,
         ...rightRefs.current,
         ...cardRefs.current,
         ...titleRefs.current,
+        ...allPreloaderImages,
         introBrandRef.current,
         introRightTextOneRef.current,
         introRightTextTwoRef.current,
@@ -288,6 +323,13 @@ export default function HeroSection() {
           transformOrigin: "left center",
         });
 
+        gsap.set(allPreloaderImages, {
+          y: 24,
+          scale: 0.94,
+          autoAlpha: 0,
+          filter: "blur(5px)",
+        });
+
         const introTl = gsap.timeline({
           defaults: {
             ease: "power4.inOut",
@@ -311,6 +353,19 @@ export default function HeroSection() {
               ease: "power3.out",
             },
             "-=0.34",
+          )
+          .to(
+            allPreloaderImages,
+            {
+              y: 0,
+              scale: 1,
+              autoAlpha: 1,
+              filter: "blur(0px)",
+              duration: 0.62,
+              stagger: 0.08,
+              ease: "power3.out",
+            },
+            "-=0.42",
           )
           .to(
             [
@@ -430,6 +485,10 @@ export default function HeroSection() {
         gsap.set([introLeftBlankRef.current, introRightBlankRef.current], {
           autoAlpha: 0,
           display: "none",
+        });
+
+        gsap.set(allPreloaderImages, {
+          autoAlpha: 0,
         });
 
         gsap.set(introBrandRef.current, {
@@ -844,26 +903,58 @@ export default function HeroSection() {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
 
             <div className="absolute left-4 top-4 z-20 overflow-hidden md:left-8 md:top-7">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.35em] text-black/60 md:text-xs">
+              <p className="text-[10px] font-semibold hidden md:block uppercase tracking-[0.35em] text-black/60 md:text-xs">
                 Petsaco Goods
               </p>
             </div>
 
-            <div
-              ref={introBrandRef}
-              className="invisible absolute left-4 top-[37%] z-20 max-w-[calc(100%-2rem)] translate-y-[26px] opacity-0 will-change-transform md:left-8 md:top-[22%] md:max-w-[42vw]"
-            >
-              <h2 className="text-[clamp(3rem,9vw,8rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-black/75">
-                Petsaco
-              </h2>
+            <div className="absolute inset-0 z-10 hidden md:block">
+              {preloaderLeftImages.map((image, index) => (
+                <div
+                  key={`preloader-left-image-${image.src}-${index}`}
+                  ref={(el) => {
+                    preloaderLeftImageRefs.current[index] = el;
+                  }}
+                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform ${image.className}`}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    priority
+                    draggable={false}
+                    sizes="150px"
+                    className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+                  />
+
+                  <div className="absolute inset-0 bg-black/10" />
+
+                  <div
+                    className="absolute inset-0 opacity-[0.25] mix-blend-overlay"
+                    style={{
+                      backgroundImage: grainDataUrl,
+                      backgroundSize: "36px 36px",
+                    }}
+                  />
+                </div>
+              ))}
             </div>
 
             <div
               ref={introPanelTextRef}
-              className="invisible absolute bottom-4 left-4 z-20 max-w-[18rem] translate-y-[18px] text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.18em] text-[#963d3a] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[30rem] md:text-[18px] md:tracking-[0.22em]"
+              className="invisible absolute left-4 top-[37%] z-20 max-w-[18rem] translate-y-[18px] text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.18em] text-black/75 opacity-0 will-change-transform md:left-8 md:top-[22%] md:max-w-[30rem] md:text-[18px] md:tracking-[0.22em]"
             >
               Selected essentials for soft routines, slow mornings and quiet
               companions.
+            </div>
+
+            <div
+              ref={introBrandRef}
+              className="invisible absolute bottom-4 left-4 z-20 max-w-[calc(100%-2rem)] translate-y-[26px] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[42vw]"
+            >
+              <h2 className="text-[clamp(3rem,9vw,8rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-[#963d3a]">
+                Petsaco
+              </h2>
             </div>
           </div>
         </div>
@@ -933,20 +1024,52 @@ export default function HeroSection() {
               </p>
             </div>
 
+            <div className="absolute inset-0 z-10 hidden md:block">
+              {preloaderRightImages.map((image, index) => (
+                <div
+                  key={`preloader-right-image-${image.src}-${index}`}
+                  ref={(el) => {
+                    preloaderRightImageRefs.current[index] = el;
+                  }}
+                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform md:opacity-75 ${image.className}`}
+                >
+                  <Image
+                    src={image.src}
+                    alt={image.alt}
+                    fill
+                    priority
+                    draggable={false}
+                    sizes="150px"
+                    className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
+                  />
+
+                  <div className="absolute inset-0 bg-black/10" />
+
+                  <div
+                    className="absolute inset-0 opacity-[0.25] mix-blend-overlay"
+                    style={{
+                      backgroundImage: grainDataUrl,
+                      backgroundSize: "36px 36px",
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+
             <div
               ref={introRightTextOneRef}
               className="invisible absolute right-5 top-[18%] z-20 max-w-[10rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-10 md:top-[22%] md:max-w-[15rem]"
             >
-              <p className="text-[9px] font-semibold uppercase leading-[1.15] tracking-[0.22em] text-black/55 md:text-xs">
-                Soft goods for dogs, cats and quiet daily rituals.
+              <p className="text-[9px] font-semibold uppercase leading-[1.15] tracking-[0.22em] text-black/60 md:text-[15px]">
+                Goods for dogs, cats and quiet daily rituals.
               </p>
             </div>
 
             <div
               ref={introRightTextTwoRef}
-              className="invisible absolute right-[18%] top-[52%] z-20 hidden max-w-[9rem] translate-y-[18px] text-left opacity-0 will-change-transform md:block"
+              className="invisible absolute right-[45%] top-[52%] z-20 ml-10  translate-y-[18px] text-left opacity-0 will-change-transform "
             >
-              <p className="text-[10px] font-medium uppercase leading-[1.25] tracking-[0.18em] text-black/40">
+              <p className="text-[10px] font-semibold uppercase leading-[1.25] tracking-[0.18em] text-black/80 md:text-[26px]">
                 Walk. Rest. Scratch. Sleep. Repeat.
               </p>
             </div>
@@ -955,7 +1078,7 @@ export default function HeroSection() {
               ref={introRightTextThreeRef}
               className="invisible absolute bottom-[22%] right-8 z-20 max-w-[8rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-[14%]"
             >
-              <p className="text-[8px] font-semibold uppercase leading-[1.2] tracking-[0.2em] text-black/35 md:text-[10px]">
+              <p className="text-[8px] font-semibold uppercase leading-[1.2] tracking-[0.2em] text-black/60 md:text-[12px]">
                 Everyday essentials / 2026
               </p>
             </div>
