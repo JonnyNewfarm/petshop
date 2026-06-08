@@ -47,49 +47,6 @@ const slides: Slide[] = [
   },
 ];
 
-const introImages = [
-  {
-    src: slides[0].leftImage,
-    alt: "Dogs intro 1",
-    rotation: -7,
-    exitRotation: -13,
-    x: -54,
-    y: -24,
-    exitX: -88,
-    exitY: -150,
-  },
-  {
-    src: slides[0].rightImage,
-    alt: "Dogs intro 2",
-    rotation: 5,
-    exitRotation: 11,
-    x: 46,
-    y: 18,
-    exitX: 82,
-    exitY: -142,
-  },
-  {
-    src: slides[1].leftImage,
-    alt: "Cats intro 1",
-    rotation: -4,
-    exitRotation: -10,
-    x: -24,
-    y: 46,
-    exitX: -52,
-    exitY: -132,
-  },
-  {
-    src: slides[1].rightImage,
-    alt: "Cats intro 2",
-    rotation: 8,
-    exitRotation: 15,
-    x: 58,
-    y: -38,
-    exitX: 96,
-    exitY: -162,
-  },
-];
-
 const grainSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
   <filter id="noise">
@@ -117,7 +74,12 @@ export default function HeroSection() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   const preloaderRef = useRef<HTMLDivElement | null>(null);
-  const introStackRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const introBrandRef = useRef<HTMLDivElement | null>(null);
+  const introRightTextOneRef = useRef<HTMLDivElement | null>(null);
+  const introRightTextTwoRef = useRef<HTMLDivElement | null>(null);
+  const introRightTextThreeRef = useRef<HTMLDivElement | null>(null);
+
   const introTinyLineRef = useRef<HTMLDivElement | null>(null);
   const introPanelTextRef = useRef<HTMLDivElement | null>(null);
 
@@ -161,7 +123,10 @@ export default function HeroSection() {
         ...rightRefs.current,
         ...cardRefs.current,
         ...titleRefs.current,
-        ...introStackRefs.current,
+        introBrandRef.current,
+        introRightTextOneRef.current,
+        introRightTextTwoRef.current,
+        introRightTextThreeRef.current,
         introPanelTextRef.current,
         introTinyLineRef.current,
         introLeftBlankRef.current,
@@ -296,16 +261,22 @@ export default function HeroSection() {
           display: "block",
         });
 
-        gsap.set(introStackRefs.current, {
-          xPercent: -50,
-          yPercent: -50,
-          x: 0,
-          y: 0,
-          rotate: 0,
-          scale: 0.88,
+        gsap.set(introBrandRef.current, {
+          y: 26,
           autoAlpha: 0,
-          zIndex: 1,
         });
+
+        gsap.set(
+          [
+            introRightTextOneRef.current,
+            introRightTextTwoRef.current,
+            introRightTextThreeRef.current,
+          ],
+          {
+            y: 18,
+            autoAlpha: 0,
+          },
+        );
 
         gsap.set(introPanelTextRef.current, {
           y: 18,
@@ -325,64 +296,52 @@ export default function HeroSection() {
         });
 
         introTl
-          .to(introPanelTextRef.current, {
+          .to(introBrandRef.current, {
             y: 0,
             autoAlpha: 1,
-            duration: 0.75,
+            duration: 0.54,
             ease: "power3.out",
           })
+          .to(
+            introPanelTextRef.current,
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.48,
+              ease: "power3.out",
+            },
+            "-=0.34",
+          )
+          .to(
+            [
+              introRightTextOneRef.current,
+              introRightTextTwoRef.current,
+              introRightTextThreeRef.current,
+            ],
+            {
+              y: 0,
+              autoAlpha: 1,
+              duration: 0.5,
+              stagger: 0.08,
+              ease: "power3.out",
+            },
+            "-=0.36",
+          )
           .to(
             introTinyLineRef.current,
             {
               scaleX: 1,
-              duration: 0.95,
+              duration: 0.58,
               ease: "expo.inOut",
             },
-            "-=0.55",
-          );
-
-        introImages.forEach((image, index) => {
-          introTl.to(
-            introStackRefs.current[index],
+            "-=0.42",
+          )
+          .to(
+            {},
             {
-              autoAlpha: 1,
-              x: image.x,
-              y: image.y,
-              rotate: image.rotation,
-              scale: 1,
-              zIndex: 10 + index,
-              duration: 0.62,
-              ease: "expo.out",
+              duration: 0.12,
             },
-            index === 0 ? "-=0.2" : "-=0.34",
           );
-        });
-
-        introTl.to(
-          introStackRefs.current,
-          {
-            duration: 0.42,
-          },
-          "+=0.1",
-        );
-
-        [...introImages].reverse().forEach((image, reverseIndex) => {
-          const originalIndex = introImages.length - 1 - reverseIndex;
-
-          introTl.to(
-            introStackRefs.current[originalIndex],
-            {
-              autoAlpha: 0,
-              x: image.exitX,
-              y: image.exitY,
-              rotate: image.exitRotation,
-              scale: 0.9,
-              duration: 0.48,
-              ease: "power4.inOut",
-            },
-            reverseIndex === 0 ? undefined : "-=0.25",
-          );
-        });
 
         introTl
           .to(
@@ -408,7 +367,7 @@ export default function HeroSection() {
             introLeftBlankRef.current,
             {
               yPercent: -100,
-              duration: 1.35,
+              duration: 0.82,
               ease: "expo.inOut",
             },
             "-=0.02",
@@ -417,7 +376,7 @@ export default function HeroSection() {
             introRightBlankRef.current,
             {
               yPercent: 100,
-              duration: 1.35,
+              duration: 0.82,
               ease: "expo.inOut",
             },
             "<",
@@ -427,7 +386,7 @@ export default function HeroSection() {
             {
               scale: 1,
               filter: "blur(0px)",
-              duration: 1.65,
+              duration: 0.95,
               ease: "expo.out",
             },
             "<",
@@ -438,7 +397,7 @@ export default function HeroSection() {
               y: 0,
               opacity: 1,
               autoAlpha: 1,
-              duration: 0.95,
+              duration: 0.72,
               ease: "power4.out",
             },
             "-=0.5",
@@ -449,7 +408,7 @@ export default function HeroSection() {
               y: 0,
               opacity: 1,
               autoAlpha: 1,
-              duration: 0.95,
+              duration: 0.72,
               ease: "power4.out",
             },
             "-=0.78",
@@ -473,9 +432,22 @@ export default function HeroSection() {
           display: "none",
         });
 
-        gsap.set(introStackRefs.current, {
+        gsap.set(introBrandRef.current, {
+          y: 0,
           autoAlpha: 0,
         });
+
+        gsap.set(
+          [
+            introRightTextOneRef.current,
+            introRightTextTwoRef.current,
+            introRightTextThreeRef.current,
+          ],
+          {
+            y: 0,
+            autoAlpha: 0,
+          },
+        );
 
         gsap.set(introPanelTextRef.current, {
           y: 0,
@@ -878,6 +850,15 @@ export default function HeroSection() {
             </div>
 
             <div
+              ref={introBrandRef}
+              className="invisible absolute left-4 top-[37%] z-20 max-w-[calc(100%-2rem)] translate-y-[26px] opacity-0 will-change-transform md:left-8 md:top-[22%] md:max-w-[42vw]"
+            >
+              <h2 className="text-[clamp(3rem,9vw,8rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-black/75">
+                Petsaco
+              </h2>
+            </div>
+
+            <div
               ref={introPanelTextRef}
               className="invisible absolute bottom-4 left-4 z-20 max-w-[18rem] translate-y-[18px] text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.18em] text-[#963d3a] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[30rem] md:text-[18px] md:tracking-[0.22em]"
             >
@@ -951,6 +932,33 @@ export default function HeroSection() {
                 Dogs / Cats
               </p>
             </div>
+
+            <div
+              ref={introRightTextOneRef}
+              className="invisible absolute right-5 top-[18%] z-20 max-w-[10rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-10 md:top-[22%] md:max-w-[15rem]"
+            >
+              <p className="text-[9px] font-semibold uppercase leading-[1.15] tracking-[0.22em] text-black/55 md:text-xs">
+                Soft goods for dogs, cats and quiet daily rituals.
+              </p>
+            </div>
+
+            <div
+              ref={introRightTextTwoRef}
+              className="invisible absolute right-[18%] top-[52%] z-20 hidden max-w-[9rem] translate-y-[18px] text-left opacity-0 will-change-transform md:block"
+            >
+              <p className="text-[10px] font-medium uppercase leading-[1.25] tracking-[0.18em] text-black/40">
+                Walk. Rest. Scratch. Sleep. Repeat.
+              </p>
+            </div>
+
+            <div
+              ref={introRightTextThreeRef}
+              className="invisible absolute bottom-[22%] right-8 z-20 max-w-[8rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-[14%]"
+            >
+              <p className="text-[8px] font-semibold uppercase leading-[1.2] tracking-[0.2em] text-black/35 md:text-[10px]">
+                Everyday essentials / 2026
+              </p>
+            </div>
           </div>
         </div>
       </div>
@@ -959,45 +967,13 @@ export default function HeroSection() {
         ref={preloaderRef}
         className="pointer-events-none absolute inset-0 z-[80] overflow-hidden text-black"
       >
-        <div className="absolute left-1/2 top-1/2 z-10 h-[48vh] w-[36vh] min-w-[230px] max-w-[360px] -translate-x-1/2 -translate-y-1/2">
-          {introImages.map((image, index) => (
-            <div
-              key={`${image.src}-${index}`}
-              ref={(el) => {
-                introStackRefs.current[index] = el;
-              }}
-              className="absolute left-1/2 top-1/2 aspect-[3/4] w-full overflow-hidden opacity-0 will-change-transform"
-            >
-              <Image
-                src={image.src}
-                alt={image.alt}
-                fill
-                priority
-                draggable={false}
-                sizes="360px"
-                className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-              />
-
-              <div className="absolute inset-0 bg-black/8" />
-
-              <div
-                className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
-                style={{
-                  backgroundImage: grainDataUrl,
-                  backgroundSize: "80px 80px",
-                }}
-              />
-            </div>
-          ))}
-        </div>
-
         <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-3 text-right md:bottom-8 md:right-8">
           <div className="h-px w-28 overflow-hidden bg-black/15">
             <div ref={introTinyLineRef} className="h-full w-full bg-black/60" />
           </div>
 
           <p className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-35 md:text-[10px]">
-            01 / 04
+            Intro
           </p>
         </div>
       </div>
