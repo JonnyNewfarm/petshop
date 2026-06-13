@@ -51,12 +51,20 @@ const preloaderLeftImages = [
   {
     src: slides[0].leftImage,
     alt: "Dog preloader image",
-    className: "right-[14%] top-[18%] h-[96px] w-[74px]",
+    className:
+      "left-[7%] top-[12%] h-[190px] w-[145px] md:h-[280px] md:w-[210px]",
   },
   {
     src: slides[1].leftImage,
     alt: "Cat preloader image",
-    className: "right-[34%] top-[50%] h-[162px] w-[132px]",
+    className:
+      "right-[8%] top-[38%] h-[230px] w-[185px] md:h-[360px] md:w-[285px]",
+  },
+  {
+    src: slides[0].rightImage,
+    alt: "Dog preloader image",
+    className:
+      "left-[24%] bottom-[10%] h-[155px] w-[130px] md:h-[250px] md:w-[205px]",
   },
 ];
 
@@ -64,12 +72,20 @@ const preloaderRightImages = [
   {
     src: slides[0].rightImage,
     alt: "Dog preloader image",
-    className: "left-[13%] top-[22%] h-[142px] w-[126px]",
+    className:
+      "left-[8%] top-[16%] h-[240px] w-[200px] md:h-[380px] md:w-[315px]",
   },
   {
     src: slides[1].rightImage,
     alt: "Cat preloader image",
-    className: "right-[13%] top-[40%] h-[92px] w-[72px]",
+    className:
+      "right-[7%] top-[45%] h-[175px] w-[140px] md:h-[290px] md:w-[230px]",
+  },
+  {
+    src: slides[1].leftImage,
+    alt: "Cat preloader image",
+    className:
+      "left-[38%] bottom-[9%] h-[145px] w-[120px] md:h-[235px] md:w-[190px]",
   },
 ];
 
@@ -102,13 +118,6 @@ export default function HeroSection() {
   const preloaderRef = useRef<HTMLDivElement | null>(null);
 
   const introBrandRef = useRef<HTMLDivElement | null>(null);
-  const introRightTextOneRef = useRef<HTMLDivElement | null>(null);
-  const introRightTextTwoRef = useRef<HTMLDivElement | null>(null);
-  const introRightTextThreeRef = useRef<HTMLDivElement | null>(null);
-
-  const introTinyLineRef = useRef<HTMLDivElement | null>(null);
-  const introPanelTextRef = useRef<HTMLDivElement | null>(null);
-
   const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
   const introRightBlankRef = useRef<HTMLDivElement | null>(null);
 
@@ -159,11 +168,6 @@ export default function HeroSection() {
         ...titleRefs.current,
         ...allPreloaderImages,
         introBrandRef.current,
-        introRightTextOneRef.current,
-        introRightTextTwoRef.current,
-        introRightTextThreeRef.current,
-        introPanelTextRef.current,
-        introTinyLineRef.current,
         introLeftBlankRef.current,
         introRightBlankRef.current,
         preloaderRef.current,
@@ -297,37 +301,15 @@ export default function HeroSection() {
         });
 
         gsap.set(introBrandRef.current, {
-          y: 26,
+          y: 30,
           autoAlpha: 0,
-        });
-
-        gsap.set(
-          [
-            introRightTextOneRef.current,
-            introRightTextTwoRef.current,
-            introRightTextThreeRef.current,
-          ],
-          {
-            y: 18,
-            autoAlpha: 0,
-          },
-        );
-
-        gsap.set(introPanelTextRef.current, {
-          y: 18,
-          autoAlpha: 0,
-        });
-
-        gsap.set(introTinyLineRef.current, {
-          scaleX: 0,
-          transformOrigin: "left center",
         });
 
         gsap.set(allPreloaderImages, {
-          y: 24,
-          scale: 0.94,
+          y: 34,
+          scale: 0.86,
           autoAlpha: 0,
-          filter: "blur(5px)",
+          filter: "blur(6px)",
         });
 
         const introTl = gsap.timeline({
@@ -341,19 +323,9 @@ export default function HeroSection() {
           .to(introBrandRef.current, {
             y: 0,
             autoAlpha: 1,
-            duration: 0.54,
+            duration: 0.62,
             ease: "power3.out",
           })
-          .to(
-            introPanelTextRef.current,
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.48,
-              ease: "power3.out",
-            },
-            "-=0.34",
-          )
           .to(
             allPreloaderImages,
             {
@@ -361,54 +333,20 @@ export default function HeroSection() {
               scale: 1,
               autoAlpha: 1,
               filter: "blur(0px)",
-              duration: 0.62,
+              duration: 0.8,
               stagger: 0.08,
               ease: "power3.out",
-            },
-            "-=0.42",
-          )
-          .to(
-            [
-              introRightTextOneRef.current,
-              introRightTextTwoRef.current,
-              introRightTextThreeRef.current,
-            ],
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.5,
-              stagger: 0.08,
-              ease: "power3.out",
-            },
-            "-=0.36",
-          )
-          .to(
-            introTinyLineRef.current,
-            {
-              scaleX: 1,
-              duration: 0.58,
-              ease: "expo.inOut",
             },
             "-=0.42",
           )
           .to(
             {},
             {
-              duration: 0.12,
+              duration: 0.2,
             },
           );
 
         introTl
-          .to(
-            introTinyLineRef.current,
-            {
-              scaleX: 0,
-              transformOrigin: "right center",
-              duration: 0.55,
-              ease: "power4.inOut",
-            },
-            "-=0.12",
-          )
           .to(
             preloaderRef.current,
             {
@@ -416,7 +354,7 @@ export default function HeroSection() {
               duration: 0.25,
               ease: "power2.out",
             },
-            "-=0.08",
+            "+=0.1",
           )
           .to(
             introLeftBlankRef.current,
@@ -425,7 +363,7 @@ export default function HeroSection() {
               duration: 0.82,
               ease: "expo.inOut",
             },
-            "-=0.02",
+            "-=0.08",
           )
           .to(
             introRightBlankRef.current,
@@ -494,27 +432,6 @@ export default function HeroSection() {
         gsap.set(introBrandRef.current, {
           y: 0,
           autoAlpha: 0,
-        });
-
-        gsap.set(
-          [
-            introRightTextOneRef.current,
-            introRightTextTwoRef.current,
-            introRightTextThreeRef.current,
-          ],
-          {
-            y: 0,
-            autoAlpha: 0,
-          },
-        );
-
-        gsap.set(introPanelTextRef.current, {
-          y: 0,
-          autoAlpha: 0,
-        });
-
-        gsap.set(introTinyLineRef.current, {
-          scaleX: 0,
         });
 
         placeActive(currentIndexRef.current);
@@ -902,13 +819,7 @@ export default function HeroSection() {
 
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
 
-            <div className="absolute left-4 top-4 z-20 overflow-hidden md:left-8 md:top-7">
-              <p className="text-[10px] font-semibold hidden md:block uppercase tracking-[0.35em] text-black/60 md:text-xs">
-                Petsaco Goods
-              </p>
-            </div>
-
-            <div className="absolute inset-0 z-10 hidden md:block">
+            <div className="absolute inset-0 z-10">
               {preloaderLeftImages.map((image, index) => (
                 <div
                   key={`preloader-left-image-${image.src}-${index}`}
@@ -923,7 +834,7 @@ export default function HeroSection() {
                     fill
                     priority
                     draggable={false}
-                    sizes="150px"
+                    sizes="(max-width: 767px) 45vw, 320px"
                     className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
                   />
 
@@ -941,18 +852,10 @@ export default function HeroSection() {
             </div>
 
             <div
-              ref={introPanelTextRef}
-              className="invisible absolute left-4 top-[37%] z-20 max-w-[18rem] translate-y-[18px] text-[12px] font-semibold uppercase leading-[1.15] tracking-[0.18em] text-black/75 opacity-0 will-change-transform md:left-8 md:top-[22%] md:max-w-[30rem] md:text-[18px] md:tracking-[0.22em]"
-            >
-              Selected essentials for soft routines, slow mornings and quiet
-              companions.
-            </div>
-
-            <div
               ref={introBrandRef}
-              className="invisible absolute bottom-4 left-4 z-20 max-w-[calc(100%-2rem)] translate-y-[26px] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[42vw]"
+              className="invisible absolute bottom-4 left-4 z-20 max-w-[calc(100%-2rem)] translate-y-[30px] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[42vw]"
             >
-              <h2 className="text-[clamp(3rem,9vw,8rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-[#963d3a]">
+              <h2 className="text-[clamp(3.8rem,11vw,9rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-[#963d3a]">
                 Petsaco
               </h2>
             </div>
@@ -1018,20 +921,14 @@ export default function HeroSection() {
 
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
 
-            <div className="absolute right-4 top-4 z-20 text-right md:right-8 md:top-7">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.25em] text-black/45 md:text-xs">
-                Dogs / Cats
-              </p>
-            </div>
-
-            <div className="absolute inset-0 z-10 hidden md:block">
+            <div className="absolute inset-0 z-10">
               {preloaderRightImages.map((image, index) => (
                 <div
                   key={`preloader-right-image-${image.src}-${index}`}
                   ref={(el) => {
                     preloaderRightImageRefs.current[index] = el;
                   }}
-                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform md:opacity-75 ${image.className}`}
+                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform ${image.className}`}
                 >
                   <Image
                     src={image.src}
@@ -1039,7 +936,7 @@ export default function HeroSection() {
                     fill
                     priority
                     draggable={false}
-                    sizes="150px"
+                    sizes="(max-width: 767px) 45vw, 380px"
                     className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
                   />
 
@@ -1055,33 +952,6 @@ export default function HeroSection() {
                 </div>
               ))}
             </div>
-
-            <div
-              ref={introRightTextOneRef}
-              className="invisible absolute right-5 top-[18%] z-20 max-w-[10rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-10 md:top-[22%] md:max-w-[15rem]"
-            >
-              <p className="text-[9px] font-semibold uppercase leading-[1.15] tracking-[0.22em] text-black/60 md:text-[15px]">
-                Goods for dogs, cats and quiet daily rituals.
-              </p>
-            </div>
-
-            <div
-              ref={introRightTextTwoRef}
-              className="invisible absolute right-[45%] top-[52%] z-20 ml-10  translate-y-[18px] text-left opacity-0 will-change-transform "
-            >
-              <p className="text-[10px] font-semibold uppercase leading-[1.25] tracking-[0.18em] text-black/80 md:text-[26px]">
-                Walk. Rest. Scratch. Sleep. Repeat.
-              </p>
-            </div>
-
-            <div
-              ref={introRightTextThreeRef}
-              className="invisible absolute bottom-[22%] right-8 z-20 max-w-[8rem] translate-y-[18px] text-right opacity-0 will-change-transform md:right-[14%]"
-            >
-              <p className="text-[8px] font-semibold uppercase leading-[1.2] tracking-[0.2em] text-black/60 md:text-[12px]">
-                Everyday essentials / 2026
-              </p>
-            </div>
           </div>
         </div>
       </div>
@@ -1089,17 +959,7 @@ export default function HeroSection() {
       <div
         ref={preloaderRef}
         className="pointer-events-none absolute inset-0 z-[80] overflow-hidden text-black"
-      >
-        <div className="absolute bottom-4 right-4 z-20 flex flex-col items-end gap-3 text-right md:bottom-8 md:right-8">
-          <div className="h-px w-28 overflow-hidden bg-black/15">
-            <div ref={introTinyLineRef} className="h-full w-full bg-black/60" />
-          </div>
-
-          <p className="text-[9px] font-medium uppercase tracking-[0.2em] opacity-35 md:text-[10px]">
-            Intro
-          </p>
-        </div>
-      </div>
+      />
 
       <div
         className="pointer-events-none absolute inset-[-20%] z-30 hidden opacity-[0.42] mix-blend-overlay md:block"
