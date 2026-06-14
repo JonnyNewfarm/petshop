@@ -47,48 +47,6 @@ const slides: Slide[] = [
   },
 ];
 
-const preloaderLeftImages = [
-  {
-    src: slides[0].leftImage,
-    alt: "Dog preloader image",
-    className:
-      "left-[7%] top-[12%] h-[190px] w-[145px] md:h-[280px] md:w-[210px]",
-  },
-  {
-    src: slides[1].leftImage,
-    alt: "Cat preloader image",
-    className:
-      "right-[8%] top-[38%] h-[230px] w-[185px] md:h-[360px] md:w-[285px]",
-  },
-  {
-    src: slides[0].rightImage,
-    alt: "Dog preloader image",
-    className:
-      "left-[24%] bottom-[10%] h-[155px] w-[130px] md:h-[250px] md:w-[205px]",
-  },
-];
-
-const preloaderRightImages = [
-  {
-    src: slides[0].rightImage,
-    alt: "Dog preloader image",
-    className:
-      "left-[8%] top-[16%] h-[240px] w-[200px] md:h-[380px] md:w-[315px]",
-  },
-  {
-    src: slides[1].rightImage,
-    alt: "Cat preloader image",
-    className:
-      "right-[7%] top-[45%] h-[175px] w-[140px] md:h-[290px] md:w-[230px]",
-  },
-  {
-    src: slides[1].leftImage,
-    alt: "Cat preloader image",
-    className:
-      "left-[38%] bottom-[9%] h-[145px] w-[120px] md:h-[235px] md:w-[190px]",
-  },
-];
-
 const grainSvg = `
 <svg xmlns="http://www.w3.org/2000/svg" width="220" height="220" viewBox="0 0 220 220">
   <filter id="noise">
@@ -118,11 +76,9 @@ export default function HeroSection() {
   const preloaderRef = useRef<HTMLDivElement | null>(null);
 
   const introBrandRef = useRef<HTMLDivElement | null>(null);
+  const introBrandTextRef = useRef<HTMLHeadingElement | null>(null);
   const introLeftBlankRef = useRef<HTMLDivElement | null>(null);
   const introRightBlankRef = useRef<HTMLDivElement | null>(null);
-
-  const preloaderLeftImageRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const preloaderRightImageRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const leftRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
@@ -151,23 +107,79 @@ export default function HeroSection() {
       const markPreloaderAsPlayed = () => {
         try {
           sessionStorage.setItem(PRELOADER_STORAGE_KEY, "true");
-        } catch {
-          // Ignore storage errors.
-        }
+        } catch {}
       };
 
-      const allPreloaderImages = [
-        ...preloaderLeftImageRefs.current,
-        ...preloaderRightImageRefs.current,
-      ].filter(Boolean);
+      const SCRAMBLE_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+      const SCRAMBLE_DURATION = 1.65;
+      const SCRAMBLE_TICK = 0.085;
+
+      const getRandomChar = () =>
+        SCRAMBLE_CHARS[Math.floor(Math.random() * SCRAMBLE_CHARS.length)];
+
+      const scrambleText = (element: HTMLElement | null, finalText: string) => {
+        if (!element) return gsap.timeline();
+
+        const letters = finalText.split("");
+        const randomLetters = letters.map(() => getRandomChar());
+
+        const state = {
+          progress: 0,
+        };
+
+        let lastTick = -1;
+
+        element.textContent = randomLetters.join("");
+
+        return gsap.to(state, {
+          progress: 1,
+          duration: SCRAMBLE_DURATION,
+          ease: "power2.out",
+          onUpdate: () => {
+            const currentTime = state.progress * SCRAMBLE_DURATION;
+            const currentTick = Math.floor(currentTime / SCRAMBLE_TICK);
+
+            if (currentTick !== lastTick) {
+              lastTick = currentTick;
+
+              for (let i = 0; i < randomLetters.length; i += 1) {
+                randomLetters[i] = getRandomChar();
+              }
+            }
+
+            const output = letters
+              .map((letter, index) => {
+                const lockStart = 0.38;
+                const lockEnd = 0.88;
+                const letterProgress =
+                  letters.length === 1 ? 1 : index / (letters.length - 1);
+
+                const lockAt =
+                  lockStart + (lockEnd - lockStart) * letterProgress;
+
+                if (state.progress >= lockAt) {
+                  return letter;
+                }
+
+                return randomLetters[index];
+              })
+              .join("");
+
+            element.textContent = output;
+          },
+          onComplete: () => {
+            element.textContent = finalText;
+          },
+        });
+      };
 
       const allPanels = [
         ...leftRefs.current,
         ...rightRefs.current,
         ...cardRefs.current,
         ...titleRefs.current,
-        ...allPreloaderImages,
         introBrandRef.current,
+        introBrandTextRef.current,
         introLeftBlankRef.current,
         introRightBlankRef.current,
         preloaderRef.current,
@@ -305,12 +317,13 @@ export default function HeroSection() {
           autoAlpha: 0,
         });
 
-        gsap.set(allPreloaderImages, {
-          y: 34,
-          scale: 0.86,
-          autoAlpha: 0,
-          filter: "blur(6px)",
+        gsap.set(introBrandTextRef.current, {
+          autoAlpha: 1,
         });
+
+        if (introBrandTextRef.current) {
+          introBrandTextRef.current.textContent = "XXXXXXX";
+        }
 
         const introTl = gsap.timeline({
           defaults: {
@@ -320,29 +333,19 @@ export default function HeroSection() {
         });
 
         introTl
+          .add(() => {
+            scrambleText(introBrandTextRef.current, "Petsaco");
+          })
           .to(introBrandRef.current, {
             y: 0,
             autoAlpha: 1,
-            duration: 0.62,
+            duration: 0.22,
             ease: "power3.out",
           })
           .to(
-            allPreloaderImages,
-            {
-              y: 0,
-              scale: 1,
-              autoAlpha: 1,
-              filter: "blur(0px)",
-              duration: 0.8,
-              stagger: 0.08,
-              ease: "power3.out",
-            },
-            "-=0.42",
-          )
-          .to(
             {},
             {
-              duration: 0.2,
+              duration: 1.55,
             },
           );
 
@@ -351,10 +354,10 @@ export default function HeroSection() {
             preloaderRef.current,
             {
               autoAlpha: 0,
-              duration: 0.25,
+              duration: 0.22,
               ease: "power2.out",
             },
-            "+=0.1",
+            "+=0.02",
           )
           .to(
             introLeftBlankRef.current,
@@ -425,14 +428,14 @@ export default function HeroSection() {
           display: "none",
         });
 
-        gsap.set(allPreloaderImages, {
-          autoAlpha: 0,
-        });
-
         gsap.set(introBrandRef.current, {
           y: 0,
           autoAlpha: 0,
         });
+
+        if (introBrandTextRef.current) {
+          introBrandTextRef.current.textContent = "Petsaco";
+        }
 
         placeActive(currentIndexRef.current);
       }
@@ -819,44 +822,15 @@ export default function HeroSection() {
 
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
 
-            <div className="absolute inset-0 z-10">
-              {preloaderLeftImages.map((image, index) => (
-                <div
-                  key={`preloader-left-image-${image.src}-${index}`}
-                  ref={(el) => {
-                    preloaderLeftImageRefs.current[index] = el;
-                  }}
-                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform ${image.className}`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    priority
-                    draggable={false}
-                    sizes="(max-width: 767px) 45vw, 320px"
-                    className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-                  />
-
-                  <div className="absolute inset-0 bg-black/10" />
-
-                  <div
-                    className="absolute inset-0 opacity-[0.25] mix-blend-overlay"
-                    style={{
-                      backgroundImage: grainDataUrl,
-                      backgroundSize: "36px 36px",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
-
             <div
               ref={introBrandRef}
               className="invisible absolute bottom-4 left-4 z-20 max-w-[calc(100%-2rem)] translate-y-[30px] opacity-0 will-change-transform md:bottom-8 md:left-8 md:max-w-[42vw]"
             >
-              <h2 className="text-[clamp(3.8rem,11vw,9rem)] font-semibold uppercase leading-[0.78] tracking-[-0.08em] text-[#963d3a]">
-                Petsaco
+              <h2
+                ref={introBrandTextRef}
+                className="text-[clamp(3.8rem,11vw,9rem)] font-semibold uppercase leading-[0.78] tracking-[-0.035em] text-[#963d3a]"
+              >
+                XXXXXXX
               </h2>
             </div>
           </div>
@@ -920,38 +894,6 @@ export default function HeroSection() {
             />
 
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(255,255,255,0.3)_0%,rgba(0,0,0,0.1)_100%)]" />
-
-            <div className="absolute inset-0 z-10">
-              {preloaderRightImages.map((image, index) => (
-                <div
-                  key={`preloader-right-image-${image.src}-${index}`}
-                  ref={(el) => {
-                    preloaderRightImageRefs.current[index] = el;
-                  }}
-                  className={`invisible absolute overflow-hidden border border-black/10 opacity-0 will-change-transform ${image.className}`}
-                >
-                  <Image
-                    src={image.src}
-                    alt={image.alt}
-                    fill
-                    priority
-                    draggable={false}
-                    sizes="(max-width: 767px) 45vw, 380px"
-                    className="select-none object-cover contrast-[1.08] saturate-[0.9] sepia-[0.12]"
-                  />
-
-                  <div className="absolute inset-0 bg-black/10" />
-
-                  <div
-                    className="absolute inset-0 opacity-[0.25] mix-blend-overlay"
-                    style={{
-                      backgroundImage: grainDataUrl,
-                      backgroundSize: "36px 36px",
-                    }}
-                  />
-                </div>
-              ))}
-            </div>
           </div>
         </div>
       </div>
