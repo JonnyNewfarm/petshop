@@ -12,12 +12,9 @@ type Slide = {
   label: "Dogs" | "Cats";
   leftImage: string;
   rightImage: string;
-  title: string;
   text: string;
   cta: string;
   meta: string;
-  bg: string;
-  textColor: string;
 };
 
 const PRELOADER_STORAGE_KEY = "petsaco-hero-preloader-played";
@@ -27,23 +24,17 @@ const slides: Slide[] = [
     label: "Dogs",
     leftImage: "/processed_dog-11.jpeg",
     rightImage: "/processed_dog-22.jpeg",
-    title: "Dogs",
     text: "Walk, rest and play essentials for everyday dog life.",
     cta: "Shop dogs",
     meta: "Canine goods",
-    bg: "#8f3a32",
-    textColor: "#f1e9dc",
   },
   {
     label: "Cats",
     leftImage: "/processed_cat-11.jpeg",
     rightImage: "/processed_cat-22.jpeg",
-    title: "Cats",
     text: "Soft, useful objects for sleep, scratch and sunlit corners.",
     cta: "Shop cats",
     meta: "Feline goods",
-    bg: "#ded8cc",
-    textColor: "#111111",
   },
 ];
 
@@ -83,7 +74,6 @@ export default function HeroSection() {
   const leftRefs = useRef<(HTMLDivElement | null)[]>([]);
   const rightRefs = useRef<(HTMLDivElement | null)[]>([]);
   const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const titleRefs = useRef<(HTMLHeadingElement | null)[]>([]);
 
   const currentIndexRef = useRef(0);
   const isAnimatingRef = useRef(false);
@@ -177,7 +167,6 @@ export default function HeroSection() {
         ...leftRefs.current,
         ...rightRefs.current,
         ...cardRefs.current,
-        ...titleRefs.current,
         introBrandRef.current,
         introBrandTextRef.current,
         introLeftBlankRef.current,
@@ -213,16 +202,7 @@ export default function HeroSection() {
         });
 
         gsap.set(cardRefs.current[index], {
-          yPercent: 100,
-          y: 0,
-          opacity: 0,
-          zIndex: 1,
-          autoAlpha: 0,
-        });
-
-        gsap.set(titleRefs.current[index], {
-          yPercent: 100,
-          y: 0,
+          y: 24,
           opacity: 0,
           zIndex: 1,
           autoAlpha: 0,
@@ -249,15 +229,6 @@ export default function HeroSection() {
         });
 
         gsap.set(cardRefs.current[index], {
-          yPercent: 0,
-          y: 0,
-          opacity: 1,
-          zIndex: 2,
-          autoAlpha: 1,
-        });
-
-        gsap.set(titleRefs.current[index], {
-          yPercent: 0,
           y: 0,
           opacity: 1,
           zIndex: 2,
@@ -276,14 +247,8 @@ export default function HeroSection() {
       if (shouldPlayPreloader) {
         markPreloaderAsPlayed();
 
-        gsap.set(titleRefs.current[0], {
-          y: 40,
-          opacity: 0,
-          autoAlpha: 0,
-        });
-
         gsap.set(cardRefs.current[0], {
-          y: 40,
+          y: 30,
           opacity: 0,
           autoAlpha: 0,
         });
@@ -388,17 +353,6 @@ export default function HeroSection() {
             "<",
           )
           .to(
-            titleRefs.current[0],
-            {
-              y: 0,
-              opacity: 1,
-              autoAlpha: 1,
-              duration: 0.72,
-              ease: "power4.out",
-            },
-            "-=0.5",
-          )
-          .to(
             cardRefs.current[0],
             {
               y: 0,
@@ -407,7 +361,7 @@ export default function HeroSection() {
               duration: 0.72,
               ease: "power4.out",
             },
-            "-=0.78",
+            "-=0.62",
           )
           .set([introLeftBlankRef.current, introRightBlankRef.current], {
             autoAlpha: 0,
@@ -456,22 +410,18 @@ export default function HeroSection() {
         const currentLeft = leftRefs.current[current];
         const currentRight = rightRefs.current[current];
         const currentCard = cardRefs.current[current];
-        const currentTitle = titleRefs.current[current];
 
         const nextLeft = leftRefs.current[next];
         const nextRight = rightRefs.current[next];
         const nextCard = cardRefs.current[next];
-        const nextTitle = titleRefs.current[next];
 
         gsap.killTweensOf([
           currentLeft,
           currentRight,
           currentCard,
-          currentTitle,
           nextLeft,
           nextRight,
           nextCard,
-          nextTitle,
         ]);
 
         gsap.set(currentLeft, {
@@ -493,13 +443,7 @@ export default function HeroSection() {
         });
 
         gsap.set(currentCard, {
-          yPercent: 0,
-          zIndex: 2,
-          autoAlpha: 1,
-        });
-
-        gsap.set(currentTitle, {
-          yPercent: 0,
+          y: 0,
           opacity: 1,
           zIndex: 2,
           autoAlpha: 1,
@@ -544,14 +488,8 @@ export default function HeroSection() {
         }
 
         gsap.set(nextCard, {
-          yPercent: direction === 1 ? 100 : -100,
-          zIndex: 3,
-          autoAlpha: 1,
-        });
-
-        gsap.set(nextTitle, {
-          yPercent: direction === 1 ? 100 : -100,
-          opacity: 1,
+          y: direction === 1 ? 24 : -24,
+          opacity: 0,
           zIndex: 3,
           autoAlpha: 1,
         });
@@ -577,11 +515,6 @@ export default function HeroSection() {
 
             gsap.set(currentCard, {
               autoAlpha: 0,
-              zIndex: 1,
-            });
-
-            gsap.set(currentTitle, {
-              autoAlpha: 0,
               opacity: 0,
               zIndex: 1,
             });
@@ -605,13 +538,7 @@ export default function HeroSection() {
             });
 
             gsap.set(nextCard, {
-              yPercent: 0,
-              zIndex: 2,
-              autoAlpha: 1,
-            });
-
-            gsap.set(nextTitle, {
-              yPercent: 0,
+              y: 0,
               opacity: 1,
               zIndex: 2,
               autoAlpha: 1,
@@ -692,33 +619,22 @@ export default function HeroSection() {
         tl.to(
           currentCard,
           {
-            yPercent: direction === 1 ? -100 : 100,
+            y: direction === 1 ? -24 : 24,
+            opacity: 0,
+            duration: 0.45,
+            ease: "power3.out",
           },
           0,
-        )
-          .to(
-            nextCard,
-            {
-              yPercent: 0,
-            },
-            0,
-          )
-          .to(
-            currentTitle,
-            {
-              yPercent: direction === 1 ? -100 : 100,
-              opacity: 0,
-            },
-            0,
-          )
-          .to(
-            nextTitle,
-            {
-              yPercent: 0,
-              opacity: 1,
-            },
-            0,
-          );
+        ).to(
+          nextCard,
+          {
+            y: 0,
+            opacity: 1,
+            duration: 0.68,
+            ease: "power3.out",
+          },
+          0.34,
+        );
       };
 
       const observer = Observer.create({
@@ -922,21 +838,7 @@ export default function HeroSection() {
 
       <div className="pointer-events-none absolute inset-0 z-30 hidden bg-[#c79a6b]/10 mix-blend-soft-light md:block" />
 
-      <div className="pointer-events-none absolute bottom-[calc(13rem+env(safe-area-inset-bottom))] left-4 z-40 h-[clamp(2.8rem,15vw,5.5rem)] overflow-hidden md:bottom-6 md:left-8 md:h-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:left-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[3.5rem]">
-        {slides.map((slide, index) => (
-          <h1
-            key={`title-${slide.label}`}
-            ref={(el) => {
-              titleRefs.current[index] = el;
-            }}
-            className="invisible absolute left-0 top-0 text-[clamp(2.8rem,15vw,5.5rem)] font-semibold uppercase leading-[0.75] tracking-[-0.09em] opacity-0 will-change-transform md:text-[clamp(4rem,15vw,16rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[3.5rem]"
-          >
-            {slide.label}
-          </h1>
-        ))}
-      </div>
-
-      <div className="absolute bottom-[calc(2.8rem+env(safe-area-inset-bottom))] right-4 z-50 h-[115px] w-[250px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[160px] md:w-[360px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[105px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[260px]">
+      <div className="absolute bottom-[calc(2.2rem+env(safe-area-inset-bottom))] right-4 z-50 h-[185px] w-[315px] max-w-[calc(100%-2rem)] overflow-hidden md:bottom-8 md:right-8 md:h-[220px] md:w-[455px] [@media_(orientation:landscape)_and_(max-height:500px)]:bottom-4 [@media_(orientation:landscape)_and_(max-height:500px)]:right-4 [@media_(orientation:landscape)_and_(max-height:500px)]:h-[145px] [@media_(orientation:landscape)_and_(max-height:500px)]:w-[320px]">
         {slides.map((slide, index) => (
           <InfoCard
             key={`card-${slide.label}`}
@@ -944,6 +846,7 @@ export default function HeroSection() {
               cardRefs.current[index] = el;
             }}
             slide={slide}
+            index={index}
           />
         ))}
       </div>
@@ -1001,89 +904,52 @@ export default function HeroSection() {
   );
 }
 
-const InfoCard = forwardRef<HTMLDivElement, { slide: Slide }>(function InfoCard(
-  { slide },
-  ref,
-) {
+const InfoCard = forwardRef<
+  HTMLDivElement,
+  {
+    slide: Slide;
+    index: number;
+  }
+>(function InfoCard({ slide, index }, ref) {
+  const href =
+    slide.label === "Dogs"
+      ? "/shop?category=dogs&page=1"
+      : "/shop?category=cats&page=1";
+
   return (
     <div
       ref={ref}
-      style={{
-        backgroundColor: slide.bg,
-        color: slide.textColor,
-      }}
-      className="invisible absolute inset-0 overflow-hidden border border-black/10 px-3 py-3 opacity-0 will-change-transform md:px-5 md:py-4 [@media_(orientation:landscape)_and_(max-height:500px)]:px-3 [@media_(orientation:landscape)_and_(max-height:500px)]:py-2"
+      className="invisible absolute inset-0 overflow-hidden opacity-0 will-change-transform"
     >
-      <div className="pointer-events-none absolute inset-0 bg-[#b88a5f]/8 mix-blend-soft-light" />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.34] mix-blend-multiply"
-        style={{
-          backgroundImage: grainDataUrl,
-          backgroundSize: "70px 70px",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.18] mix-blend-overlay"
-        style={{
-          backgroundImage: grainDataUrl,
-          backgroundSize: "32px 32px",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0 opacity-[0.12] mix-blend-soft-light"
-        style={{
-          backgroundImage: grainDataUrl,
-          backgroundSize: "18px 18px",
-        }}
-      />
-
-      <div
-        className="pointer-events-none absolute inset-0"
-        style={{
-          background:
-            "radial-gradient(circle at center, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.10) 100%)",
-        }}
-      />
-
       <Link
-        href={
-          slide.label === "Dogs"
-            ? "/shop?category=dogs&page=1"
-            : "/shop?category=cats&page=1"
-        }
-        className="relative z-10 flex h-full flex-col justify-between"
+        href={href}
+        className="group flex h-full flex-col items-end justify-end text-right text-white"
       >
-        <div className="flex items-start justify-between gap-3 md:gap-6 [@media_(orientation:landscape)_and_(max-height:500px)]:gap-3">
-          <div>
-            <p className="mb-1 text-[7px] font-semibold uppercase tracking-[0.18em] opacity-55 md:mb-2 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:mb-1 [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
-              Petsaco / {slide.meta}
-            </p>
+        <div className="flex w-full max-w-[315px] flex-col items-end gap-3 md:max-w-[455px] md:gap-4 [@media_(orientation:landscape)_and_(max-height:500px)]:max-w-[320px] [@media_(orientation:landscape)_and_(max-height:500px)]:gap-2">
+          <div className="flex items-center gap-2 text-[8px] font-semibold uppercase tracking-[0.08em] text-white/80 md:text-[10px] md:tracking-[0.1em]">
+            <span className="block h-[2px] w-12 shrink-0 bg-white/80 transition-all duration-500 group-hover:w-20 md:w-16 md:group-hover:w-28" />
+          </div>
+          <h1 className="text-[clamp(2.6rem,8vw,5rem)] font-semibold uppercase leading-[0.85] tracking-[-0.04em] text-white md:text-[clamp(4rem,6vw,7rem)] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[3rem]">
+            {slide.label}
+          </h1>
 
-            <h2 className="text-2xl font-semibold uppercase leading-[0.85] tracking-[-0.07em] md:text-3xl [@media_(orientation:landscape)_and_(max-height:500px)]:text-xl">
-              {slide.title}
-            </h2>
+          <div className="w-full border-t border-white/30 pt-3 md:pt-4 [@media_(orientation:landscape)_and_(max-height:500px)]:pt-2">
+            <p className="ml-auto max-w-[15rem] text-[13px] font-medium leading-[1.12] tracking-[-0.025em] text-white/82 md:max-w-[18rem] md:text-[16px] [@media_(orientation:landscape)_and_(max-height:500px)]:max-w-[13rem] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[10px]">
+              {slide.text}
+            </p>
           </div>
 
-          <span className="hidden text-sm leading-none opacity-65 sm:block md:text-lg [@media_(orientation:landscape)_and_(max-height:500px)]:text-sm">
-            ↗
-          </span>
-        </div>
+          <div className="flex items-center gap-3 text-[9px] font-semibold uppercase tracking-[0.13em] text-white md:text-[11px] md:tracking-[0.16em] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
+            <span className="text-white/50">{slide.meta}</span>
 
-        <div>
-          <p className="mb-2 max-w-[13rem] text-[10px] font-medium leading-snug opacity-70 md:mb-3 md:max-w-[15rem] md:text-xs [@media_(orientation:landscape)_and_(max-height:500px)]:mb-1 [@media_(orientation:landscape)_and_(max-height:500px)]:max-w-[12rem] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[9px]">
-            {slide.text}
-          </p>
+            <span className="h-px w-6 bg-white/35" />
 
-          <div className="flex items-center justify-between border-t border-current/20 pt-2 md:pt-3 [@media_(orientation:landscape)_and_(max-height:500px)]:pt-1.5">
-            <p className="text-[7px] font-semibold uppercase tracking-[0.18em] opacity-80 transition hover:opacity-50 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
+            <span className="opacity-75 transition-opacity duration-300 group-hover:opacity-100">
               {slide.cta}
-            </p>
+            </span>
 
-            <span className="text-[7px] uppercase tracking-[0.18em] opacity-45 md:text-[9px] md:tracking-[0.22em] [@media_(orientation:landscape)_and_(max-height:500px)]:text-[7px]">
-              {slide.label}
+            <span className="inline-flex h-7 w-7 items-center justify-center  text-[13px] leading-none transition duration-500 group-hover:-translate-y-1 group-hover:translate-x-1 group-hover:border-white md:h-9 md:w-9 md:text-[16px] [@media_(orientation:landscape)_and_(max-height:500px)]:h-6 [@media_(orientation:landscape)_and_(max-height:500px)]:w-6 [@media_(orientation:landscape)_and_(max-height:500px)]:text-[11px]">
+              ↗
             </span>
           </div>
         </div>
